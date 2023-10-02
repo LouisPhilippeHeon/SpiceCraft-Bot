@@ -1,6 +1,6 @@
 export enum register {
 	timeoutAnswer = 'Temps de réponse maximum dépassé, veuillez réessayer en cliqant le bouton `S\'inscrire` à nouveau.',
-	messageSentInDms = 'Merci de répondre au bot qui vous a envoyé un message en privé! Si vous n\'avez rien reçu, activez vos messages privés.',
+	messageSentInDms = 'Merci de répondre au bot qui vous a envoyé un message en privé !',
 	adminsAlreadyDeniedRequest = '🚫 Les administrateurs ont déjà refusé ta demande ! 🚫',
 	askWhatIsMinecraftUsername = 'Quel est ton nom d\'utilisateur sur Minecraft ?',
 	askWhatIsNewMinecraftUsername = 'Quel est le bon nom d\'utilisateur ?',
@@ -14,5 +14,7 @@ export enum register {
 	usernameUpdated = 'Votre nom d\'utilisateur a été changé avec succès, je t\'envoie un message lorsque le nom d\'utilisateur sera mis à jour dans la whitelist.',
 	embedDescription = 'Compte Discord : <@$discordUuid$>.\nUsername Minecraft : $minecraftUsername$.',
 	unaprovedUserChangedMinecraftUsername = '<@$discordUuid$> a changé son username Minecraft pour \`$minecraftUsername$\` dans sa demande d\'ajout à la whitelist.',
-	minecraftAccountDoesNotExist = '❌ Le compte Minecraft « $minecraftUsername$ » n\'existe pas! Tu peux cliquer à nouveau le bouton \`S\'inscrire\` pour réessayer. ❌'
+	minecraftAccountDoesNotExist = '❌ Le compte Minecraft « $minecraftUsername$ » n\'existe pas! Tu peux cliquer à nouveau le bouton \`S\'inscrire\` pour réessayer. ❌',
+	dmsAreClosed = 'Tes paramètres de confidentialité m\'empêchent de t\'envoyer des messages. Change ces paramètres pour pouvoir compléter ton inscription',
+	unknownError = 'Une erreur inconnue est survenue !'
 }

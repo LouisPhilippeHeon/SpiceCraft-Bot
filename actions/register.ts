@@ -27,22 +27,23 @@ export async function handleInscriptionButtonClick(interaction: any) {
 			return;
 		}
 
-		await interactionReference.reply({ content: Texts.register.messageSentInDms, ephemeral: true });
-
-		updateExistingUser(userFromDb.inscription_status);
+		await updateExistingUser(userFromDb.inscription_status).catch(async () => {
+			await interactionReference.reply({ content: Texts.register.dmsAreClosed, ephemeral: true });
+		});
 	}
 	// User does not exist in the database and should be created
 	catch (error) {
 		if (error.message === 'Cet utilisateur n\'existe pas!') {
-			await interactionReference.reply({ content: Texts.register.messageSentInDms, ephemeral: true });
-
-			registerNewUser();
+			await registerNewUser().catch(async () => await interactionReference.reply({ content: Texts.register.dmsAreClosed, ephemeral: true }));
+			return;
 		}
+		interactionReference.reply(Texts.register.unknownError);
 	}
 };
 
 async function updateExistingUser(status: number) {
 	const usernameMessage = await interactionReference.member.send(Texts.register.askWhatIsNewMinecraftUsername);
+	await interactionReference.reply({ content: Texts.register.messageSentInDms, ephemeral: true });
 	const dmChannel = usernameMessage.channel;
 	const collectorFilter = (m: any) => m.author.id == discordUuid;
 	const usernameCollector = dmChannel.createMessageCollector({ filter: collectorFilter, max: 1, time: Constants.timeToWaitForUserInputBeforeTimeout });
@@ -104,8 +105,8 @@ async function updateAdminApprovalRequest(dmChannel: any) {
 
 async function registerNewUser() {
 	const usernameMessage = await interactionReference.member.send(Texts.register.askWhatIsMinecraftUsername);
+	await interactionReference.reply({ content: Texts.register.messageSentInDms, ephemeral: true });
 	const dmChannel = usernameMessage.channel;
-
 	const collectorFilter = (m: any) => m.author.id == interactionReference.user.id;
 	const usernameCollector = dmChannel.createMessageCollector({ filter: collectorFilter, max: 1, time: Constants.timeToWaitForUserInputBeforeTimeout });
 
