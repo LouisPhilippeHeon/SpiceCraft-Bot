@@ -62,7 +62,7 @@ async function updateExistingUser(status: number) {
 			collectedMinecraftUsername = minecraftUuid.name;
 
 			// If user is already approved
-			if (status == Constants.inscriptionStatus.approved) {
+			if (status === Constants.inscriptionStatus.approved) {
 				RequestAdminApproval.sendUsernameChangeRequest(interactionReference, collectedMinecraftUsername, collectedMinecraftUuid);
 				dmChannel.send(Texts.register.usernameUpdated);
 			}

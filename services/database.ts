@@ -65,7 +65,7 @@ export async function getUserByDiscordUuid(discordUuid: string) {
 	const tag = await this.tags.findOne({ where: { discord_uuid: discordUuid } });
 
 	if (tag) {
-		// TODO Essayer deepClone
+		// TODO Essayer deepClone ou trouver quelque chose de moins laid
 		return JSON.parse(JSON.stringify(tag.get({ plain: true })));
 	}
 
@@ -74,5 +74,13 @@ export async function getUserByDiscordUuid(discordUuid: string) {
 
 export async function getUsers(status?: number) {
 	if (status == null) return await this.tags.findAll({ raw: true });
-	return await this.tags.findAll({ where: {inscription_status : status}, raw: true });
+	return await this.tags.findAll({ where: { inscription_status: status }, raw: true });
 };
+
+export async function deleteUser(discordUuid: string) {
+	await this.tags.destroy({
+		where: {
+			discord_uuid: discordUuid
+		},
+	});
+}

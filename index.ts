@@ -6,6 +6,7 @@ import * as DatabaseService from './services/database';
 import * as Register from './actions/register';
 import * as HandleButton from './actions/handle-button';
 import * as Utils from './utils'
+import * as Constants from './bot-constants';
 
 const erreurCommandeText = 'Une erreur s\'est produite lors de l\'exécution de cette commande!';
 // Create a new client instance
@@ -68,6 +69,12 @@ Utils.client.on(Events.InteractionCreate, async (interaction: any) => {
 		else {
 			await interaction.reply({ content: erreurCommandeText, ephemeral: true });
 		}
+	}
+});
+
+Utils.client.on('guildMemberUpdate', async (oldMember: any, newMember: any) => {
+	if (oldMember.roles.cache.some((role: any) => role.name === Constants.playerRoleName) && !newMember.roles.cache.some((role: any) => role.name === Constants.playerRoleName)) {
+		await DatabaseService.deleteUser(newMember.user.id);
 	}
 });
 

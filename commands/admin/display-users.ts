@@ -28,7 +28,7 @@ module.exports = {
 		const users = await DatabaseService.getUsers(status);
 
 		if (users.length == 0) {
-			await interaction.reply('Aucun résultat ne correspond à ces critères');
+			await interaction.reply('Aucun utilisateur à afficher.');
 			return;
 		}
 
@@ -68,8 +68,8 @@ function createMessages(users: any): string[] {
 };
 
 async function sendMessages(interaction: any, messages: string[], status: number) {
-	if (status) await interaction.reply({ content: 'Affichage des utilisateurs ' + Utils.statusToText(status)});
-	else await interaction.reply({ content: 'Affichage de tous les utilisateurs'});
+	if (status) await interaction.reply({ content: 'Affichage des utilisateurs ' + Utils.statusToText(status) });
+	else await interaction.reply({ content: 'Affichage de tous les utilisateurs' });
 
 	messages.forEach(async message => {
 		await interaction.channel.send({ content: message });

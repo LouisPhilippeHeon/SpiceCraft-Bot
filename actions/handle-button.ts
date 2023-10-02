@@ -99,7 +99,6 @@ export async function confirmUsernameChange(interaction: any) {
 		const discordUuid = interaction.customId.split('-')[1];
 		const minecraftUuid = interaction.customId.split('-')[2];
 
-		console.log(minecraftUuid, interaction.customId);
 		await DatabaseService.changeMinecraftUuid(discordUuid, minecraftUuid);
 
 		const approvalRequest = interaction.message;
