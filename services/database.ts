@@ -65,8 +65,7 @@ export async function getUserByDiscordUuid(discordUuid: string) {
 	const tag = await this.tags.findOne({ where: { discord_uuid: discordUuid } });
 
 	if (tag) {
-		// TODO Essayer deepClone ou trouver quelque chose de moins laid
-		return JSON.parse(JSON.stringify(tag.get({ plain: true })));
+		return structuredClone(tag.get({ plain: true }))
 	}
 
 	throw new Error('Cet utilisateur n\'existe pas!');
@@ -77,10 +76,14 @@ export async function getUsers(status?: number) {
 	return await this.tags.findAll({ where: { inscription_status: status }, raw: true });
 };
 
-export async function deleteUser(discordUuid: string) {
-	await this.tags.destroy({
-		where: {
-			discord_uuid: discordUuid
-		},
-	});
+export async function deleteEntryWithDiscordUuid(discordUuid: string) {
+	const tagToDelete = await this.tags.findOne({ where: { discord_uuid: discordUuid } })
+	if (tagToDelete === null) throw new Error('Cet utilisateur n\'est pas inscrit');
+	tagToDelete.destroy();
+}
+
+export async function deleteEntry(id: number) {
+	const tagToDelete = await this.tags.findOne({ where: { id: id } })
+	if (tagToDelete === null) throw new Error('Cet utilisateur n\'est pas inscrit');
+	tagToDelete.destroy();
 }

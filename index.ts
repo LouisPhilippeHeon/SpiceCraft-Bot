@@ -1,6 +1,6 @@
 import fs = require('node:fs');
 import path = require('node:path');
-import { Collection, Events } from 'discord.js';
+import { AuditLogEvent, Collection, Events } from 'discord.js';
 import { token } from './config';
 import * as DatabaseService from './services/database';
 import * as Register from './actions/register';
@@ -72,9 +72,16 @@ Utils.client.on(Events.InteractionCreate, async (interaction: any) => {
 	}
 });
 
-Utils.client.on('guildMemberUpdate', async (oldMember: any, newMember: any) => {
+Utils.client.on(Events.GuildMemberUpdate, async (oldMember: any, newMember: any) => {
 	if (oldMember.roles.cache.some((role: any) => role.name === Constants.playerRoleName) && !newMember.roles.cache.some((role: any) => role.name === Constants.playerRoleName)) {
-		await DatabaseService.deleteUser(newMember.user.id);
+		try {
+			const latestMemberRoleUpdateLog = await newMember.guild.fetchAuditLogs({ type: AuditLogEvent.MemberRoleUpdate, limit: 1 });
+			const executor = newMember.guild.members.resolve(latestMemberRoleUpdateLog.entries.first().executor);
+			if (executor.user.id !== Constants.discordBotUuid) await DatabaseService.deleteEntryWithDiscordUuid(newMember.user.id);
+		}
+		catch (e) {
+			if (e.code === 50013) console.log('Le bot a besoin de permission pour lire les logs.');
+		}
 	}
 });
 

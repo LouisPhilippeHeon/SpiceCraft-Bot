@@ -3,6 +3,11 @@ import * as Constants from "./bot-constants";
 
 export const client: any = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.DirectMessages, GatewayIntentBits.DirectMessageReactions, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildPresences] });
 
+// structuredClone dosen't work in some circumstances
+export function deepCloneWithJson(objectToClone: any): any {
+	return JSON.parse(JSON.stringify(objectToClone));
+}
+
 // TODO Move to texts
 export function statusToText(statusCode: number): string {
 	if (statusCode == Constants.inscriptionStatus.awaitingApproval) return 'en attente';

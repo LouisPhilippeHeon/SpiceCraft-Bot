@@ -3,6 +3,7 @@ import * as HttpService from '../services/http';
 import * as DatabaseService from '../services/database';
 import * as RequestAdminApproval from './request-admin-approval';
 import * as Texts from '../texts'
+import * as Utils from '../utils'
 import { EmbedBuilder } from 'discord.js';
 
 const rulesEmbed = new EmbedBuilder()
@@ -37,7 +38,7 @@ export async function handleInscriptionButtonClick(interaction: any) {
 			await registerNewUser().catch(async () => await interactionReference.reply({ content: Texts.register.dmsAreClosed, ephemeral: true }));
 			return;
 		}
-		interactionReference.reply(Texts.register.unknownError);
+		await interactionReference.reply(Texts.register.unknownError);
 	}
 };
 
@@ -50,13 +51,13 @@ async function updateExistingUser(status: number) {
 
 	usernameCollector.on('end', async (usernameCollected: any) => {
 		if (usernameCollected.size === 0) {
-			usernameMessage.reply(Texts.register.timeoutAnswer);
+			await usernameMessage.reply(Texts.register.timeoutAnswer);
 			return;
 		}
 		collectedMinecraftUsername = usernameCollected.first().content;
 		HttpService.getUuidAndFormatedUsernameFromUsername(collectedMinecraftUsername).then(async (minecraftUuid: any) => {
 			if (minecraftUuid.id === undefined) {
-				dmChannel.send(Texts.register.minecraftAccountDoesNotExist.replace('$minecraftUsername$', collectedMinecraftUsername));
+				await dmChannel.send(Texts.register.minecraftAccountDoesNotExist.replace('$minecraftUsername$', collectedMinecraftUsername));
 				return;
 			}
 			collectedMinecraftUuid = minecraftUuid.id;
@@ -64,19 +65,19 @@ async function updateExistingUser(status: number) {
 
 			// If user is already approved
 			if (status === Constants.inscriptionStatus.approved) {
-				RequestAdminApproval.sendUsernameChangeRequest(interactionReference, collectedMinecraftUsername, collectedMinecraftUuid);
-				dmChannel.send(Texts.register.usernameUpdated);
+				await RequestAdminApproval.sendUsernameChangeRequest(interactionReference, collectedMinecraftUsername, collectedMinecraftUuid);
+				await dmChannel.send(Texts.register.usernameUpdated);
 			}
 			else {
-				updateAdminApprovalRequest(dmChannel);
+				await updateAdminApprovalRequest(dmChannel);
 			}
 
-		}).catch((err) => {
+		}).catch(async (err) => {
 			if (err.name == 'SequelizeUniqueConstraintError') {
-				dmChannel.send(Texts.register.usernameUsedWithAnotherAccount);
+				await dmChannel.send(Texts.register.usernameUsedWithAnotherAccount);
 				return;
 			}
-			dmChannel.send(Texts.register.errorWhileConnectingToMojangServer);
+			await dmChannel.send(Texts.register.errorWhileConnectingToMojangServer);
 		});
 	});
 }
@@ -93,14 +94,13 @@ async function updateAdminApprovalRequest(dmChannel: any) {
 		await whitelistChannel.send(Texts.register.unaprovedUserChangedMinecraftUsername.replace('$discordUuid$', discordUuid).replace('$minecraftUsername$', collectedMinecraftUsername));
 	}
 	else {
-		const embedToUpdate = JSON.parse(JSON.stringify(approvalRequest.embeds[0]));
-		//TODO Valider si marche
+		const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
 		embedToUpdate.description = Texts.register.embedDescription.replace('$discordUuid$', discordUuid).replace('$minecraftUsername$', collectedMinecraftUsername);
 		approvalRequest.edit({ embeds: [embedToUpdate] });
 	}
 
 	await DatabaseService.changeMinecraftUuid(discordUuid, collectedMinecraftUuid);
-	dmChannel.send(Texts.register.requestSucessfullyUpdated);
+	await dmChannel.send(Texts.register.requestSucessfullyUpdated);
 }
 
 async function registerNewUser() {
@@ -112,21 +112,21 @@ async function registerNewUser() {
 
 	usernameCollector.on('end', async (usernameCollected: any) => {
 		if (usernameCollected.size === 0) {
-			usernameMessage.reply(Texts.register.timeoutAnswer);
+			await usernameMessage.reply(Texts.register.timeoutAnswer);
 			return;
 		}
 
 		collectedMinecraftUsername = usernameCollected.first().content;
-		HttpService.getUuidAndFormatedUsernameFromUsername(collectedMinecraftUsername).then((minecraftUuid: any) => {
+		HttpService.getUuidAndFormatedUsernameFromUsername(collectedMinecraftUsername).then(async (minecraftUuid: any) => {
 			if (minecraftUuid.id === undefined) {
-				dmChannel.send(Texts.register.minecraftAccountDoesNotExist.replace('$minecraftUsername$', collectedMinecraftUsername));
+				await dmChannel.send(Texts.register.minecraftAccountDoesNotExist.replace('$minecraftUsername$', collectedMinecraftUsername));
 				return;
 			}
 			collectedMinecraftUuid = minecraftUuid.id;
 			collectedMinecraftUsername = minecraftUuid.name;
-			getRulesAcknowledgment(dmChannel);
-		}).catch(() => {
-			dmChannel.send(Texts.register.errorWhileConnectingToMojangServer);
+			await getRulesAcknowledgment(dmChannel);
+		}).catch(async () => {
+			await dmChannel.send(Texts.register.errorWhileConnectingToMojangServer);
 		});
 	});
 }
@@ -140,9 +140,9 @@ async function getRulesAcknowledgment(channel: any) {
 	};
 
 	rulesMessage.awaitReactions({ filter: emojiFilter, max: 1, time: Constants.timeToWaitForUserInputBeforeTimeout, errors: ['time'] }).then(async () => {
-		saveNewUserToDb(channel);
-	}).catch(() => {
-		rulesMessage.reply(Texts.register.timeoutAnswer);
+		await saveNewUserToDb(channel);
+	}).catch(async () => {
+		await rulesMessage.reply(Texts.register.timeoutAnswer);
 		return;
 	});
 }
@@ -150,10 +150,10 @@ async function getRulesAcknowledgment(channel: any) {
 async function saveNewUserToDb(channel: any) {
 	try {
 		await DatabaseService.createUser(collectedMinecraftUuid, discordUuid);
-		RequestAdminApproval.sendApprovalRequest(interactionReference, collectedMinecraftUsername);
-		channel.send(Texts.register.waitForAdminApprobation);
+		await RequestAdminApproval.sendApprovalRequest(interactionReference, collectedMinecraftUsername);
+		await channel.send(Texts.register.waitForAdminApprobation);
 	}
 	catch (error) {
-		channel.send(error.message);
+		await channel.send(error.message);
 	}
 }

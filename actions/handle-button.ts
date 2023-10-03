@@ -16,7 +16,7 @@ export async function approveUser(interaction: any) {
 		await DatabaseService.changeStatus(discordUuid, inscriptionStatus.approved);
 
 		const approvalRequest = interaction.message;
-		const embedToUpdate = JSON.parse(JSON.stringify(approvalRequest.embeds[0]));
+		const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
 		embedToUpdate.color = Colors.Green;
 
 		interaction.message.edit({ content: requestGranted, embeds: [embedToUpdate], components: [] });
@@ -77,7 +77,7 @@ export async function confirmRejectUser(interaction: any) {
 		const approvalRequest = await whitelistChannel.messages.fetch(messageUuid);
 
 		if (approvalRequest !== undefined) {
-			const embedToUpdate = JSON.parse(JSON.stringify(approvalRequest.embeds[0]));
+			const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
 			embedToUpdate.color = Colors.Red;
 			approvalRequest.edit({ content: requestDenied, embeds: [embedToUpdate], components: [] });
 		}
@@ -102,7 +102,7 @@ export async function confirmUsernameChange(interaction: any) {
 		await DatabaseService.changeMinecraftUuid(discordUuid, minecraftUuid);
 
 		const approvalRequest = interaction.message;
-		const embedToUpdate = JSON.parse(JSON.stringify(approvalRequest.embeds[0]));
+		const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
 		embedToUpdate.color = Colors.Green;
 
 		interaction.message.edit({ content: '✅ La mise à jour de username a été complétée.', embeds: [embedToUpdate], components: [] });

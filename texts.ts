@@ -15,6 +15,6 @@ export enum register {
 	embedDescription = 'Compte Discord : <@$discordUuid$>.\nUsername Minecraft : $minecraftUsername$.',
 	unaprovedUserChangedMinecraftUsername = '<@$discordUuid$> a changé son username Minecraft pour \`$minecraftUsername$\` dans sa demande d\'ajout à la whitelist.',
 	minecraftAccountDoesNotExist = '❌ Le compte Minecraft « $minecraftUsername$ » n\'existe pas! Tu peux cliquer à nouveau le bouton \`S\'inscrire\` pour réessayer. ❌',
-	dmsAreClosed = 'Tes paramètres de confidentialité m\'empêchent de t\'envoyer des messages. Change ces paramètres pour pouvoir compléter ton inscription',
+	dmsAreClosed = 'Tes paramètres de confidentialité m\'empêchent de t\'envoyer des messages. Change ces paramètres pour pouvoir compléter ton inscription.',
 	unknownError = 'Une erreur inconnue est survenue !'
 }

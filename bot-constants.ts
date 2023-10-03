@@ -1,5 +1,5 @@
 export const whitelistChannelName = 'whitelist';
-export const discordBotUuid = '590216555736989697';
+export const discordBotUuid = '1131788629556072469';
 export const timeToWaitForUserInputBeforeTimeout = 120000;
 export const playerRoleName = 'Joueur';
 
