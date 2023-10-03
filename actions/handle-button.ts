@@ -19,12 +19,12 @@ export async function approveUser(interaction: any) {
 		const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
 		embedToUpdate.color = Colors.Green;
 
-		interaction.message.edit({ content: requestGranted, embeds: [embedToUpdate], components: [] });
+		await interaction.message.edit({ content: requestGranted, embeds: [embedToUpdate], components: [] });
 
 		interaction.guild.members.fetch(discordUuid, false).then(async (member: any) => {
 			let role = interaction.guild.roles.cache.find((r: any) => r.name.toLowerCase() == Constants.playerRoleName.toLowerCase());
 			if (!role) {
-				interaction.guild.roles.create({
+				await interaction.guild.roles.create({
 					name: Constants.playerRoleName,
 					color: Colors.Green,
 					reason: 'Le rôle pour les joueurs n\'existait pas, il a été créé.',
@@ -33,14 +33,14 @@ export async function approveUser(interaction: any) {
 			}
 
 			await member.roles.add(role.id);
-			member.send(addedText);
-			interaction.reply({ content: `Un message a été envoyé à <@${discordUuid}> pour l'informer de son ajout à la whitelist.`, ephemeral: true });
-		}).catch(() => {
-			interaction.reply(noDiscordUserWithThisUuidText);
+			await member.send(addedText);
+			await interaction.reply({ content: `Un message a été envoyé à <@${discordUuid}> pour l'informer de son ajout à la whitelist.`, ephemeral: true });
+		}).catch(async () => {
+			await interaction.reply(noDiscordUserWithThisUuidText);
 		});
 	}
 	catch (e) {
-		interaction.reply(e.message);
+		await interaction.reply(e.message);
 	}
 }
 
@@ -53,7 +53,7 @@ export async function rejectUser(interaction: any) {
 			.setLabel('Rejeter')
 			.setStyle(ButtonStyle.Danger);
 		const cancel = new ButtonBuilder()
-			.setCustomId('cancel-reject')
+			.setCustomId('cancel')
 			.setLabel('Annuler')
 			.setStyle(ButtonStyle.Secondary);
 
@@ -61,7 +61,7 @@ export async function rejectUser(interaction: any) {
 		await interaction.reply({ content: `Êtes vous certain de vouloir rejeter <@${discordUuid}> ?`, components: [row] });
 	}
 	catch (e) {
-		interaction.reply(e.message);
+		await interaction.reply(e.message);
 	}
 }
 
@@ -79,18 +79,18 @@ export async function confirmRejectUser(interaction: any) {
 		if (approvalRequest !== undefined) {
 			const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
 			embedToUpdate.color = Colors.Red;
-			approvalRequest.edit({ content: requestDenied, embeds: [embedToUpdate], components: [] });
+			await approvalRequest.edit({ content: requestDenied, embeds: [embedToUpdate], components: [] });
 		}
 
-		Utils.client.users.fetch(discordUuid, false).then((user: any) => {
+		Utils.client.users.fetch(discordUuid, false).then(async (user: any) => {
 			user.send(rejectedText);
-			interaction.reply({ content: `Un message a été envoyé à <@${discordUuid}> pour l'informer du refus.`, ephemeral: true });
-		}).catch(() => {
-			interaction.reply(noDiscordUserWithThisUuidText);
+			await interaction.reply({ content: `Un message a été envoyé à <@${discordUuid}> pour l'informer du rejet.`, ephemeral: true });
+		}).catch(async () => {
+			await interaction.reply(noDiscordUserWithThisUuidText);
 		});
 	}
 	catch (e) {
-		interaction.reply(e.message);
+		await interaction.reply(e.message);
 	}
 }
 
@@ -105,16 +105,31 @@ export async function confirmUsernameChange(interaction: any) {
 		const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
 		embedToUpdate.color = Colors.Green;
 
-		interaction.message.edit({ content: '✅ La mise à jour de username a été complétée.', embeds: [embedToUpdate], components: [] });
+		await interaction.message.edit({ content: '✅ La mise à jour de username a été complétée.', embeds: [embedToUpdate], components: [] });
 
-		Utils.client.users.fetch(discordUuid, false).then((user: any) => {
-			user.send('Ton username Minecraft a été mis à jour dans la whitelist.');
-			interaction.reply({ content: `Un message a été envoyé à <@${discordUuid}> pour l'informer de la mise à jour du username.`, ephemeral: true });
-		}).catch(() => {
-			interaction.reply(noDiscordUserWithThisUuidText);
+		Utils.client.users.fetch(discordUuid, false).then(async (user: any) => {
+			await user.send('Ton username Minecraft a été mis à jour dans la whitelist.');
+			await interaction.reply({ content: `Un message a été envoyé à <@${discordUuid}> pour l'informer de la mise à jour du username.`, ephemeral: true });
+		}).catch(async () => {
+			await interaction.reply(noDiscordUserWithThisUuidText);
 		});
 	}
 	catch (e) {
-		interaction.reply(e.message);
+		await interaction.reply(e.message);
+	}
+}
+
+export async function deleteUser(interaction: any) {
+	try {
+		const discordUuid = interaction.customId.split('-')[1];
+		await DatabaseService.deleteEntryWithDiscordUuid(discordUuid);
+
+		const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
+		embedToUpdate.color = Colors.Red;
+		await interaction.message.edit({ content: '🗑️ L\'utilisateur a été supprimé de la base de données', embeds:[embedToUpdate], components: [] });
+		await interaction.reply({ content: 'L\'utilisateur a été supprimé de la base de données.', ephemeral: true })
+	}
+	catch (e) { 
+		await interaction.reply(e.message);
 	}
 }

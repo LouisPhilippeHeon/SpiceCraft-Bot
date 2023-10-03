@@ -1,6 +1,6 @@
 import fs = require('node:fs');
 import path = require('node:path');
-import { AuditLogEvent, Collection, Events } from 'discord.js';
+import { ActionRowBuilder, AuditLogEvent, ButtonBuilder, ButtonStyle, Collection, EmbedBuilder, Events } from 'discord.js';
 import { token } from './config';
 import * as DatabaseService from './services/database';
 import * as Register from './actions/register';
@@ -41,12 +41,13 @@ Utils.client.once(Events.ClientReady, (c: any) => {
 
 Utils.client.on(Events.InteractionCreate, async (interaction: any) => {
 	if (interaction.isButton()) {
-		if (interaction.customId === 'inscription') Register.handleInscriptionButtonClick(interaction);
-		if (interaction.customId === 'cancel-reject') interaction.message.delete();
-		if (interaction.customId.startsWith('confirm-reject')) HandleButton.confirmRejectUser(interaction);
-		if (interaction.customId.startsWith('approve')) HandleButton.approveUser(interaction);
-		if (interaction.customId.startsWith('reject')) HandleButton.rejectUser(interaction);
-		if (interaction.customId.startsWith('update')) HandleButton.confirmUsernameChange(interaction);
+		if (interaction.customId === 'inscription') await Register.handleInscriptionButtonClick(interaction);
+		if (interaction.customId === 'cancel') await interaction.message.delete();
+		if (interaction.customId.startsWith('confirm-reject')) await HandleButton.confirmRejectUser(interaction);
+		if (interaction.customId.startsWith('approve')) await HandleButton.approveUser(interaction);
+		if (interaction.customId.startsWith('reject')) await HandleButton.rejectUser(interaction);
+		if (interaction.customId.startsWith('update')) await HandleButton.confirmUsernameChange(interaction);
+		if (interaction.customId.startsWith('delete')) await HandleButton.deleteUser(interaction);
 	}
 
 	if (!interaction.isChatInputCommand()) return;
@@ -83,6 +84,33 @@ Utils.client.on(Events.GuildMemberUpdate, async (oldMember: any, newMember: any)
 			if (e.code === 50013) console.log('Le bot a besoin de permission pour lire les logs.');
 		}
 	}
+});
+
+Utils.client.on(Events.GuildMemberRemove, async (member: any) => {
+	try {
+		const userFromDb = await DatabaseService.getUserByDiscordUuid(member.user.id);
+		const whitelistChannel = member.guild.channels.cache.find((channel: any) => channel.name === Constants.whitelistChannelName);
+
+		const confirmDelete = new ButtonBuilder()
+			.setCustomId(`delete-${userFromDb.discord_uuid}`)
+			.setLabel('Oui')
+			.setStyle(ButtonStyle.Danger);
+
+		const cancel = new ButtonBuilder()
+			.setCustomId('cancel')
+			.setLabel('Ne rien faire')
+			.setStyle(ButtonStyle.Secondary);
+
+		const deleteEmbed = new EmbedBuilder()
+			.setTitle(`Un utilisateur a quitté. Faut-il le retirer de la base de données ?`)
+			.setDescription(`Compte Discord : <@${userFromDb.discord_uuid}>.`)
+
+		const row = new ActionRowBuilder()
+			.addComponents(confirmDelete, cancel);
+
+		await whitelistChannel.send({embeds: [deleteEmbed], components: [row] });
+	}
+	catch { }
 });
 
 Utils.client.login(token);
