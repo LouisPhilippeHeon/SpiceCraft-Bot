@@ -1,4 +1,5 @@
 const Sequelize = require('sequelize');
+import * as Constants from '../bot-constants'
 
 const sequelize = new Sequelize('database', 'user', 'password', {
 	host: 'localhost',
@@ -29,27 +30,25 @@ export async function createUser(minecraftUuid: string, discordUuid: string) {
 			minecraft_uuid: minecraftUuid,
 			discord_uuid: discordUuid,
 		});
-
-		console.log(`Un utilisateur a été ajouté avec le UUID Disocrd ${discordUuid} et le UUID Minecraft ${minecraftUuid}.`);
 	}
 	catch (error) {
 		if (error.name === 'SequelizeUniqueConstraintError') {
-			throw new Error('Ce UUID Minecraft ou Discord existe déjà dans la base de données.');
+			throw new Error(Constants.errorMessages.notUnique);
 		}
 
-		throw new Error('Une erreur inconnue est survenue lors de l\'écriture dans la base de données.');
+		throw new Error(Constants.errorMessages.unknownError);
 	}
 };
 
 export async function changeStatus(discordUuid: string, newStatus: number) {
 	if (![0, 1, 2].includes(newStatus)) {
-		throw new Error('Statut invalide');
+		throw new Error(Constants.errorMessages.invalidStatus);
 	}
 
 	const affectedRows = await this.tags.update({ inscription_status: newStatus }, { where: { discord_uuid: discordUuid } });
 
 	if (affectedRows[0] === 0) {
-		throw new Error('Cet utilisateur n\'est pas inscrit');
+		throw new Error(Constants.errorMessages.userDoesNotExist);
 	}
 };
 
@@ -57,7 +56,7 @@ export async function changeMinecraftUuid(discordUuid: string, minecraftUuid: st
 	const affectedRows = await this.tags.update({ minecraft_uuid: minecraftUuid }, { where: { discord_uuid: discordUuid } });
 
 	if (affectedRows[0] === 0) {
-		throw new Error('Cet utilisateur n\'est pas inscrit');
+		throw new Error(Constants.errorMessages.userDoesNotExist);
 	}
 };
 
@@ -68,7 +67,7 @@ export async function getUserByDiscordUuid(discordUuid: string) {
 		return structuredClone(tag.get({ plain: true }))
 	}
 
-	throw new Error('Cet utilisateur n\'existe pas!');
+	throw new Error(Constants.errorMessages.userDoesNotExist);
 };
 
 export async function getUsers(status?: number) {
@@ -78,12 +77,12 @@ export async function getUsers(status?: number) {
 
 export async function deleteEntryWithDiscordUuid(discordUuid: string) {
 	const tagToDelete = await this.tags.findOne({ where: { discord_uuid: discordUuid } })
-	if (tagToDelete === null) throw new Error('Cet utilisateur n\'est pas inscrit');
+	if (tagToDelete === null) throw new Error(Constants.errorMessages.userDoesNotExist);
 	tagToDelete.destroy();
 }
 
 export async function deleteEntry(id: number) {
 	const tagToDelete = await this.tags.findOne({ where: { id: id } })
-	if (tagToDelete === null) throw new Error('Cet utilisateur n\'est pas inscrit');
+	if (tagToDelete === null) throw new Error(Constants.errorMessages.userDoesNotExist);
 	tagToDelete.destroy();
 }

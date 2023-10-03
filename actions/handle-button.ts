@@ -8,7 +8,7 @@ const requestGranted = '✅ La demande a été approuvée.';
 const requestDenied = '❌ La demande a été rejetée.';
 const addedText = 'Tu a été ajouté à la whitelist. Si tu n\'arrive pas à te connecter, ton username Minecraft est peut-être incorrect. Si c\'est le cas, clique à nouveau sur le bouton d\'inscription.';
 const rejectedText = 'Désolé, mais les administrateurs ont choisi de ne pas t\'ajouter à la whitelist. Contacte-les pour plus de détails.';
-const noDiscordUserWithThisUuidText = 'Le UUID Discord de l\'utilisateur qui s\'est inscrit ne correspond à aucun utilisateur existant.';
+const noDiscordUserWithThisUuidText = 'Cet utilisateur Discord n\'est pas membre du serveur.';
 
 export async function approveUser(interaction: any) {
 	try {
@@ -33,8 +33,13 @@ export async function approveUser(interaction: any) {
 			}
 
 			await member.roles.add(role.id);
-			await member.send(addedText);
-			await interaction.reply({ content: `Un message a été envoyé à <@${discordUuid}> pour l'informer de son ajout à la whitelist.`, ephemeral: true });
+			try {
+				await member.send(addedText);
+				await interaction.reply({ content: `Un message a été envoyé à <@${discordUuid}> pour l'informer de son ajout à la whitelist.`, ephemeral: true });
+			}
+			catch {
+				await interaction.reply('Impossible d\'envoyer un message à cet utilisateur en raison de ses paramètres de confidentialité.');
+			}
 		}).catch(async () => {
 			await interaction.reply(noDiscordUserWithThisUuidText);
 		});
@@ -83,8 +88,13 @@ export async function confirmRejectUser(interaction: any) {
 		}
 
 		Utils.client.users.fetch(discordUuid, false).then(async (user: any) => {
-			user.send(rejectedText);
-			await interaction.reply({ content: `Un message a été envoyé à <@${discordUuid}> pour l'informer du rejet.`, ephemeral: true });
+			try {
+				user.send(rejectedText);
+				await interaction.reply({ content: `Un message a été envoyé à <@${discordUuid}> pour l'informer du rejet.`, ephemeral: true });
+			}
+			catch {
+				await interaction.reply('Impossible d\'envoyer un message à cet utilisateur en raison de ses paramètres de confidentialité.');
+			}
 		}).catch(async () => {
 			await interaction.reply(noDiscordUserWithThisUuidText);
 		});
@@ -108,8 +118,13 @@ export async function confirmUsernameChange(interaction: any) {
 		await interaction.message.edit({ content: '✅ La mise à jour de username a été complétée.', embeds: [embedToUpdate], components: [] });
 
 		Utils.client.users.fetch(discordUuid, false).then(async (user: any) => {
-			await user.send('Ton username Minecraft a été mis à jour dans la whitelist.');
-			await interaction.reply({ content: `Un message a été envoyé à <@${discordUuid}> pour l'informer de la mise à jour du username.`, ephemeral: true });
+			try {
+				await user.send('Ton username Minecraft a été mis à jour dans la whitelist.');
+				await interaction.reply({ content: `Un message a été envoyé à <@${discordUuid}> pour l'informer de la mise à jour du username.`, ephemeral: true });
+			}
+			catch {
+				await interaction.reply('Impossible d\'envoyer un message à cet utilisateur en raison de ses paramètres de confidentialité.');
+			}
 		}).catch(async () => {
 			await interaction.reply(noDiscordUserWithThisUuidText);
 		});

@@ -1,5 +1,6 @@
 import * as DatabaseService from '../services/database';
 import * as Constants from '../bot-constants';
+import * as Texts from '../texts'
 
 export async function editUserStatus(interaction: any, status: number) {
     const idToEdit = interaction.options.getUser('membre').id;
@@ -12,27 +13,21 @@ export async function editUserStatus(interaction: any, status: number) {
         (status == Constants.inscriptionStatus.approved) ? await member.roles.add(role.id) : await member.roles.remove(role.id);
 
         if (!interaction.options.getBoolean('silencieux') && status !== Constants.inscriptionStatus.awaitingApproval) {
+            const interactionReplyMessage = Texts.editUserStatus.statusChanged.replace('$discordUuid$', idToEdit).replace('$status$', Texts.getStatusName(status));
             try {
-                await member.send(getMessageSentToUser(status));
+                await member.send(getMessageToSendToUser(status));
+                await interaction.reply(interactionReplyMessage);
             }
             catch {
-                await interaction.reply(getInteractionReplyMessage(status, idToEdit) + ' Attention : Impossible d\'envoyer un message à cet utilisateur en raison de ses paramètres de confidentialité !');
-                return;
+                await interaction.reply(interactionReplyMessage + '\n' + Texts.editUserStatus.cantSendDm);
             }
         }
-        await interaction.reply(getInteractionReplyMessage(status, idToEdit));
-    }).catch(async () => {
-        await interaction.reply('Cet utilisateur n\'a jamais complété le formulaire d\'inscription !');
+    }).catch(async (e: any) => {
+        await interaction.reply(e.message);
     });
 }
 
-function getMessageSentToUser(status: number): string {
-    if (status == Constants.inscriptionStatus.approved) return 'Tu a été ajouté à la whitelist de SpiceCraft.';
-    if (status == Constants.inscriptionStatus.rejected) return 'Tu a été retiré de la whitelist de SpiceCraft. Contacte les administrateurs pour plus de détails.';
-}
-
-function getInteractionReplyMessage(status: number, discordUuid: string): string {
-    if (status == Constants.inscriptionStatus.approved) return `Le statut de <@${discordUuid}> à été changé pour "approuvé".`
-    if (status == Constants.inscriptionStatus.rejected) return `Le statut de <@${discordUuid}> à été changé pour "rejeté".`
-    if (status == Constants.inscriptionStatus.awaitingApproval) return `Le statut de <@${discordUuid}> à été changé pour "en attente".`
+function getMessageToSendToUser(status: number): string {
+    if (status == Constants.inscriptionStatus.approved) return Texts.editUserStatus.dmAddedToWhitelist;
+    if (status == Constants.inscriptionStatus.rejected) return Texts.editUserStatus.dmRemovedFromWhitelist;
 }

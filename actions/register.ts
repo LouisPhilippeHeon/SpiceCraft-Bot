@@ -34,7 +34,7 @@ export async function handleInscriptionButtonClick(interaction: any) {
 	}
 	// User does not exist in the database and should be created
 	catch (error) {
-		if (error.message === 'Cet utilisateur n\'existe pas!') {
+		if (error.message === Constants.errorMessages.userDoesNotExist) {
 			await registerNewUser().catch(async () => await interactionReference.reply({ content: Texts.register.dmsAreClosed, ephemeral: true }));
 			return;
 		}

@@ -1,7 +1,7 @@
 import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import * as DatabaseService from '../../services/database';
 import * as Constants from '../../bot-constants';
-import * as Utils from '../../utils'
+import * as Texts from '../../texts'
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -28,7 +28,7 @@ module.exports = {
 		const users = await DatabaseService.getUsers(status);
 
 		if (users.length == 0) {
-			await interaction.reply('Aucun utilisateur à afficher.');
+			await interaction.reply(Texts.displayUsers.noUserFound);
 			return;
 		}
 
@@ -45,9 +45,9 @@ async function sendAsJson(interaction: any, users: any, status: number) {
 	await interaction.reply({
 		files: [{
 			attachment: Buffer.from(JSON.stringify(users)),
-			name: (status) ? 'utilisateurs_' + Utils.statusToText(status) + '.json' : 'utilisateurs.json'
+			name: (status) ? Texts.displayUsers.fileNameWithStatus.replace('$status$', Texts.getStatusName(Number(status))) : Texts.displayUsers.filename
 		}]
-	})
+	});
 };
 
 function createMessages(users: any): string[] {
@@ -60,7 +60,10 @@ function createMessages(users: any): string[] {
 			messages.push(currentMessage);
 			currentMessage = '';
 		}
-		currentMessage += `<@${user.discord_uuid}> | [Afficher](<https://api.mojang.com/user/profile/${user.minecraft_uuid}>) | ${Utils.statusToEmoji(user.inscription_status)}\n`;
+		currentMessage += Texts.displayUsers.databaseEntryLine
+			.replace('$discordUuid$', user.discord_uuid)
+			.replace('$minecraftUuid$', user.minecraft_uuid)
+			.replace('$statusEmoji$', Texts.statusToEmoji(user.inscription_status));
 	});
 	messages.push(currentMessage);
 
@@ -68,8 +71,9 @@ function createMessages(users: any): string[] {
 };
 
 async function sendMessages(interaction: any, messages: string[], status: number) {
-	if (status) await interaction.reply({ content: 'Affichage des utilisateurs ' + Utils.statusToText(status) });
-	else await interaction.reply({ content: 'Affichage de tous les utilisateurs' });
+	await interaction.reply({ content: (status)
+		? Texts.displayUsers.displayingUsersWithStatus.replace('$status$', Texts.getStatusName(Number(status)))
+		: Texts.displayUsers.displayingAllUsers });
 
 	messages.forEach(async message => {
 		await interaction.channel.send({ content: message });

@@ -1,5 +1,6 @@
 import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import * as DatabaseService from '../../services/database';
+import * as Texts from '../../texts'
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -14,7 +15,7 @@ module.exports = {
 		const option = interaction.options.getInteger('id');
 		try {
 			await DatabaseService.deleteEntry(option);
-			await interaction.reply('L\'utilisateur à été supprimé de la base de données.')
+			await interaction.reply(Texts.deleteEntry.reply)
 		}
 		catch (e) {
 			await interaction.reply(e.message);

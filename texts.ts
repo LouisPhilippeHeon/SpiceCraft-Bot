@@ -1,3 +1,5 @@
+import * as Constants from './bot-constants'
+
 export enum register {
 	timeoutAnswer = 'Temps de réponse maximum dépassé, veuillez réessayer en cliqant le bouton `S\'inscrire` à nouveau.',
 	messageSentInDms = 'Merci de répondre au bot qui vous a envoyé un message en privé !',
@@ -17,4 +19,46 @@ export enum register {
 	minecraftAccountDoesNotExist = '❌ Le compte Minecraft « $minecraftUsername$ » n\'existe pas! Tu peux cliquer à nouveau le bouton \`S\'inscrire\` pour réessayer. ❌',
 	dmsAreClosed = 'Tes paramètres de confidentialité m\'empêchent de t\'envoyer des messages. Change ces paramètres pour pouvoir compléter ton inscription.',
 	unknownError = 'Une erreur inconnue est survenue !'
+}
+export enum editUserStatus {
+	dmAddedToWhitelist = 'Tu a été ajouté à la whitelist de SpiceCraft.',
+	dmRemovedFromWhitelist = 'Tu a été retiré de la whitelist de SpiceCraft. Contacte les administrateurs pour plus de détails.',
+	cantSendDm = 'Attention : Impossible d\'envoyer un message à cet utilisateur en raison de ses paramètres de confidentialité !',
+	statusChanged = 'Le statut de <@$discordUuid$> à été changé pour "$status$".'
+}
+
+export enum requestAdminApproval {
+	approvalRequestTitle = '$discordUsername$ veut être ajouté à la whitelist.',
+	usernameChangeRequestTitle = '$discordUsername$ demande un changement de nom d\'utilisateur.',
+	approvalRequestDescription = 'Compte Discord : <@$discordUuid$>.\nUsername Minecraft : $username$.',
+	userNameChangeRequestDescription = 'Compte Discord : <@$discordUuid$>.\nNouveau username Minecraft : $username$.'
+}
+
+export enum displayUsers {
+	noUserFound = 'Aucun utilisateur à afficher.',
+	displayingUsersWithStatus = 'Affichage des utilisateurs avec le statut "$status$"',
+	displayingAllUsers = 'Affichage de tous les utilisateurs',
+	databaseEntryLine = '<@$discordUuid$> | [Afficher](<https://api.mojang.com/user/profile/$minecraftUuid$>) | $statusEmoji$\n',
+	filename = 'utilisateurs.json',
+	fileNameWithStatus = 'utilisateurs_$status$.json'
+}
+
+export enum deleteEntry {
+	reply = 'L\'utilisateur à été supprimé de la base de données.'
+}
+
+export function getStatusName(status: number): string {
+	switch (status) {
+		case Constants.inscriptionStatus.awaitingApproval: return 'en attente';
+		case Constants.inscriptionStatus.approved: return 'approuvé';
+		case Constants.inscriptionStatus.rejected: return 'rejeté';
+	 }
+}
+
+export function statusToEmoji(status: number): string {
+	switch (status) {
+		case Constants.inscriptionStatus.awaitingApproval: return '🕓';
+		case Constants.inscriptionStatus.approved: return '✅';
+		case Constants.inscriptionStatus.rejected: return '❌';
+	 }
 }

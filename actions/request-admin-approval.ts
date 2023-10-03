@@ -1,5 +1,6 @@
 import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from 'discord.js';
 import * as Constants from '../bot-constants'
+import * as Texts from '../texts'
 
 let discordUuid: string;
 
@@ -18,12 +19,12 @@ export async function sendApprovalRequest(interaction: any, username: string) {
 		.setStyle(ButtonStyle.Danger);
 
 	const approvalRequestEmbed = new EmbedBuilder()
-		.setTitle(`${interaction.user.username} veut être ajouté à la whitelist.`)
+		.setTitle(Texts.requestAdminApproval.approvalRequestTitle.replace('$discordUsername$', interaction.user.username))
+		.setDescription(Texts.requestAdminApproval.approvalRequestDescription.replace('$discordUuid$', discordUuid).replace('$username$', username))
 		.setThumbnail(interaction.user.displayAvatarURL({ size: 256, dynamic: true }));
 
 	const row = new ActionRowBuilder().addComponents(approve, reject);
 
-	approvalRequestEmbed.setDescription(`Compte Discord : <@${discordUuid}>.\nUsername Minecraft : ${username}.`);
 	await whitelistChannel.send({ embeds: [approvalRequestEmbed], components: [row] });
 };
 
@@ -37,11 +38,11 @@ export async function sendUsernameChangeRequest(interaction: any, username: stri
 		.setStyle(ButtonStyle.Success);
 
 	const approvalRequestEmbed = new EmbedBuilder()
-		.setTitle(`${interaction.user.username} demande un changement de nom d'utilisateur.`)
+		.setTitle(Texts.requestAdminApproval.usernameChangeRequestTitle.replace('$discordUsername$', interaction.user.username))
+		.setDescription(Texts.requestAdminApproval.userNameChangeRequestDescription.replace('$discordUuid$', discordUuid).replace('$username$', username))
 		.setThumbnail(interaction.user.displayAvatarURL({ size: 256, dynamic: true }));
 
 	const row = new ActionRowBuilder().addComponents(approve);
 
-	approvalRequestEmbed.setDescription(`Compte Discord : <@${discordUuid}>.\nNouveau username Minecraft : ${username}.`);
 	await whitelistChannel.send({ embeds: [approvalRequestEmbed], components: [row] });
 };
