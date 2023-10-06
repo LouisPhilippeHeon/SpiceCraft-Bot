@@ -2,7 +2,7 @@ import { inscriptionStatus } from '../bot-constants';
 import * as DatabaseService from '../services/database';
 import * as Utils from '../utils'
 import * as Constants from '../bot-constants';
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, GuildMember, Role, TextChannel, User } from 'discord.js';
 
 const requestGranted = '✅ La demande a été approuvée.';
 const requestDenied = '❌ La demande a été rejetée.';
@@ -10,7 +10,7 @@ const addedText = 'Tu a été ajouté à la whitelist. Si tu n\'arrive pas à te
 const rejectedText = 'Désolé, mais les administrateurs ont choisi de ne pas t\'ajouter à la whitelist. Contacte-les pour plus de détails.';
 const noDiscordUserWithThisUuidText = 'Cet utilisateur Discord n\'est pas membre du serveur.';
 
-export async function approveUser(interaction: any) {
+export async function approveUser(interaction: ButtonInteraction) {
 	try {
 		const discordUuid = interaction.customId.split('-')[1];
 		await DatabaseService.changeStatus(discordUuid, inscriptionStatus.approved);
@@ -21,15 +21,15 @@ export async function approveUser(interaction: any) {
 
 		await interaction.message.edit({ content: requestGranted, embeds: [embedToUpdate], components: [] });
 
-		interaction.guild.members.fetch(discordUuid, false).then(async (member: any) => {
-			let role = interaction.guild.roles.cache.find((r: any) => r.name.toLowerCase() == Constants.playerRoleName.toLowerCase());
+		interaction.guild.members.fetch(discordUuid).then(async member => {
+			let role = interaction.guild.roles.cache.find(role => role.name.toLowerCase() == Constants.playerRoleName.toLowerCase());
 			if (!role) {
 				await interaction.guild.roles.create({
 					name: Constants.playerRoleName,
 					color: Colors.Green,
 					reason: 'Le rôle pour les joueurs n\'existait pas, il a été créé.',
 				});
-				role = interaction.guild.roles.cache.find((r: any) => r.name == Constants.playerRoleName);
+				role = interaction.guild.roles.cache.find(role => role.name == Constants.playerRoleName);
 			}
 
 			await member.roles.add(role.id);
@@ -49,7 +49,7 @@ export async function approveUser(interaction: any) {
 	}
 }
 
-export async function rejectUser(interaction: any) {
+export async function rejectUser(interaction: ButtonInteraction) {
 	try {
 		const discordUuid = interaction.customId.split('-')[1];
 
@@ -62,7 +62,7 @@ export async function rejectUser(interaction: any) {
 			.setLabel('Annuler')
 			.setStyle(ButtonStyle.Secondary);
 
-		const row = new ActionRowBuilder().addComponents(confirmRejection, cancel);
+		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmRejection, cancel);
 		await interaction.reply({ content: `Êtes vous certain de vouloir rejeter <@${discordUuid}> ?`, components: [row] });
 	}
 	catch (e) {
@@ -70,7 +70,7 @@ export async function rejectUser(interaction: any) {
 	}
 }
 
-export async function confirmRejectUser(interaction: any) {
+export async function confirmRejectUser(interaction: ButtonInteraction) {
 	try {
 		const discordUuid = interaction.customId.split('-')[2];
 		const messageUuid = interaction.customId.split('-')[3];
@@ -78,7 +78,7 @@ export async function confirmRejectUser(interaction: any) {
 		await interaction.message.delete();
 		await DatabaseService.changeStatus(discordUuid, inscriptionStatus.rejected);
 
-		const whitelistChannel = interaction.channel.guild.channels.cache.find((channel: any) => channel.name.toLowerCase() == Constants.whitelistChannelName);
+		const whitelistChannel = interaction.guild.channels.cache.find(channel => channel.name.toLowerCase() == Constants.whitelistChannelName) as TextChannel;
 		const approvalRequest = await whitelistChannel.messages.fetch(messageUuid);
 
 		if (approvalRequest !== undefined) {
@@ -87,7 +87,7 @@ export async function confirmRejectUser(interaction: any) {
 			await approvalRequest.edit({ content: requestDenied, embeds: [embedToUpdate], components: [] });
 		}
 
-		Utils.client.users.fetch(discordUuid, false).then(async (user: any) => {
+		Utils.client.users.fetch(discordUuid).then(async (user: User) => {
 			try {
 				user.send(rejectedText);
 				await interaction.reply({ content: `Un message a été envoyé à <@${discordUuid}> pour l'informer du rejet.`, ephemeral: true });
@@ -104,7 +104,7 @@ export async function confirmRejectUser(interaction: any) {
 	}
 }
 
-export async function confirmUsernameChange(interaction: any) {
+export async function confirmUsernameChange(interaction: ButtonInteraction) {
 	try {
 		const discordUuid = interaction.customId.split('-')[1];
 		const minecraftUuid = interaction.customId.split('-')[2];
@@ -117,7 +117,7 @@ export async function confirmUsernameChange(interaction: any) {
 
 		await interaction.message.edit({ content: '✅ La mise à jour de username a été complétée.', embeds: [embedToUpdate], components: [] });
 
-		Utils.client.users.fetch(discordUuid, false).then(async (user: any) => {
+		Utils.client.users.fetch(discordUuid).then(async user => {
 			try {
 				await user.send('Ton username Minecraft a été mis à jour dans la whitelist.');
 				await interaction.reply({ content: `Un message a été envoyé à <@${discordUuid}> pour l'informer de la mise à jour du username.`, ephemeral: true });
@@ -134,7 +134,7 @@ export async function confirmUsernameChange(interaction: any) {
 	}
 }
 
-export async function deleteUser(interaction: any) {
+export async function deleteUser(interaction: ButtonInteraction) {
 	try {
 		const discordUuid = interaction.customId.split('-')[1];
 		await DatabaseService.deleteEntryWithDiscordUuid(discordUuid);

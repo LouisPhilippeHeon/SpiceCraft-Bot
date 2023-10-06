@@ -1,11 +1,13 @@
 const Sequelize = require('sequelize');
 import * as Constants from '../bot-constants'
+import * as Models from '../models'
 
 const sequelize = new Sequelize('database', 'user', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
 	logging: false,
 	storage: 'database.sqlite',
+	define: { 'underscored': true }
 });
 
 export const tags = sequelize.define('tags', {
@@ -60,7 +62,7 @@ export async function changeMinecraftUuid(discordUuid: string, minecraftUuid: st
 	}
 };
 
-export async function getUserByDiscordUuid(discordUuid: string) {
+export async function getUserByDiscordUuid(discordUuid: string): Promise<Models.UserFromDb> {
 	const tag = await this.tags.findOne({ where: { discord_uuid: discordUuid } });
 
 	if (tag) {
@@ -70,7 +72,7 @@ export async function getUserByDiscordUuid(discordUuid: string) {
 	throw new Error(Constants.errorMessages.userDoesNotExist);
 };
 
-export async function getUsers(status?: number) {
+export async function getUsers(status?: number): Promise<Models.UserFromDb[]> {
 	if (status == null) return await this.tags.findAll({ raw: true });
 	return await this.tags.findAll({ where: { inscription_status: status }, raw: true });
 };

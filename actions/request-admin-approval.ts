@@ -1,11 +1,12 @@
-import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from 'discord.js';
+import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, ButtonInteraction, TextChannel } from 'discord.js';
 import * as Constants from '../bot-constants'
 import * as Texts from '../texts'
+import * as Models from '../models'
 
 let discordUuid: string;
 
-export async function sendApprovalRequest(interaction: any, username: string) {
-	const whitelistChannel = interaction.channel.guild.channels.cache.find((channel: any) => channel.name === Constants.whitelistChannelName);
+export async function sendApprovalRequest(interaction: ButtonInteraction, username: string) {
+	const whitelistChannel = interaction.guild.channels.cache.find(channel => channel.name === Constants.whitelistChannelName) as TextChannel;
 	discordUuid = interaction.user.id;
 
 	const approve = new ButtonBuilder()
@@ -21,28 +22,28 @@ export async function sendApprovalRequest(interaction: any, username: string) {
 	const approvalRequestEmbed = new EmbedBuilder()
 		.setTitle(Texts.requestAdminApproval.approvalRequestTitle.replace('$discordUsername$', interaction.user.username))
 		.setDescription(Texts.requestAdminApproval.approvalRequestDescription.replace('$discordUuid$', discordUuid).replace('$username$', username))
-		.setThumbnail(interaction.user.displayAvatarURL({ size: 256, dynamic: true }));
+		.setThumbnail(interaction.user.displayAvatarURL({ size: 256 }));
 
-	const row = new ActionRowBuilder().addComponents(approve, reject);
+	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(approve, reject);
 
 	await whitelistChannel.send({ embeds: [approvalRequestEmbed], components: [row] });
 };
 
-export async function sendUsernameChangeRequest(interaction: any, username: string, minecraftUUid: string) {
-	const whitelistChannel = interaction.channel.guild.channels.cache.find((channel: any) => channel.name === Constants.whitelistChannelName);
+export async function sendUsernameChangeRequest(interaction: ButtonInteraction, userFromMojangApi: Models.UserFromMojangApi) {
+	const whitelistChannel = interaction.guild.channels.cache.find(channel => channel.name === Constants.whitelistChannelName) as TextChannel;
 	discordUuid = interaction.user.id;
 
 	const approve = new ButtonBuilder()
-		.setCustomId(`update-${discordUuid}-${minecraftUUid}`)
+		.setCustomId(`update-${discordUuid}-${userFromMojangApi.id}`)
 		.setLabel('Approuver')
 		.setStyle(ButtonStyle.Success);
 
 	const approvalRequestEmbed = new EmbedBuilder()
 		.setTitle(Texts.requestAdminApproval.usernameChangeRequestTitle.replace('$discordUsername$', interaction.user.username))
-		.setDescription(Texts.requestAdminApproval.userNameChangeRequestDescription.replace('$discordUuid$', discordUuid).replace('$username$', username))
-		.setThumbnail(interaction.user.displayAvatarURL({ size: 256, dynamic: true }));
+		.setDescription(Texts.requestAdminApproval.userNameChangeRequestDescription.replace('$discordUuid$', discordUuid).replace('$username$', userFromMojangApi.name))
+		.setThumbnail(interaction.user.displayAvatarURL({ size: 256 }));
 
-	const row = new ActionRowBuilder().addComponents(approve);
+	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(approve);
 
 	await whitelistChannel.send({ embeds: [approvalRequestEmbed], components: [row] });
 };

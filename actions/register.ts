@@ -4,19 +4,19 @@ import * as DatabaseService from '../services/database';
 import * as RequestAdminApproval from './request-admin-approval';
 import * as Texts from '../texts'
 import * as Utils from '../utils'
-import { EmbedBuilder } from 'discord.js';
+import * as Models from '../models'
+import { ButtonInteraction, Collection, DMChannel, EmbedBuilder, Message, MessageReaction, TextChannel, User } from 'discord.js';
 
 const rulesEmbed = new EmbedBuilder()
 	.setColor(0x0099FF)
 	.setTitle(Texts.register.rulesEmbedTitle)
 	.setDescription(Texts.register.rules);
 
-let collectedMinecraftUsername: string;
-let collectedMinecraftUuid: string;
-let interactionReference: any;
+let userFromMojangApi: Models.UserFromMojangApi;
+let interactionReference: ButtonInteraction;
 let discordUuid: string;
 
-export async function handleInscriptionButtonClick(interaction: any) {
+export async function handleInscriptionButtonClick(interaction: ButtonInteraction) {
 	interactionReference = interaction;
 	discordUuid = interactionReference.user.id;
 
@@ -43,29 +43,32 @@ export async function handleInscriptionButtonClick(interaction: any) {
 };
 
 async function updateExistingUser(status: number) {
-	const usernameMessage = await interactionReference.member.send(Texts.register.askWhatIsNewMinecraftUsername);
+	const usernameMessage = await interactionReference.user.send(Texts.register.askWhatIsNewMinecraftUsername);
 	await interactionReference.reply({ content: Texts.register.messageSentInDms, ephemeral: true });
-	const dmChannel = usernameMessage.channel;
-	const collectorFilter = (m: any) => m.author.id == discordUuid;
+	const dmChannel = usernameMessage.channel as DMChannel;
+	const collectorFilter = (message: Message) => message.author.id == discordUuid;
 	const usernameCollector = dmChannel.createMessageCollector({ filter: collectorFilter, max: 1, time: Constants.timeToWaitForUserInputBeforeTimeout });
 
-	usernameCollector.on('end', async (usernameCollected: any) => {
+	usernameCollector.on('end', async (usernameCollected: Collection<string, Message<boolean>>) => {
 		if (usernameCollected.size === 0) {
 			await usernameMessage.reply(Texts.register.timeoutAnswer);
 			return;
 		}
-		collectedMinecraftUsername = usernameCollected.first().content;
-		HttpService.getUuidAndFormatedUsernameFromUsername(collectedMinecraftUsername).then(async (minecraftUuid: any) => {
-			if (minecraftUuid.id === undefined) {
-				await dmChannel.send(Texts.register.minecraftAccountDoesNotExist.replace('$minecraftUsername$', collectedMinecraftUsername));
+
+		let usernameSentByUser: string = usernameCollected.first().content;
+		HttpService.getUuidAndFormatedUsernameFromUsername(usernameSentByUser).then(async (response: Models.UserFromMojangApi | Error) => {
+			if ((response as Error).message != null) return;
+			response = response as Models.UserFromMojangApi;
+
+			if (response.id === undefined) {
+				await dmChannel.send(Texts.register.minecraftAccountDoesNotExist.replace('$minecraftUsername$', usernameSentByUser));
 				return;
 			}
-			collectedMinecraftUuid = minecraftUuid.id;
-			collectedMinecraftUsername = minecraftUuid.name;
+			userFromMojangApi = { id: response.id, name: response.name };
 
 			// If user is already approved
 			if (status === Constants.inscriptionStatus.approved) {
-				await RequestAdminApproval.sendUsernameChangeRequest(interactionReference, collectedMinecraftUsername, collectedMinecraftUuid);
+				await RequestAdminApproval.sendUsernameChangeRequest(interactionReference, userFromMojangApi);
 				await dmChannel.send(Texts.register.usernameUpdated);
 			}
 			else {
@@ -82,48 +85,50 @@ async function updateExistingUser(status: number) {
 	});
 }
 
-async function updateAdminApprovalRequest(dmChannel: any) {
-	const whitelistChannel = interactionReference.channel.guild.channels.cache.find((channel: any) => channel.name.toLowerCase() == Constants.whitelistChannelName);
+async function updateAdminApprovalRequest(dmChannel: DMChannel) {
+	const whitelistChannel = interactionReference.guild.channels.cache.find(channel => channel.name.toLowerCase() == Constants.whitelistChannelName) as TextChannel;
 	const messagesOfWhitelistChannel = await whitelistChannel.messages.fetch({ limit: 100 });
 
 	// Find approval request for the user in the whitelist channel
-	const approvalRequest: any = Array.from(messagesOfWhitelistChannel.values()).find((val: any) => val.embeds[0]?.description.includes(`<@${discordUuid}>`));
+	const approvalRequest: Message = Array.from(messagesOfWhitelistChannel.values()).find(message => message.embeds[0]?.description.includes(`<@${discordUuid}>`));
 
 	// If message is too old to be updated
 	if (approvalRequest === undefined) {
-		await whitelistChannel.send(Texts.register.unaprovedUserChangedMinecraftUsername.replace('$discordUuid$', discordUuid).replace('$minecraftUsername$', collectedMinecraftUsername));
+		await whitelistChannel.send(Texts.register.unaprovedUserChangedMinecraftUsername.replace('$discordUuid$', discordUuid).replace('$minecraftUsername$', userFromMojangApi.name));
 	}
 	else {
 		const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
-		embedToUpdate.description = Texts.register.embedDescription.replace('$discordUuid$', discordUuid).replace('$minecraftUsername$', collectedMinecraftUsername);
-		approvalRequest.edit({ embeds: [embedToUpdate] });
+		embedToUpdate.description = Texts.register.embedDescription.replace('$discordUuid$', discordUuid).replace('$minecraftUsername$', userFromMojangApi.name);
+		await approvalRequest.edit({ embeds: [embedToUpdate] });
 	}
 
-	await DatabaseService.changeMinecraftUuid(discordUuid, collectedMinecraftUuid);
+	await DatabaseService.changeMinecraftUuid(discordUuid, userFromMojangApi.id);
 	await dmChannel.send(Texts.register.requestSucessfullyUpdated);
 }
 
 async function registerNewUser() {
-	const usernameMessage = await interactionReference.member.send(Texts.register.askWhatIsMinecraftUsername);
+	const usernameMessage = await interactionReference.user.send(Texts.register.askWhatIsMinecraftUsername);
 	await interactionReference.reply({ content: Texts.register.messageSentInDms, ephemeral: true });
-	const dmChannel = usernameMessage.channel;
-	const collectorFilter = (m: any) => m.author.id == interactionReference.user.id;
+	const dmChannel: DMChannel = usernameMessage.channel as DMChannel;
+	const collectorFilter = (message: Message) => message.author.id == interactionReference.user.id;
 	const usernameCollector = dmChannel.createMessageCollector({ filter: collectorFilter, max: 1, time: Constants.timeToWaitForUserInputBeforeTimeout });
 
-	usernameCollector.on('end', async (usernameCollected: any) => {
+	usernameCollector.on('end', async (usernameCollected: Collection<string, Message<boolean>>) => {
 		if (usernameCollected.size === 0) {
 			await usernameMessage.reply(Texts.register.timeoutAnswer);
 			return;
 		}
 
-		collectedMinecraftUsername = usernameCollected.first().content;
-		HttpService.getUuidAndFormatedUsernameFromUsername(collectedMinecraftUsername).then(async (minecraftUuid: any) => {
-			if (minecraftUuid.id === undefined) {
-				await dmChannel.send(Texts.register.minecraftAccountDoesNotExist.replace('$minecraftUsername$', collectedMinecraftUsername));
+		let usernameSentByUser: string = usernameCollected.first().content;
+		HttpService.getUuidAndFormatedUsernameFromUsername(usernameSentByUser).then(async (response: Models.UserFromMojangApi | Error) => {
+			if ((response as Error).message != null) return;		
+			response = response as Models.UserFromMojangApi;
+
+			if (response.id === undefined) {
+				await dmChannel.send(Texts.register.minecraftAccountDoesNotExist.replace('$minecraftUsername$', usernameSentByUser));
 				return;
 			}
-			collectedMinecraftUuid = minecraftUuid.id;
-			collectedMinecraftUsername = minecraftUuid.name;
+			userFromMojangApi = { id: response.id, name: response.name };
 			await getRulesAcknowledgment(dmChannel);
 		}).catch(async () => {
 			await dmChannel.send(Texts.register.errorWhileConnectingToMojangServer);
@@ -131,11 +136,11 @@ async function registerNewUser() {
 	});
 }
 
-async function getRulesAcknowledgment(channel: any) {
+async function getRulesAcknowledgment(channel: DMChannel) {
 	const rulesMessage = await channel.send({ content: Texts.register.reactToAcceptRules, embeds: [rulesEmbed] });
 	rulesMessage.react('✅');
 
-	const emojiFilter = (reaction: any, user: any) => {
+	const emojiFilter = (reaction: MessageReaction, user: User) => {
 		return (reaction.emoji.name == '✅') && (user.id === discordUuid);
 	};
 
@@ -147,10 +152,10 @@ async function getRulesAcknowledgment(channel: any) {
 	});
 }
 
-async function saveNewUserToDb(channel: any) {
+async function saveNewUserToDb(channel: DMChannel) {
 	try {
-		await DatabaseService.createUser(collectedMinecraftUuid, discordUuid);
-		await RequestAdminApproval.sendApprovalRequest(interactionReference, collectedMinecraftUsername);
+		await DatabaseService.createUser(userFromMojangApi.id, discordUuid);
+		await RequestAdminApproval.sendApprovalRequest(interactionReference, userFromMojangApi.name);
 		await channel.send(Texts.register.waitForAdminApprobation);
 	}
 	catch (error) {

@@ -1,15 +1,16 @@
 import * as DatabaseService from '../services/database';
 import * as Constants from '../bot-constants';
 import * as Texts from '../texts'
+import { ChatInputCommandInteraction, GuildMember } from 'discord.js';
 
-export async function editUserStatus(interaction: any, status: number) {
+export async function editUserStatus(interaction: ChatInputCommandInteraction, status: number) {
     const idToEdit = interaction.options.getUser('membre').id;
 
-    interaction.guild.members.fetch(idToEdit, false).then(async (member: any) => {
+    interaction.guild.members.fetch(idToEdit).then(async member => {
         // Change status in database
         await DatabaseService.changeStatus(idToEdit, status);
         // Remove role on Discord
-        let role = interaction.guild.roles.cache.find((r: any) => r.name.toLowerCase() == Constants.playerRoleName.toLowerCase());
+        let role = interaction.guild.roles.cache.find(role => role.name.toLowerCase() == Constants.playerRoleName.toLowerCase());
         (status == Constants.inscriptionStatus.approved) ? await member.roles.add(role.id) : await member.roles.remove(role.id);
 
         if (!interaction.options.getBoolean('silencieux') && status !== Constants.inscriptionStatus.awaitingApproval) {
@@ -22,7 +23,7 @@ export async function editUserStatus(interaction: any, status: number) {
                 await interaction.reply(interactionReplyMessage + '\n' + Texts.editUserStatus.cantSendDm);
             }
         }
-    }).catch(async (e: any) => {
+    }).catch(async (e) => {
         await interaction.reply(e.message);
     });
 }

@@ -1,4 +1,4 @@
-import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { editUserStatus } from '../../actions/edit-user-status';
 import { inscriptionStatus } from '../../bot-constants';
 
@@ -14,7 +14,7 @@ module.exports = {
 			option.setName('silencieux')
 				.setDescription('Envoyer un message à l\'utilisateur rejeté ?'))
 		.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
-	async execute(interaction: any) {
+	async execute(interaction: ChatInputCommandInteraction) {
 		await editUserStatus(interaction, inscriptionStatus.rejected);
 	},
 };

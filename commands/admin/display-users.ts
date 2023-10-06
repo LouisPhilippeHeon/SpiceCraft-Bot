@@ -1,7 +1,8 @@
-import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import * as DatabaseService from '../../services/database';
 import * as Constants from '../../bot-constants';
 import * as Texts from '../../texts'
+import * as Models from '../../models'
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -23,39 +24,41 @@ module.exports = {
 					{ name: 'JSON', value: 'json' },
 					{ name: 'Message', value: 'message' },
 				)),
-	async execute(interaction: any) {
-		const status = interaction.options.getString('statut');
-		const users = await DatabaseService.getUsers(status);
+	async execute(interaction: ChatInputCommandInteraction) {
+		const status: number = interaction.options.getString('statut') ? Number(interaction.options.getString('statut')) : null;
+		const format = interaction.options.getString('format');
+		
+		const usersFromDb = await DatabaseService.getUsers(status);
 
-		if (users.length == 0) {
+		if (usersFromDb.length == 0) {
 			await interaction.reply(Texts.displayUsers.noUserFound);
 			return;
 		}
 
-		if (interaction.options.getString('format') == 'json') {
-			await sendAsJson(interaction, users, status);
+		if (format == 'json') {
+			await sendAsJson(interaction, usersFromDb, status);
 			return;
 		}
 
-		await sendMessages(interaction, createMessages(users), status);
+		await sendMessages(interaction, createMessages(usersFromDb), status);
 	},
 };
 
-async function sendAsJson(interaction: any, users: any, status: number) {
+async function sendAsJson(interaction: ChatInputCommandInteraction, usersFromDb: Models.UserFromDb[], status: number) {
 	await interaction.reply({
 		files: [{
-			attachment: Buffer.from(JSON.stringify(users)),
-			name: (status) ? Texts.displayUsers.fileNameWithStatus.replace('$status$', Texts.getStatusName(Number(status))) : Texts.displayUsers.filename
+			attachment: Buffer.from(JSON.stringify(usersFromDb)),
+			name: (status) ? Texts.displayUsers.fileNameWithStatus.replace('$status$', Texts.getStatusName(status)) : Texts.displayUsers.filename
 		}]
 	});
 };
 
-function createMessages(users: any): string[] {
+function createMessages(usersFromDb: Models.UserFromDb[]): string[] {
 	const messages = [];
 	let currentMessage = '';
 
 	// Cuts data in multiple messages in order to bypass the 2000 caracter limit of Discord messages
-	users.forEach((user: any) => {
+	usersFromDb.forEach((user: Models.UserFromDb) => {
 		if (currentMessage.length > 1844) {
 			messages.push(currentMessage);
 			currentMessage = '';
@@ -70,9 +73,9 @@ function createMessages(users: any): string[] {
 	return messages;
 };
 
-async function sendMessages(interaction: any, messages: string[], status: number) {
+async function sendMessages(interaction: ChatInputCommandInteraction, messages: string[], status: number) {
 	await interaction.reply({ content: (status)
-		? Texts.displayUsers.displayingUsersWithStatus.replace('$status$', Texts.getStatusName(Number(status)))
+		? Texts.displayUsers.displayingUsersWithStatus.replace('$status$', Texts.getStatusName(status))
 		: Texts.displayUsers.displayingAllUsers });
 
 	messages.forEach(async message => {

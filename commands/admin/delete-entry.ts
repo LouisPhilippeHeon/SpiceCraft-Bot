@@ -1,4 +1,4 @@
-import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import * as DatabaseService from '../../services/database';
 import * as Texts from '../../texts'
 
@@ -11,7 +11,7 @@ module.exports = {
 				.setDescription('Retirer l\'entrée pour quel id ?')
 				.setRequired(true))
 		.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
-	async execute(interaction: any) {
+	async execute(interaction: ChatInputCommandInteraction) {
 		const option = interaction.options.getInteger('id');
 		try {
 			await DatabaseService.deleteEntry(option);

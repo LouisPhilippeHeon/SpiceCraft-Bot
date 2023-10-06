@@ -1,19 +1,20 @@
 import fs = require('node:fs');
 import path = require('node:path');
-import { ActionRowBuilder, AuditLogEvent, ButtonBuilder, ButtonStyle, Collection, EmbedBuilder, Events } from 'discord.js';
+import { ActionRowBuilder, AuditLogEvent, ButtonBuilder, ButtonStyle, Collection, EmbedBuilder, Events, GuildMember, TextChannel } from 'discord.js';
 import { clientId, token } from './config';
 import * as DatabaseService from './services/database';
 import * as Register from './actions/register';
 import * as HandleButton from './actions/handle-button';
 import * as Utils from './utils'
 import * as Constants from './bot-constants';
+import * as Models from './models';
 
 const erreurCommandeText = 'Une erreur s\'est produite lors de l\'exécution de cette commande!';
 // Create a new client instance
 Utils.client.commands = new Collection();
 
 const foldersPath = path.join(__dirname, 'commands');
-const commandFolders = fs.readdirSync(foldersPath).filter((folder: string) => !folder.endsWith('.DS_Store'));
+const commandFolders = fs.readdirSync(foldersPath).filter(folder => !folder.endsWith('.DS_Store'));
 
 for (const folder of commandFolders) {
 	const commandsPath = path.join(foldersPath, folder);
@@ -31,15 +32,15 @@ for (const folder of commandFolders) {
 	}
 }
 
-Utils.client.once(Events.ClientReady, (c: any) => {
+Utils.client.once(Events.ClientReady, client => {
 	const Tags = DatabaseService.tags;
 	Tags.sync({ force: true });
 	// Tags.sync();
 
-	console.log(`Ready! Logged in as ${c.user.tag}`);
+	console.log(`Ready! Logged in as ${client.user.tag}`);
 });
 
-Utils.client.on(Events.InteractionCreate, async (interaction: any) => {
+Utils.client.on(Events.InteractionCreate, async (interaction: Models.InteractionWithCommands) => {
 	if (interaction.isButton()) {
 		if (interaction.customId === 'inscription') await Register.handleInscriptionButtonClick(interaction);
 		if (interaction.customId === 'cancel') await interaction.message.delete();
@@ -73,8 +74,8 @@ Utils.client.on(Events.InteractionCreate, async (interaction: any) => {
 	}
 });
 
-Utils.client.on(Events.GuildMemberUpdate, async (oldMember: any, newMember: any) => {
-	if (oldMember.roles.cache.some((role: any) => role.name === Constants.playerRoleName) && !newMember.roles.cache.some((role: any) => role.name === Constants.playerRoleName)) {
+Utils.client.on(Events.GuildMemberUpdate, async (oldMember: GuildMember, newMember: GuildMember) => {
+	if (oldMember.roles.cache.some(role => role.name === Constants.playerRoleName) && !newMember.roles.cache.some(role => role.name === Constants.playerRoleName)) {
 		try {
 			const latestMemberRoleUpdateLog = await newMember.guild.fetchAuditLogs({ type: AuditLogEvent.MemberRoleUpdate, limit: 1 });
 			const executor = newMember.guild.members.resolve(latestMemberRoleUpdateLog.entries.first().executor);
@@ -86,10 +87,11 @@ Utils.client.on(Events.GuildMemberUpdate, async (oldMember: any, newMember: any)
 	}
 });
 
-Utils.client.on(Events.GuildMemberRemove, async (member: any) => {
+Utils.client.on(Events.GuildMemberRemove, async (member: GuildMember) => {
 	try {
+		// Only there to test if user exists in the database
 		const userFromDb = await DatabaseService.getUserByDiscordUuid(member.user.id);
-		const whitelistChannel = member.guild.channels.cache.find((channel: any) => channel.name === Constants.whitelistChannelName);
+		const whitelistChannel = member.guild.channels.cache.find(channel => channel.name === Constants.whitelistChannelName) as TextChannel;
 
 		const confirmDelete = new ButtonBuilder()
 			.setCustomId(`delete-${userFromDb.discord_uuid}`)
@@ -102,11 +104,10 @@ Utils.client.on(Events.GuildMemberRemove, async (member: any) => {
 			.setStyle(ButtonStyle.Secondary);
 
 		const deleteEmbed = new EmbedBuilder()
-			.setTitle(`Un utilisateur a quitté. Faut-il le retirer de la base de données ?`)
-			.setDescription(`Compte Discord : <@${userFromDb.discord_uuid}>.`)
+			.setTitle('Un utilisateur a quitté. Faut-il le retirer de la base de données ?')
+			.setDescription(`Compte Discord : <@${userFromDb.discord_uuid}>.`);
 
-		const row = new ActionRowBuilder()
-			.addComponents(confirmDelete, cancel);
+		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmDelete, cancel);
 
 		await whitelistChannel.send({embeds: [deleteEmbed], components: [row] });
 	}
