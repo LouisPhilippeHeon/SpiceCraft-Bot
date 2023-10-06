@@ -28,7 +28,7 @@ export async function handleInscriptionButtonClick(interaction: ButtonInteractio
 			return;
 		}
 
-		await updateExistingUser(userFromDb.inscription_status).catch(async () => {
+		await updateExistingUser(userFromDb).catch(async () => {
 			await interactionReference.reply({ content: Texts.register.dmsAreClosed, ephemeral: true });
 		});
 	}
@@ -42,7 +42,7 @@ export async function handleInscriptionButtonClick(interaction: ButtonInteractio
 	}
 };
 
-async function updateExistingUser(status: number) {
+async function updateExistingUser(userFromDb : Models.UserFromDb) {
 	const usernameMessage = await interactionReference.user.send(Texts.register.askWhatIsNewMinecraftUsername);
 	await interactionReference.reply({ content: Texts.register.messageSentInDms, ephemeral: true });
 	const dmChannel = usernameMessage.channel as DMChannel;
@@ -66,8 +66,12 @@ async function updateExistingUser(status: number) {
 			}
 			userFromMojangApi = { id: response.id, name: response.name };
 
+			if (userFromDb.minecraft_uuid == userFromMojangApi.id) {
+				dmChannel.send(Texts.register.sameMinecraftAccountAsBefore);
+				return;
+			}
 			// If user is already approved
-			if (status === Constants.inscriptionStatus.approved) {
+			if (userFromDb.inscription_status === Constants.inscriptionStatus.approved) {
 				await RequestAdminApproval.sendUsernameChangeRequest(interactionReference, userFromMojangApi);
 				await dmChannel.send(Texts.register.usernameUpdated);
 			}
@@ -83,27 +87,6 @@ async function updateExistingUser(status: number) {
 			await dmChannel.send(Texts.register.errorWhileConnectingToMojangServer);
 		});
 	});
-}
-
-async function updateAdminApprovalRequest(dmChannel: DMChannel) {
-	const whitelistChannel = interactionReference.guild.channels.cache.find(channel => channel.name.toLowerCase() == Constants.whitelistChannelName) as TextChannel;
-	const messagesOfWhitelistChannel = await whitelistChannel.messages.fetch({ limit: 100 });
-
-	// Find approval request for the user in the whitelist channel
-	const approvalRequest: Message = Array.from(messagesOfWhitelistChannel.values()).find(message => message.embeds[0]?.description.includes(`<@${discordUuid}>`));
-
-	// If message is too old to be updated
-	if (approvalRequest === undefined) {
-		await whitelistChannel.send(Texts.register.unaprovedUserChangedMinecraftUsername.replace('$discordUuid$', discordUuid).replace('$minecraftUsername$', userFromMojangApi.name));
-	}
-	else {
-		const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
-		embedToUpdate.description = Texts.register.embedDescription.replace('$discordUuid$', discordUuid).replace('$minecraftUsername$', userFromMojangApi.name);
-		await approvalRequest.edit({ embeds: [embedToUpdate] });
-	}
-
-	await DatabaseService.changeMinecraftUuid(discordUuid, userFromMojangApi.id);
-	await dmChannel.send(Texts.register.requestSucessfullyUpdated);
 }
 
 async function registerNewUser() {
@@ -150,6 +133,27 @@ async function getRulesAcknowledgment(channel: DMChannel) {
 		await rulesMessage.reply(Texts.register.timeoutAnswer);
 		return;
 	});
+}
+
+async function updateAdminApprovalRequest(dmChannel: DMChannel) {
+	const whitelistChannel = interactionReference.guild.channels.cache.find(channel => channel.name.toLowerCase() == Constants.whitelistChannelName) as TextChannel;
+	const messagesOfWhitelistChannel = await whitelistChannel.messages.fetch({ limit: 100 });
+
+	// Find approval request for the user in the whitelist channel
+	const approvalRequest: Message = Array.from(messagesOfWhitelistChannel.values()).find(message => message.embeds[0]?.description.includes(`<@${discordUuid}>`));
+
+	// If message is too old to be updated
+	if (approvalRequest === undefined) {
+		await whitelistChannel.send(Texts.register.unaprovedUserChangedMinecraftUsername.replace('$discordUuid$', discordUuid).replace('$minecraftUsername$', userFromMojangApi.name));
+	}
+	else {
+		const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
+		embedToUpdate.description = Texts.register.embedDescription.replace('$discordUuid$', discordUuid).replace('$minecraftUsername$', userFromMojangApi.name);
+		await approvalRequest.edit({ embeds: [embedToUpdate] });
+	}
+
+	await DatabaseService.changeMinecraftUuid(discordUuid, userFromMojangApi.id);
+	await dmChannel.send(Texts.register.requestSucessfullyUpdated);
 }
 
 async function saveNewUserToDb(channel: DMChannel) {

@@ -18,7 +18,8 @@ export enum register {
 	unaprovedUserChangedMinecraftUsername = '<@$discordUuid$> a changé son username Minecraft pour \`$minecraftUsername$\` dans sa demande d\'ajout à la whitelist.',
 	minecraftAccountDoesNotExist = '❌ Le compte Minecraft « $minecraftUsername$ » n\'existe pas! Tu peux cliquer à nouveau le bouton \`S\'inscrire\` pour réessayer. ❌',
 	dmsAreClosed = 'Tes paramètres de confidentialité m\'empêchent de t\'envoyer des messages. Change ces paramètres pour pouvoir compléter ton inscription.',
-	unknownError = 'Une erreur inconnue est survenue !'
+	unknownError = 'Une erreur inconnue est survenue !',
+	sameMinecraftAccountAsBefore = 'Pas besoin de mettre à jour ton nom d\'utilisateur, car il est identique à celui associé au compte Minecraft dans la whitelist.'
 }
 export enum editUserStatus {
 	dmAddedToWhitelist = 'Tu a été ajouté à la whitelist de SpiceCraft.',
