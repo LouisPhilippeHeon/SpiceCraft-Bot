@@ -33,8 +33,8 @@ export async function handleInscriptionButtonClick(interaction: ButtonInteractio
 		});
 	}
 	// User does not exist in the database and should be created
-	catch (error) {
-		if (error.message === Constants.errorMessages.userDoesNotExist) {
+	catch (e) {
+		if (e.message === Constants.errorMessages.userDoesNotExist) {
 			await registerNewUser().catch(async () => await interactionReference.reply({ content: Texts.register.dmsAreClosed, ephemeral: true }));
 			return;
 		}
@@ -42,7 +42,7 @@ export async function handleInscriptionButtonClick(interaction: ButtonInteractio
 	}
 };
 
-async function updateExistingUser(userFromDb : Models.UserFromDb) {
+async function updateExistingUser(userFromDb: Models.UserFromDb) {
 	const usernameMessage = await interactionReference.user.send(Texts.register.askWhatIsNewMinecraftUsername);
 	await interactionReference.reply({ content: Texts.register.messageSentInDms, ephemeral: true });
 	const dmChannel = usernameMessage.channel as DMChannel;
@@ -79,8 +79,8 @@ async function updateExistingUser(userFromDb : Models.UserFromDb) {
 				await updateAdminApprovalRequest(dmChannel);
 			}
 
-		}).catch(async (err) => {
-			if (err.name == 'SequelizeUniqueConstraintError') {
+		}).catch(async (e) => {
+			if (e.name == 'SequelizeUniqueConstraintError') {
 				await dmChannel.send(Texts.register.usernameUsedWithAnotherAccount);
 				return;
 			}
@@ -104,7 +104,7 @@ async function registerNewUser() {
 
 		let usernameSentByUser: string = usernameCollected.first().content;
 		HttpService.getUuidAndFormatedUsernameFromUsername(usernameSentByUser).then(async (response: Models.UserFromMojangApi | Error) => {
-			if ((response as Error).message != null) return;		
+			if ((response as Error).message != null) return;
 			response = response as Models.UserFromMojangApi;
 
 			if (response.id === undefined) {
