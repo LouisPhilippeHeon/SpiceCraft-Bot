@@ -53,7 +53,7 @@ export function getStatusName(status: number): string {
 		case Constants.inscriptionStatus.awaitingApproval: return 'en attente';
 		case Constants.inscriptionStatus.approved: return 'approuvé';
 		case Constants.inscriptionStatus.rejected: return 'rejeté';
-	 }
+	}
 }
 
 export function statusToEmoji(status: number): string {
@@ -61,5 +61,5 @@ export function statusToEmoji(status: number): string {
 		case Constants.inscriptionStatus.awaitingApproval: return '🕓';
 		case Constants.inscriptionStatus.approved: return '✅';
 		case Constants.inscriptionStatus.rejected: return '❌';
-	 }
+	}
 }
