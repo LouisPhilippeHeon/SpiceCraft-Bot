@@ -20,5 +20,5 @@ module.exports = {
 		catch (e) {
 			await interaction.reply(e.message);
 		}
-	},
+	}
 };

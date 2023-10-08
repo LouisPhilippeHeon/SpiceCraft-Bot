@@ -15,14 +15,14 @@ module.exports = {
 				.addChoices(
 					{ name: 'Approuvé', value: Constants.inscriptionStatus.approved.toString() },
 					{ name: 'Rejeté', value: Constants.inscriptionStatus.rejected.toString() },
-					{ name: 'En attente', value: Constants.inscriptionStatus.awaitingApproval.toString() },
+					{ name: 'En attente', value: Constants.inscriptionStatus.awaitingApproval.toString() }
 				))
 		.addStringOption(option =>
 			option.setName('format')
 				.setDescription('Afficher les données avec quel format?')
 				.addChoices(
 					{ name: 'JSON', value: 'json' },
-					{ name: 'Message', value: 'message' },
+					{ name: 'Message', value: 'message' }
 				)),
 	async execute(interaction: ChatInputCommandInteraction) {
 		const status: number = interaction.options.getString('statut') ? Number(interaction.options.getString('statut')) : null;
@@ -41,7 +41,7 @@ module.exports = {
 		}
 
 		await sendMessages(interaction, createMessages(usersFromDb), status);
-	},
+	}
 };
 
 async function sendAsJson(interaction: ChatInputCommandInteraction, usersFromDb: Models.UserFromDb[], status: number) {

@@ -33,9 +33,7 @@ for (const folder of commandFolders) {
 }
 
 Utils.client.once(Events.ClientReady, client => {
-	const Tags = DatabaseService.tags;
-	Tags.sync({ force: true });
-	// Tags.sync();
+	DatabaseService.tags.sync();
 
 	console.log(`Ready! Logged in as ${client.user.tag}`);
 });
@@ -44,6 +42,7 @@ Utils.client.on(Events.InteractionCreate, async (interaction: Models.Interaction
 	if (interaction.isButton()) {
 		if (interaction.customId === 'inscription') await Register.handleInscriptionButtonClick(interaction);
 		if (interaction.customId === 'cancel') await interaction.message.delete();
+		if (interaction.customId === 'confirm-new-season') await HandleButton.confirmEndSeason(interaction);
 		if (interaction.customId.startsWith('confirm-reject')) await HandleButton.confirmRejectUser(interaction);
 		if (interaction.customId.startsWith('approve')) await HandleButton.approveUser(interaction);
 		if (interaction.customId.startsWith('reject')) await HandleButton.rejectUser(interaction);
@@ -56,7 +55,7 @@ Utils.client.on(Events.InteractionCreate, async (interaction: Models.Interaction
 	const command = interaction.client.commands.get(interaction.commandName);
 
 	if (!command) {
-		console.error(`No command matching ${interaction.commandName} was found.`);
+		console.error(`Aucune commande ne corresponsant à ${interaction.commandName} n'a été trouvée.`);
 		return;
 	}
 
@@ -91,7 +90,7 @@ Utils.client.on(Events.GuildMemberRemove, async (member: GuildMember) => {
 	try {
 		// Only there to test if user exists in the database
 		const userFromDb = await DatabaseService.getUserByDiscordUuid(member.user.id);
-		const whitelistChannel = member.guild.channels.cache.find(channel => channel.name === Constants.whitelistChannelName) as TextChannel;
+		const whitelistChannel = await Utils.fetchBotChannel(member.guild);
 
 		const confirmDelete = new ButtonBuilder()
 			.setCustomId(`delete-${userFromDb.discord_uuid}`)

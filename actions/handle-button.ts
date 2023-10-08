@@ -1,8 +1,9 @@
 import { inscriptionStatus } from '../bot-constants';
 import * as DatabaseService from '../services/database';
-import * as Utils from '../utils'
+import * as Utils from '../utils';
 import * as Constants from '../bot-constants';
-import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, GuildMember, Role, TextChannel, User } from 'discord.js';
+import * as Texts from '../texts'
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, User } from 'discord.js';
 
 const requestGranted = '✅ La demande a été approuvée.';
 const requestDenied = '❌ La demande a été rejetée.';
@@ -22,17 +23,9 @@ export async function approveUser(interaction: ButtonInteraction) {
 		await interaction.message.edit({ content: requestGranted, embeds: [embedToUpdate], components: [] });
 
 		interaction.guild.members.fetch(discordUuid).then(async member => {
-			let role = interaction.guild.roles.cache.find(role => role.name.toLowerCase() == Constants.playerRoleName.toLowerCase());
-			if (!role) {
-				await interaction.guild.roles.create({
-					name: Constants.playerRoleName,
-					color: Colors.Green,
-					reason: 'Le rôle pour les joueurs n\'existait pas, il a été créé.',
-				});
-				role = interaction.guild.roles.cache.find(role => role.name == Constants.playerRoleName);
-			}
+			let role = await Utils.fetchPlayerRole(interaction.guild);
 
-			await member.roles.add(role.id);
+			await member.roles.add(role);
 			try {
 				await member.send(addedText);
 				await interaction.reply({ content: `Un message a été envoyé à <@${discordUuid}> pour l'informer de son ajout à la whitelist.`, ephemeral: true });
@@ -78,7 +71,7 @@ export async function confirmRejectUser(interaction: ButtonInteraction) {
 		await interaction.message.delete();
 		await DatabaseService.changeStatus(discordUuid, inscriptionStatus.rejected);
 
-		const whitelistChannel = interaction.guild.channels.cache.find(channel => channel.name.toLowerCase() == Constants.whitelistChannelName) as TextChannel;
+		const whitelistChannel = await Utils.fetchBotChannel(interaction.guild);
 		const approvalRequest = await whitelistChannel.messages.fetch(messageUuid);
 
 		if (approvalRequest !== undefined) {
@@ -142,9 +135,37 @@ export async function deleteUser(interaction: ButtonInteraction) {
 		const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
 		embedToUpdate.color = Colors.Red;
 		await interaction.message.edit({ content: '🗑️ L\'utilisateur a été supprimé de la base de données', embeds:[embedToUpdate], components: [] });
-		await interaction.reply({ content: 'L\'utilisateur a été supprimé de la base de données.', ephemeral: true })
+		await interaction.reply({ content: 'L\'utilisateur a été supprimé de la base de données.', ephemeral: true });
 	}
 	catch (e) { 
 		await interaction.reply(e.message);
+	}
+}
+
+export async function confirmEndSeason(interaction: ButtonInteraction) {
+	try {
+		await interaction.message.edit({ content: 'La saison a pris fin !', components: [] });
+
+		// Sending the data about to be deleted to the user performing the command
+		await (await Utils.client.users.fetch(interaction.member.user.id)).send({
+			files: [{
+				attachment: Buffer.from(JSON.stringify(await DatabaseService.getUsers())),
+				name: 'sauvegarde_saison.json'
+			}]
+		}).catch(async () =>
+			// People using this commands are admins, therefore they should have their DMs turned on for the server anyways
+			console.log(JSON.stringify(await DatabaseService.getUsers()))
+		);
+
+		await interaction.reply({content: 'Nouvelle saison !', ephemeral: true});
+		DatabaseService.tags.sync({ force: true });
+		await (await Utils.fetchPlayerRole(interaction.guild)).delete();
+	
+		// Not calling fetchBotChannel to avoid creating a channel if it is already deleted
+		const botChannel = interaction.guild.channels.cache.find(channel => channel.name === Constants.whitelistChannelName);
+		if (botChannel) await botChannel.delete();
+	}
+	catch {
+		await interaction.reply({ content: 'Une erreur est survenue !', ephemeral: true });
 	}
 }

@@ -4,17 +4,17 @@ import { inscriptionStatus } from '../../bot-constants';
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('approuver')
-		.setDescription('Approuver le membre du serveur Minecraft et lui ajouter le rôle joueur sur le Discord.')
+		.setName('rejeter')
+		.setDescription('Rejeter le membre du serveur Minecraft et lui retirer le rôle joueur sur le Discord.')
 		.addUserOption(option =>
 			option.setName('membre')
-				.setDescription('Membre à approuver')
+				.setDescription('Membre à rejeter')
 				.setRequired(true))
 		.addBooleanOption(option =>
 			option.setName('silencieux')
-				.setDescription('Envoyer un message à l\'utilisateur approuvé ?'))
+				.setDescription('Envoyer un message à l\'utilisateur rejeté ?'))
 		.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
 	async execute(interaction: ChatInputCommandInteraction) {
-		await editUserStatus(interaction, inscriptionStatus.approved);
-	},
+		await editUserStatus(interaction, inscriptionStatus.rejected);
+	}
 };

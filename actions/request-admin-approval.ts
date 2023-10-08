@@ -1,12 +1,12 @@
-import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, ButtonInteraction, TextChannel } from 'discord.js';
-import * as Constants from '../bot-constants'
-import * as Texts from '../texts'
-import * as Models from '../models'
+import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, ButtonInteraction } from 'discord.js';
+import * as Texts from '../texts';
+import * as Models from '../models';
+import * as Utils from '../utils'
 
 let discordUuid: string;
 
 export async function sendApprovalRequest(interaction: ButtonInteraction, username: string) {
-	const whitelistChannel = interaction.guild.channels.cache.find(channel => channel.name === Constants.whitelistChannelName) as TextChannel;
+	const whitelistChannel = await Utils.fetchBotChannel(interaction.guild);
 	discordUuid = interaction.user.id;
 
 	const approve = new ButtonBuilder()
@@ -30,7 +30,7 @@ export async function sendApprovalRequest(interaction: ButtonInteraction, userna
 };
 
 export async function sendUsernameChangeRequest(interaction: ButtonInteraction, userFromMojangApi: Models.UserFromMojangApi) {
-	const whitelistChannel = interaction.guild.channels.cache.find(channel => channel.name === Constants.whitelistChannelName) as TextChannel;
+	const whitelistChannel = await Utils.fetchBotChannel(interaction.guild);
 	discordUuid = interaction.user.id;
 
 	const approve = new ButtonBuilder()

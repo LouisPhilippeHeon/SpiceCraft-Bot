@@ -5,7 +5,7 @@ import * as RequestAdminApproval from './request-admin-approval';
 import * as Texts from '../texts'
 import * as Utils from '../utils'
 import * as Models from '../models'
-import { ButtonInteraction, Collection, DMChannel, EmbedBuilder, Message, MessageReaction, TextChannel, User } from 'discord.js';
+import { ButtonInteraction, Collection, DMChannel, EmbedBuilder, Message, MessageReaction, User } from 'discord.js';
 
 const rulesEmbed = new EmbedBuilder()
 	.setColor(0x0099FF)
@@ -136,7 +136,7 @@ async function getRulesAcknowledgment(channel: DMChannel) {
 }
 
 async function updateAdminApprovalRequest(dmChannel: DMChannel) {
-	const whitelistChannel = interactionReference.guild.channels.cache.find(channel => channel.name.toLowerCase() == Constants.whitelistChannelName) as TextChannel;
+	const whitelistChannel = await Utils.fetchBotChannel(interactionReference.guild);
 	const messagesOfWhitelistChannel = await whitelistChannel.messages.fetch({ limit: 100 });
 
 	// Find approval request for the user in the whitelist channel
