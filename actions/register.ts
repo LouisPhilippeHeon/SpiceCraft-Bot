@@ -56,36 +56,48 @@ async function updateExistingUser(userFromDb : Models.UserFromDb) {
 		}
 
 		let usernameSentByUser: string = usernameCollected.first().content;
-		HttpService.getUuidAndFormatedUsernameFromUsername(usernameSentByUser).then(async (response: Models.UserFromMojangApi | Error) => {
-			if ((response as Error).message != null) return;
-			response = response as Models.UserFromMojangApi;
+		let apiResponse;
 
-			if (response.id === undefined) {
-				await dmChannel.send(Texts.register.minecraftAccountDoesNotExist.replace('$minecraftUsername$', usernameSentByUser));
-				return;
-			}
-			userFromMojangApi = { id: response.id, name: response.name };
+		try {
+			apiResponse = await HttpService.getUuidAndFormatedUsernameFromUsername(usernameSentByUser);
+		}
+		catch(e) {
+			await dmChannel.send(Texts.register.errorWhileConnectingToMojangServer);
+			return;
+		}
+		if ((apiResponse as Models.MojangApiError).errorMessage != null) {
+			await dmChannel.send(Texts.register.minecraftAccountDoesNotExist.replace('$minecraftUsername$', usernameSentByUser));
+			return;
+		}
+		userFromMojangApi = apiResponse as Models.UserFromMojangApi;
 
-			if (userFromDb.minecraft_uuid == userFromMojangApi.id) {
-				dmChannel.send(Texts.register.sameMinecraftAccountAsBefore);
-				return;
-			}
+		if (userFromDb.minecraft_uuid == userFromMojangApi.id) {
+			await dmChannel.send(Texts.register.sameMinecraftAccountAsBefore);
+			return;
+		}
+		try {
 			// If user is already approved
 			if (userFromDb.inscription_status === Constants.inscriptionStatus.approved) {
-				await RequestAdminApproval.sendUsernameChangeRequest(interactionReference, userFromMojangApi);
-				await dmChannel.send(Texts.register.usernameUpdated);
+				try {
+					await DatabaseService.getUserByMinecraftUuid(userFromMojangApi.id);
+					await dmChannel.send(Texts.register.usernameUsedWithAnotherAccount);
+				}
+				catch {
+					await RequestAdminApproval.sendUsernameChangeRequest(interactionReference, userFromMojangApi);
+					await dmChannel.send(Texts.register.usernameUpdated);
+				}
 			}
 			else {
 				await updateAdminApprovalRequest(dmChannel);
 			}
-
-		}).catch(async (err) => {
-			if (err.name == 'SequelizeUniqueConstraintError') {
+		}
+		catch(e) {
+			if (e.name == 'SequelizeUniqueConstraintError') {
 				await dmChannel.send(Texts.register.usernameUsedWithAnotherAccount);
 				return;
 			}
-			await dmChannel.send(Texts.register.errorWhileConnectingToMojangServer);
-		});
+			await dmChannel.send(Texts.register.unknownError);
+		}
 	});
 }
 
@@ -103,19 +115,21 @@ async function registerNewUser() {
 		}
 
 		let usernameSentByUser: string = usernameCollected.first().content;
-		HttpService.getUuidAndFormatedUsernameFromUsername(usernameSentByUser).then(async (response: Models.UserFromMojangApi | Error) => {
-			if ((response as Error).message != null) return;		
-			response = response as Models.UserFromMojangApi;
+		let apiResponse;
 
-			if (response.id === undefined) {
-				await dmChannel.send(Texts.register.minecraftAccountDoesNotExist.replace('$minecraftUsername$', usernameSentByUser));
-				return;
-			}
-			userFromMojangApi = { id: response.id, name: response.name };
-			await getRulesAcknowledgment(dmChannel);
-		}).catch(async () => {
+		try {
+			apiResponse = await HttpService.getUuidAndFormatedUsernameFromUsername(usernameSentByUser);
+		}
+		catch(e) {
 			await dmChannel.send(Texts.register.errorWhileConnectingToMojangServer);
-		});
+			return;
+		}
+		if ((apiResponse as Models.MojangApiError).errorMessage != null) {
+			await dmChannel.send(Texts.register.minecraftAccountDoesNotExist.replace('$minecraftUsername$', usernameSentByUser));
+			return;
+		}
+		userFromMojangApi = apiResponse as Models.UserFromMojangApi;
+		await getRulesAcknowledgment(dmChannel);
 	});
 }
 
@@ -131,7 +145,6 @@ async function getRulesAcknowledgment(channel: DMChannel) {
 		await saveNewUserToDb(channel);
 	}).catch(async () => {
 		await rulesMessage.reply(Texts.register.timeoutAnswer);
-		return;
 	});
 }
 
@@ -162,7 +175,7 @@ async function saveNewUserToDb(channel: DMChannel) {
 		await RequestAdminApproval.sendApprovalRequest(interactionReference, userFromMojangApi.name);
 		await channel.send(Texts.register.waitForAdminApprobation);
 	}
-	catch (error) {
-		await channel.send(error.message);
+	catch (e) {
+		await channel.send(e.message);
 	}
 }

@@ -6,16 +6,17 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('supprimer-entree')
 		.setDescription('Supprime une rangée dans la base de données.')
-		.addIntegerOption(option =>
-			option.setName('id')
-				.setDescription('Retirer l\'entrée pour quel id ?')
+		.addStringOption(option =>
+			option.setName('discord-uuid')
+				.setDescription('Retirer l\'entrée pour quel UUID Discord ?')
 				.setRequired(true))
 		.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
 	async execute(interaction: ChatInputCommandInteraction) {
-		const option = interaction.options.getInteger('id');
+		const discordUuid = interaction.options.getString('discord-uuid');
 		try {
-			await DatabaseService.deleteEntry(option);
-			await interaction.reply(Texts.deleteEntry.reply)
+			// TODO Delete role
+			await DatabaseService.deleteEntry(discordUuid);
+			await interaction.reply(Texts.deleteEntry.reply);
 		}
 		catch (e) {
 			await interaction.reply(e.message);

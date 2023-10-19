@@ -21,3 +21,9 @@ export interface UserFromDb {
     created_at: Date;
     update_at: Date;
 }
+
+export interface MojangApiError {
+    path: string;
+    error: string;
+    errorMessage: string;
+}

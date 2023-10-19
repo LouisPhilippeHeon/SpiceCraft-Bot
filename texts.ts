@@ -13,7 +13,7 @@ export enum register {
 	errorWhileConnectingToMojangServer = '❌ Une erreur s\'est produite lorsque nous avons tenté de se connecter aux serveurs de Mojang afin d\'obtenir plus d\'informations sur ton compte. Si le problème persiste, contacte les administrateurs. ❌',
 	requestSucessfullyUpdated = 'Ta demande à été mise à jour avec succès !',
 	waitForAdminApprobation = 'Ton inscription est en attente d\'approbation par les administrateurs, je t\'enverrais un message quand elle sera acceptée!',
-	usernameUpdated = 'Votre nom d\'utilisateur a été changé avec succès, je t\'envoie un message lorsque le nom d\'utilisateur sera mis à jour dans la whitelist.',
+	usernameUpdated = 'Ton nom d\'utilisateur a été changé avec succès, je t\'envoie un message lorsque le nom d\'utilisateur sera mis à jour dans la whitelist.',
 	embedDescription = 'Compte Discord : <@$discordUuid$>.\nUsername Minecraft : $minecraftUsername$.',
 	unaprovedUserChangedMinecraftUsername = '<@$discordUuid$> a changé son username Minecraft pour \`$minecraftUsername$\` dans sa demande d\'ajout à la whitelist.',
 	minecraftAccountDoesNotExist = '❌ Le compte Minecraft « $minecraftUsername$ » n\'existe pas! Tu peux cliquer à nouveau le bouton \`S\'inscrire\` pour réessayer. ❌',

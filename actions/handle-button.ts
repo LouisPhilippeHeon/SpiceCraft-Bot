@@ -2,7 +2,7 @@ import { inscriptionStatus } from '../bot-constants';
 import * as DatabaseService from '../services/database';
 import * as Utils from '../utils';
 import * as Constants from '../bot-constants';
-import * as Texts from '../texts'
+import * as Texts from '../texts';
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, User } from 'discord.js';
 
 const requestGranted = '✅ La demande a été approuvée.';
@@ -102,11 +102,20 @@ export async function confirmUsernameChange(interaction: ButtonInteraction) {
 		const discordUuid = interaction.customId.split('-')[1];
 		const minecraftUuid = interaction.customId.split('-')[2];
 
-		await DatabaseService.changeMinecraftUuid(discordUuid, minecraftUuid);
-
 		const approvalRequest = interaction.message;
 		const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
 		embedToUpdate.color = Colors.Green;
+
+		try {
+			await DatabaseService.changeMinecraftUuid(discordUuid, minecraftUuid);
+		}
+		catch (e) {
+			if (e.name == 'SequelizeUniqueConstraintError') {
+				await interaction.reply(Texts.register.usernameUsedWithAnotherAccount);
+				return;
+			}
+			await interaction.reply(Constants.errorMessages.unknownError);
+		}
 
 		await interaction.message.edit({ content: '✅ La mise à jour de username a été complétée.', embeds: [embedToUpdate], components: [] });
 
@@ -130,7 +139,7 @@ export async function confirmUsernameChange(interaction: ButtonInteraction) {
 export async function deleteUser(interaction: ButtonInteraction) {
 	try {
 		const discordUuid = interaction.customId.split('-')[1];
-		await DatabaseService.deleteEntryWithDiscordUuid(discordUuid);
+		await DatabaseService.deleteEntry(discordUuid);
 
 		const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
 		embedToUpdate.color = Colors.Red;

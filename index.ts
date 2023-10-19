@@ -1,6 +1,6 @@
 import fs = require('node:fs');
 import path = require('node:path');
-import { ActionRowBuilder, AuditLogEvent, ButtonBuilder, ButtonStyle, Collection, EmbedBuilder, Events, GuildMember, TextChannel } from 'discord.js';
+import { ActionRowBuilder, AuditLogEvent, ButtonBuilder, ButtonStyle, Collection, EmbedBuilder, Events, GuildMember } from 'discord.js';
 import { clientId, token } from './config';
 import * as DatabaseService from './services/database';
 import * as Register from './actions/register';
@@ -78,7 +78,7 @@ Utils.client.on(Events.GuildMemberUpdate, async (oldMember: GuildMember, newMemb
 		try {
 			const latestMemberRoleUpdateLog = await newMember.guild.fetchAuditLogs({ type: AuditLogEvent.MemberRoleUpdate, limit: 1 });
 			const executor = newMember.guild.members.resolve(latestMemberRoleUpdateLog.entries.first().executor);
-			if (executor.user.id !== clientId) await DatabaseService.deleteEntryWithDiscordUuid(newMember.user.id);
+			if (executor.user.id !== clientId) await DatabaseService.deleteEntry(newMember.user.id);
 		}
 		catch (e) {
 			if (e.code === 50013) console.log('Le bot a besoin de permission pour lire les logs.');

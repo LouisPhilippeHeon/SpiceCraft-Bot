@@ -72,19 +72,23 @@ export async function getUserByDiscordUuid(discordUuid: string): Promise<Models.
 	throw new Error(Constants.errorMessages.userDoesNotExist);
 };
 
+export async function getUserByMinecraftUuid(minecraftUuid: string): Promise<Models.UserFromDb> {
+	const tag = await this.tags.findOne({ where: { minecraft_uuid: minecraftUuid } });
+
+	if (tag) {
+		return structuredClone(tag.get({ plain: true }))
+	}
+
+	throw new Error(Constants.errorMessages.userDoesNotExist);
+};
+
 export async function getUsers(status?: number): Promise<Models.UserFromDb[]> {
 	if (status == null) return await this.tags.findAll({ raw: true });
 	return await this.tags.findAll({ where: { inscription_status: status }, raw: true });
 };
 
-export async function deleteEntryWithDiscordUuid(discordUuid: string) {
+export async function deleteEntry(discordUuid: string) {
 	const tagToDelete = await this.tags.findOne({ where: { discord_uuid: discordUuid } })
-	if (tagToDelete === null) throw new Error(Constants.errorMessages.userDoesNotExist);
-	tagToDelete.destroy();
-}
-
-export async function deleteEntry(id: number) {
-	const tagToDelete = await this.tags.findOne({ where: { id: id } })
 	if (tagToDelete === null) throw new Error(Constants.errorMessages.userDoesNotExist);
 	tagToDelete.destroy();
 }
