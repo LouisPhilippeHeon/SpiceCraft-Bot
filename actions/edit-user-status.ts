@@ -11,10 +11,16 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
         await DatabaseService.changeStatus(idToEdit, status);
 
         let role = await Utils.fetchPlayerRole(interaction.guild);
-        (status == Constants.inscriptionStatus.approved) ? await member.roles.add(role.id) : await member.roles.remove(role.id);
+        (status === Constants.inscriptionStatus.approved) ? await member.roles.add(role.id) : await member.roles.remove(role.id);
 
-        if (!interaction.options.getBoolean('silencieux') && status !== Constants.inscriptionStatus.awaitingApproval) {
-            const interactionReplyMessage = Texts.editUserStatus.statusChanged.replace('$discordUuid$', idToEdit).replace('$status$', Texts.getStatusName(status));
+        const interactionReplyMessage = Texts.editUserStatus.statusChanged.replace('$discordUuid$', idToEdit).replace('$status$', Texts.getStatusName(status));
+
+        if (status === Constants.inscriptionStatus.awaitingApproval) {
+            await interaction.reply(interactionReplyMessage);
+            return;
+        }
+
+        if (!interaction.options.getBoolean('silencieux')) {
             try {
                 await member.send(getMessageToSendToUser(status));
                 await interaction.reply(interactionReplyMessage);

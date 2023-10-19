@@ -143,10 +143,10 @@ export async function deleteUser(interaction: ButtonInteraction) {
 
 		const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
 		embedToUpdate.color = Colors.Red;
-		await interaction.message.edit({ content: '🗑️ L\'utilisateur a été supprimé de la base de données', embeds:[embedToUpdate], components: [] });
+		await interaction.message.edit({ content: '🗑️ L\'utilisateur a été supprimé de la base de données', embeds: [embedToUpdate], components: [] });
 		await interaction.reply({ content: 'L\'utilisateur a été supprimé de la base de données.', ephemeral: true });
 	}
-	catch (e) { 
+	catch (e) {
 		await interaction.reply(e.message);
 	}
 }
@@ -156,20 +156,23 @@ export async function confirmEndSeason(interaction: ButtonInteraction) {
 		await interaction.message.edit({ content: 'La saison a pris fin !', components: [] });
 
 		// Sending the data about to be deleted to the user performing the command
-		await (await Utils.client.users.fetch(interaction.member.user.id)).send({
-			files: [{
-				attachment: Buffer.from(JSON.stringify(await DatabaseService.getUsers())),
-				name: 'sauvegarde_saison.json'
-			}]
-		}).catch(async () =>
-			// People using this commands are admins, therefore they should have their DMs turned on for the server anyways
-			console.log(JSON.stringify(await DatabaseService.getUsers()))
-		);
+		const users = await DatabaseService.getUsers();
+		if (users.length > 0) {
+			await (await Utils.client.users.fetch(interaction.member.user.id)).send({
+				files: [{
+					attachment: Buffer.from(JSON.stringify(users)),
+					name: 'sauvegarde_saison.json'
+				}]
+			}).catch(async () =>
+				// People using this commands are admins, therefore they should have their DMs turned on for the server anyways
+				console.log(JSON.stringify(await DatabaseService.getUsers()))
+			);
+		}
 
-		await interaction.reply({content: 'Nouvelle saison !', ephemeral: true});
+		await interaction.reply({ content: 'Nouvelle saison !', ephemeral: true });
 		DatabaseService.tags.sync({ force: true });
 		await (await Utils.fetchPlayerRole(interaction.guild)).delete();
-	
+
 		// Not calling fetchBotChannel to avoid creating a channel if it is already deleted
 		const botChannel = interaction.guild.channels.cache.find(channel => channel.name === Constants.whitelistChannelName);
 		if (botChannel) await botChannel.delete();

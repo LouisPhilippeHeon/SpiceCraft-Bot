@@ -33,8 +33,8 @@ export async function handleInscriptionButtonClick(interaction: ButtonInteractio
 		});
 	}
 	// User does not exist in the database and should be created
-	catch (error) {
-		if (error.message === Constants.errorMessages.userDoesNotExist) {
+	catch (e) {
+		if (e.message === Constants.errorMessages.userDoesNotExist) {
 			await registerNewUser().catch(async () => await interactionReference.reply({ content: Texts.register.dmsAreClosed, ephemeral: true }));
 			return;
 		}
@@ -42,7 +42,7 @@ export async function handleInscriptionButtonClick(interaction: ButtonInteractio
 	}
 };
 
-async function updateExistingUser(userFromDb : Models.UserFromDb) {
+async function updateExistingUser(userFromDb: Models.UserFromDb) {
 	const usernameMessage = await interactionReference.user.send(Texts.register.askWhatIsNewMinecraftUsername);
 	await interactionReference.reply({ content: Texts.register.messageSentInDms, ephemeral: true });
 	const dmChannel = usernameMessage.channel as DMChannel;
