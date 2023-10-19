@@ -11,7 +11,7 @@ module.exports = {
 			try {
 				const latestMemberRoleUpdateLog = await newMember.guild.fetchAuditLogs({ type: AuditLogEvent.MemberRoleUpdate, limit: 1 });
 				const executor = newMember.guild.members.resolve(latestMemberRoleUpdateLog.entries.first().executor);
-				if (executor.user.id !== clientId) await DatabaseService.deleteEntryWithDiscordUuid(newMember.user.id);
+				if (executor.user.id !== clientId) await DatabaseService.deleteEntry(newMember.user.id);
 			}
 			catch (e) {
 				if (e.code === 50013) console.log('Le bot a besoin de permission pour lire les logs.');
