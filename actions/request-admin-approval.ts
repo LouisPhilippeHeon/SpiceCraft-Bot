@@ -38,12 +38,17 @@ export async function sendUsernameChangeRequest(interaction: ButtonInteraction, 
 		.setLabel(Texts.embeds.components.approve)
 		.setStyle(ButtonStyle.Success);
 
+	const ignore = new ButtonBuilder()
+		.setCustomId('dissmiss')
+		.setLabel(Texts.embeds.components.doNotUpdate)
+		.setStyle(ButtonStyle.Secondary);
+
 	const approvalRequestEmbed = new EmbedBuilder()
 		.setTitle(Texts.embeds.titles.usernameChangeRequest.replace('$discordUsername$', interaction.user.username))
 		.setDescription(Texts.embeds.descriptions.usernameChangeRequest.replace('$discordUuid$', discordUuid).replace('$username$', userFromMojangApi.name))
 		.setThumbnail(interaction.user.displayAvatarURL({ size: 256 }));
 
-	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(approve);
+	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(approve, ignore);
 
 	await whitelistChannel.send({ embeds: [approvalRequestEmbed], components: [row] });
 };

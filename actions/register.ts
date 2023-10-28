@@ -43,8 +43,8 @@ export async function handleInscriptionButtonClick(interaction: ButtonInteractio
 };
 
 async function updateExistingUser(userFromDb: Models.UserFromDb) {
-	const usernameMessage = await interactionReference.user.send(Texts.register.askWhatIsNewMinecraftUsername);
 	await interactionReference.reply({ content: Texts.register.messageSentInDms, ephemeral: true });
+	const usernameMessage = await interactionReference.user.send(Texts.register.askWhatIsNewMinecraftUsername);
 	const dmChannel = usernameMessage.channel as DMChannel;
 	const collectorFilter = (message: Message) => message.author.id == discordUuid;
 	const usernameCollector = dmChannel.createMessageCollector({ filter: collectorFilter, max: 1, time: Constants.timeToWaitForUserInputBeforeTimeout });
@@ -150,11 +150,8 @@ async function getRulesAcknowledgment(channel: DMChannel) {
 
 async function updateAdminApprovalRequest(dmChannel: DMChannel) {
 	const whitelistChannel = await Utils.fetchBotChannel(interactionReference.guild);
-	const messagesOfWhitelistChannel = await whitelistChannel.messages.fetch({ limit: 100 });
-
 	// Find approval request for the user in the whitelist channel
-	const approvalRequest: Message = Array.from(messagesOfWhitelistChannel.values()).find(message => message.embeds[0]?.description.includes(`<@${discordUuid}>`));
-
+	const approvalRequest = Array.from((await whitelistChannel.messages.fetch({ limit: 100 })).values()).find(message => message.embeds[0]?.description.includes(`<@${discordUuid}>`));
 	// If message is too old to be updated
 	if (approvalRequest === undefined) {
 		await whitelistChannel.send(Texts.register.awaitingApprovalUserChangedMinecraftUsername.replace('$discordUuid$', discordUuid).replace('$minecraftUsername$', userFromMojangApi.name));
@@ -176,6 +173,10 @@ async function saveNewUserToDb(channel: DMChannel) {
 		await channel.send(Texts.register.waitForAdminApprobation);
 	}
 	catch (e) {
+		if (e.message === Texts.errors.database.notUnique) {
+			await channel.send(Texts.errors.usernameUsedWithAnotherAccount);
+			return;
+		}
 		await channel.send(e.message);
 	}
 }

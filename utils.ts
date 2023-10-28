@@ -51,5 +51,3 @@ export async function fetchPlayerRole(guild: Guild): Promise<Role> {
 		reason: 'Le rôle pour les joueurs n\'existait pas, il a été créé.',
 	});
 }
-
-// TODO Try send

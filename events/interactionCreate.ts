@@ -10,14 +10,19 @@ module.exports = {
 	once: false,
 	async execute(interaction: Models.InteractionWithCommands) {
 		if (interaction.isButton()) {
-			if (interaction.customId === 'inscription') await Register.handleInscriptionButtonClick(interaction);
-			if (interaction.customId === 'cancel') await interaction.message.delete();
-			if (interaction.customId === 'confirm-new-season') await HandleButton.confirmEndSeason(interaction);
-			if (interaction.customId.startsWith('confirm-reject')) await HandleButton.confirmRejectUser(interaction);
-			if (interaction.customId.startsWith('approve')) await HandleButton.approveUser(interaction);
-			if (interaction.customId.startsWith('reject')) await HandleButton.rejectUser(interaction);
-			if (interaction.customId.startsWith('update')) await HandleButton.confirmUsernameChange(interaction);
-			if (interaction.customId.startsWith('delete')) await HandleButton.deleteUser(interaction);
+			try {
+				if (interaction.customId === 'inscription') await Register.handleInscriptionButtonClick(interaction);
+				if (interaction.customId === 'dissmiss') await interaction.message.delete();
+				if (interaction.customId === 'confirm-new-season') await HandleButton.confirmEndSeason(interaction);
+				if (interaction.customId.startsWith('confirm-reject')) await HandleButton.confirmRejectUser(interaction);
+				if (interaction.customId.startsWith('approve')) await HandleButton.approveUser(interaction);
+				if (interaction.customId.startsWith('reject')) await HandleButton.rejectUser(interaction);
+				if (interaction.customId.startsWith('update')) await HandleButton.confirmUsernameChange(interaction);
+				if (interaction.customId.startsWith('delete')) await HandleButton.deleteUser(interaction);
+			}
+			catch (e) {
+				await interaction.reply({ content: e.message, ephemeral: true });
+			}
 		}
 
 		if (!interaction.isChatInputCommand()) return;

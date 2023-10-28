@@ -17,8 +17,8 @@ module.exports = {
 				.setLabel(Texts.embeds.components.yes)
 				.setStyle(ButtonStyle.Danger);
 
-			const cancel = new ButtonBuilder()
-				.setCustomId('cancel')
+			const ignore = new ButtonBuilder()
+				.setCustomId('dissmiss')
 				.setLabel(Texts.embeds.components.ignore)
 				.setStyle(ButtonStyle.Secondary);
 
@@ -26,7 +26,7 @@ module.exports = {
 				.setTitle(Texts.embeds.titles.userLeft)
 				.setDescription(Texts.embeds.descriptions.userLeft.replace('$discordUuid$', userFromDb.discord_uuid));
 
-			const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmDelete, cancel);
+			const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmDelete, ignore);
 
 			await whitelistChannel.send({ embeds: [deleteEmbed], components: [row] });
 		}

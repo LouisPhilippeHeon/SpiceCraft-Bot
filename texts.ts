@@ -36,7 +36,8 @@ export namespace events {
 		messageSentToUserToInformRejection = 'Désolé, mais les administrateurs ont choisi de ne pas t\'ajouter à la whitelist. Contacte-les pour plus de détails.',
 		requestDenied = '❌ La demande a été rejetée.',
 		askConfirmation = 'Êtes vous certain de vouloir rejeter <@$discordUuid$> ?',
-		informedUserAboutRejection = 'Un message a été envoyé à <@$discordUuid$> pour l\'informer du rejet.'
+		informedUserAboutRejection = 'Un message a été envoyé à <@$discordUuid$> pour l\'informer du rejet.',
+		userStillInBdExplanation = 'Cet utilisateur est encore dans la base de données, avec le statut "rejeté", donc s\'il rejoint à nouveau le serveur, le bot se souvient que l\'utilisateur est rejeté. Si tu souhaite le supprimer, tu peux utiliser la commande /supprimer-entree'
 	}
 
 	enum usernameChangeConfirmationButton {
@@ -129,7 +130,7 @@ export namespace errors {
 	}
 
 	enum databaseErrors {
-		userDoesNotExist = 'Cet utilisateur n\'est pas inscrit',
+		userDoesNotExist = 'Cet utilisateur n\'est pas inscrit.',
 		notUnique = 'Ce UUID Minecraft ou Discord existe déjà dans la base de données.',
 		unknownError = 'Une erreur inconnue est survenue lors de l\'écriture dans la base de données.',
 		invalidStatus = 'Statut invalide'
@@ -147,7 +148,8 @@ export namespace embeds {
 		yes = 'Oui',
 		ignore = 'Ignorer',
 		endSeason = 'Oui, terminer la saison',
-		register = 'S\'inscrire'
+		register = 'S\'inscrire',
+		doNotUpdate = 'Ne pas mettre à jour'
 	}
 
 	enum embedTitles {

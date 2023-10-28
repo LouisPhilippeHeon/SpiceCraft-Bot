@@ -14,7 +14,7 @@ module.exports = {
 				if (executor.user.id !== clientId) await DatabaseService.deleteEntry(newMember.user.id);
 			}
 			catch (e) {
-				if (e.code === 50013) console.log('Le bot a besoin de permission pour lire les logs.');
+				if (e.code === 50013) console.log('Le bot n\'a pas la permission de lire les logs.');
 			}
 		}
 	}
