@@ -20,7 +20,7 @@ for (const folder of commandFolders) {
 			commands.push(command.data.toJSON());
 		}
 		else {
-			console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+			console.log(`La commande ${filePath} n'a pas les propriétés "data" ou "execute".`);
 		}
 	}
 }
@@ -31,7 +31,7 @@ const rest = new REST().setToken(token);
 // Deploy commands
 (async () => {
 	try {
-		console.log(`Started refreshing ${commands.length} application (/) commands.`);
+		console.log(`Début du rafraichissement de ${commands.length} commandes slash.`);
 
 		// Refresh all commands in the guild with the current set
 		const data: any = await rest.put(
@@ -39,7 +39,7 @@ const rest = new REST().setToken(token);
 			{ body: commands },
 		);
 
-		console.log(`Successfully reloaded ${data.length} application (/) commands.`);
+		console.log(`Rafraichissement réussi de ${data.length} commandes slash.`);
 	}
 	catch (error) {
 		console.error(error);

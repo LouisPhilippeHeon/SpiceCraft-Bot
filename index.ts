@@ -2,7 +2,7 @@ import fs = require('node:fs');
 import path = require('node:path');
 import { Collection } from 'discord.js';
 import { token } from './config';
-import * as Utils from './utils'
+import * as Utils from './utils';
 
 Utils.client.commands = new Collection();
 
@@ -20,7 +20,7 @@ for (const folder of commandFolders) {
 			Utils.client.commands.set(command.data.name, command);
 		}
 		else {
-			console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+			console.log(`La commande ${filePath} n'a pas les propriétés "data" ou "execute".`);
 		}
 	}
 }

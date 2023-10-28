@@ -2,15 +2,15 @@ import * as Constants from '../bot-constants';
 import * as HttpService from '../services/http';
 import * as DatabaseService from '../services/database';
 import * as RequestAdminApproval from './request-admin-approval';
-import * as Texts from '../texts'
-import * as Utils from '../utils'
-import * as Models from '../models'
+import * as Texts from '../texts';
+import * as Utils from '../utils';
+import * as Models from '../models';
 import { ButtonInteraction, Collection, DMChannel, EmbedBuilder, Message, MessageReaction, User } from 'discord.js';
 
 const rulesEmbed = new EmbedBuilder()
 	.setColor(0x0099FF)
-	.setTitle(Texts.register.rulesEmbedTitle)
-	.setDescription(Texts.register.rules);
+	.setTitle(Texts.embeds.titles.rules)
+	.setDescription(Texts.embeds.descriptions.rules);
 
 let userFromMojangApi: Models.UserFromMojangApi;
 let interactionReference: ButtonInteraction;
@@ -34,11 +34,11 @@ export async function handleInscriptionButtonClick(interaction: ButtonInteractio
 	}
 	// User does not exist in the database and should be created
 	catch (e) {
-		if (e.message === Constants.errorMessages.userDoesNotExist) {
+		if (e.message === Texts.errors.database.userDoesNotExist) {
 			await registerNewUser().catch(async () => await interactionReference.reply({ content: Texts.register.dmsAreClosed, ephemeral: true }));
 			return;
 		}
-		await interactionReference.reply(Texts.register.unknownError);
+		await interactionReference.reply(Texts.errors.generic);
 	}
 };
 
@@ -59,14 +59,14 @@ async function updateExistingUser(userFromDb: Models.UserFromDb) {
 		let apiResponse;
 
 		try {
-			apiResponse = await HttpService.getUuidAndFormatedUsernameFromUsername(usernameSentByUser);
+			apiResponse = await HttpService.getMojangUser(usernameSentByUser);
 		}
-		catch(e) {
-			await dmChannel.send(Texts.register.errorWhileConnectingToMojangServer);
-			return;
-		}
-		if ((apiResponse as Models.MojangApiError).errorMessage != null) {
-			await dmChannel.send(Texts.register.minecraftAccountDoesNotExist.replace('$minecraftUsername$', usernameSentByUser));
+		catch (e) {
+			if (e.message === Texts.errors.api.noMojangAccountWithThatUsername) {
+				await dmChannel.send(Texts.register.minecraftAccountDoesNotExist.replace('$minecraftUsername$', usernameSentByUser));
+				return;
+			}
+			await dmChannel.send(e.message);
 			return;
 		}
 		userFromMojangApi = apiResponse as Models.UserFromMojangApi;
@@ -80,7 +80,7 @@ async function updateExistingUser(userFromDb: Models.UserFromDb) {
 			if (userFromDb.inscription_status === Constants.inscriptionStatus.approved) {
 				try {
 					await DatabaseService.getUserByMinecraftUuid(userFromMojangApi.id);
-					await dmChannel.send(Texts.register.usernameUsedWithAnotherAccount);
+					await dmChannel.send(Texts.errors.usernameUsedWithAnotherAccount);
 				}
 				catch {
 					await RequestAdminApproval.sendUsernameChangeRequest(interactionReference, userFromMojangApi);
@@ -91,12 +91,12 @@ async function updateExistingUser(userFromDb: Models.UserFromDb) {
 				await updateAdminApprovalRequest(dmChannel);
 			}
 		}
-		catch(e) {
+		catch (e) {
 			if (e.name == 'SequelizeUniqueConstraintError') {
-				await dmChannel.send(Texts.register.usernameUsedWithAnotherAccount);
+				await dmChannel.send(Texts.errors.usernameUsedWithAnotherAccount);
 				return;
 			}
-			await dmChannel.send(Texts.register.unknownError);
+			await dmChannel.send(Texts.errors.generic);
 		}
 	});
 }
@@ -118,17 +118,17 @@ async function registerNewUser() {
 		let apiResponse;
 
 		try {
-			apiResponse = await HttpService.getUuidAndFormatedUsernameFromUsername(usernameSentByUser);
+			apiResponse = await HttpService.getMojangUser(usernameSentByUser);
 		}
-		catch(e) {
-			await dmChannel.send(Texts.register.errorWhileConnectingToMojangServer);
+		catch (e) {
+			if (e.message === Texts.errors.api.noMojangAccountWithThatUsername) {
+				await dmChannel.send(Texts.register.minecraftAccountDoesNotExist.replace('$minecraftUsername$', usernameSentByUser));
+				return;
+			}
+			await dmChannel.send(e.message);
 			return;
 		}
-		if ((apiResponse as Models.MojangApiError).errorMessage != null) {
-			await dmChannel.send(Texts.register.minecraftAccountDoesNotExist.replace('$minecraftUsername$', usernameSentByUser));
-			return;
-		}
-		userFromMojangApi = apiResponse as Models.UserFromMojangApi;
+		userFromMojangApi = apiResponse;
 		await getRulesAcknowledgment(dmChannel);
 	});
 }
@@ -138,7 +138,7 @@ async function getRulesAcknowledgment(channel: DMChannel) {
 	rulesMessage.react('✅');
 
 	const emojiFilter = (reaction: MessageReaction, user: User) => {
-		return (reaction.emoji.name == '✅') && (user.id === discordUuid);
+		return (reaction.emoji.name === '✅') && (user.id === discordUuid);
 	};
 
 	rulesMessage.awaitReactions({ filter: emojiFilter, max: 1, time: Constants.timeToWaitForUserInputBeforeTimeout, errors: ['time'] }).then(async () => {
@@ -157,7 +157,7 @@ async function updateAdminApprovalRequest(dmChannel: DMChannel) {
 
 	// If message is too old to be updated
 	if (approvalRequest === undefined) {
-		await whitelistChannel.send(Texts.register.unaprovedUserChangedMinecraftUsername.replace('$discordUuid$', discordUuid).replace('$minecraftUsername$', userFromMojangApi.name));
+		await whitelistChannel.send(Texts.register.awaitingApprovalUserChangedMinecraftUsername.replace('$discordUuid$', discordUuid).replace('$minecraftUsername$', userFromMojangApi.name));
 	}
 	else {
 		const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);

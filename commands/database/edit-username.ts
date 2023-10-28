@@ -5,54 +5,43 @@ import * as Texts from '../../texts';
 import * as Models from '../../models';
 
 module.exports = {
-	data: new SlashCommandBuilder()
-		.setName('modifier-username')
-		.setDescription('Manuellement modifier le nom d\'utilisateur Minecraft d\'un joueur.')
-		.addStringOption(option =>
-			option.setName('discord-uuid')
-				.setDescription('Modifier l\'entrée pour quel UUID Discord ?')
-				.setRequired(true))
+    data: new SlashCommandBuilder()
+        .setName('modifier-username')
+        .setDescription(Texts.commands.editUsername.description)
+        .addStringOption(option =>
+            option.setName('discord-uuid')
+                .setDescription(Texts.commands.editUsername.userOptionDescription)
+                .setRequired(true))
         .addStringOption(option =>
             option.setName('username')
-                .setDescription('Quel est le nouveau nom d\'utilisateur ?')
+                .setDescription(Texts.commands.editUsername.newUsernameOptionDescription)
                 .setRequired(true))
-		.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
-	async execute(interaction: ChatInputCommandInteraction) {
-		const discordUuid = interaction.options.getString('discord-uuid');
+        .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
+    async execute(interaction: ChatInputCommandInteraction) {
+        const discordUuid = interaction.options.getString('discord-uuid');
         const newUsername = interaction.options.getString('username');
 
-		try {
+        try {
             let mojangUser = await getMojangAccountForNewUsername(newUsername, discordUuid);
-			await DatabaseService.changeMinecraftUuid(discordUuid, mojangUser.id);
-			await interaction.reply('Nom d\'utilisateur changé.')
-		}
-		catch (e) {
+            await DatabaseService.changeMinecraftUuid(discordUuid, mojangUser.id);
+            await interaction.reply(Texts.commands.editUsername.confirmationMessage);
+        }
+        catch (e) {
             if (e.name == 'SequelizeUniqueConstraintError') {
-				await interaction.reply(Texts.register.usernameUsedWithAnotherAccount);
-				return;
-			}
-			await interaction.reply(e.message);
-		}
-	}
+                await interaction.reply(Texts.errors.usernameUsedWithAnotherAccount);
+                return;
+            }
+            await interaction.reply(e.message);
+        }
+    }
 };
 
 async function getMojangAccountForNewUsername(newUsername: string, discordUuid: string): Promise<Models.UserFromMojangApi> {
     let userFromDb = await DatabaseService.getUserByDiscordUuid(discordUuid);
-    let userFromMojangApi;
-    
-    try {
-        userFromMojangApi = await HttpService.getUuidAndFormatedUsernameFromUsername(newUsername);
-    }
-    catch(e) {
-        throw new Error('Erreur lors de la connexion à l\'API de Mojang.');
-    }
-    if ((userFromMojangApi as Models.MojangApiError).errorMessage != null) {
-        throw new Error('Aucun compte Mojang n\'a ce nom d\'utilisateur !');
-    }
-    userFromMojangApi = userFromMojangApi as Models.UserFromMojangApi;
+    let userFromMojangApi = await HttpService.getMojangUser(newUsername);
 
     if (userFromDb.minecraft_uuid == userFromMojangApi.id) {
-        throw new Error('Pas besoin de changer le nom d\'utilisateur, le nouveau est identique à celui déjà dans la base de données.');
+        throw new Error(Texts.commands.editUsername.usernameIdenticalToPreviousOne);
     }
     return userFromMojangApi;
 }

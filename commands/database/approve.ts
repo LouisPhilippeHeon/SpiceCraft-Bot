@@ -1,18 +1,19 @@
 import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { editUserStatus } from '../../actions/edit-user-status';
 import { inscriptionStatus } from '../../bot-constants';
+import * as Texts from '../../texts';
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('approuver')
-		.setDescription('Approuver le membre du serveur Minecraft et lui ajouter le rôle joueur sur le Discord.')
+		.setDescription(Texts.commands.approve.description)
 		.addUserOption(option =>
 			option.setName('membre')
-				.setDescription('Membre à approuver')
+				.setDescription(Texts.commands.approve.memberOptionDescription)
 				.setRequired(true))
 		.addBooleanOption(option =>
 			option.setName('silencieux')
-				.setDescription('Envoyer un message à l\'utilisateur approuvé ?'))
+				.setDescription(Texts.commands.approve.silentOptionDescription))
 		.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
 	async execute(interaction: ChatInputCommandInteraction) {
 		await editUserStatus(interaction, inscriptionStatus.approved);

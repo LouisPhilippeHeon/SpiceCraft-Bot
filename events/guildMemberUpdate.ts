@@ -1,6 +1,6 @@
 import { AuditLogEvent, Events, GuildMember } from 'discord.js';
-import * as Constants from '../bot-constants'
-import * as DatabaseService from '../services/database'
+import * as Constants from '../bot-constants';
+import * as DatabaseService from '../services/database';
 import { clientId } from '../config';
 
 module.exports = {

@@ -5,12 +5,6 @@ import * as Constants from '../bot-constants';
 import * as Texts from '../texts';
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, User } from 'discord.js';
 
-const requestGranted = '✅ La demande a été approuvée.';
-const requestDenied = '❌ La demande a été rejetée.';
-const addedText = 'Tu a été ajouté à la whitelist. Si tu n\'arrive pas à te connecter, ton username Minecraft est peut-être incorrect. Si c\'est le cas, clique à nouveau sur le bouton d\'inscription.';
-const rejectedText = 'Désolé, mais les administrateurs ont choisi de ne pas t\'ajouter à la whitelist. Contacte-les pour plus de détails.';
-const noDiscordUserWithThisUuidText = 'Cet utilisateur Discord n\'est pas membre du serveur.';
-
 export async function approveUser(interaction: ButtonInteraction) {
 	try {
 		const discordUuid = interaction.customId.split('-')[1];
@@ -20,21 +14,21 @@ export async function approveUser(interaction: ButtonInteraction) {
 		const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
 		embedToUpdate.color = Colors.Green;
 
-		await interaction.message.edit({ content: requestGranted, embeds: [embedToUpdate], components: [] });
+		await interaction.message.edit({ content: Texts.events.approbation.requestGranted, embeds: [embedToUpdate], components: [] });
 
 		interaction.guild.members.fetch(discordUuid).then(async member => {
 			let role = await Utils.fetchPlayerRole(interaction.guild);
 
 			await member.roles.add(role);
 			try {
-				await member.send(addedText);
-				await interaction.reply({ content: `Un message a été envoyé à <@${discordUuid}> pour l'informer de son ajout à la whitelist.`, ephemeral: true });
+				await member.send(Texts.events.approbation.messageSentToPlayerToConfirmInscription);
+				await interaction.reply({ content: Texts.events.approbation.successReply.replace('$discordUuid$', discordUuid), ephemeral: true });
 			}
 			catch {
-				await interaction.reply('Impossible d\'envoyer un message à cet utilisateur en raison de ses paramètres de confidentialité.');
+				await interaction.reply(Texts.errors.cantSendMessageToUser);
 			}
 		}).catch(async () => {
-			await interaction.reply(noDiscordUserWithThisUuidText);
+			await interaction.reply(Texts.errors.noDiscordUserWithThisUuid);
 		});
 	}
 	catch (e) {
@@ -48,15 +42,15 @@ export async function rejectUser(interaction: ButtonInteraction) {
 
 		const confirmRejection = new ButtonBuilder()
 			.setCustomId(`confirm-reject-${discordUuid}-${interaction.message.id}`)
-			.setLabel('Rejeter')
+			.setLabel(Texts.embeds.components.reject)
 			.setStyle(ButtonStyle.Danger);
 		const cancel = new ButtonBuilder()
 			.setCustomId('cancel')
-			.setLabel('Annuler')
+			.setLabel(Texts.embeds.components.cancel)
 			.setStyle(ButtonStyle.Secondary);
 
 		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmRejection, cancel);
-		await interaction.reply({ content: `Êtes vous certain de vouloir rejeter <@${discordUuid}> ?`, components: [row] });
+		await interaction.reply({ content: Texts.events.rejection.askConfirmation.replace('$discordUuid$', discordUuid), components: [row] });
 	}
 	catch (e) {
 		await interaction.reply(e.message);
@@ -77,19 +71,19 @@ export async function confirmRejectUser(interaction: ButtonInteraction) {
 		if (approvalRequest !== undefined) {
 			const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
 			embedToUpdate.color = Colors.Red;
-			await approvalRequest.edit({ content: requestDenied, embeds: [embedToUpdate], components: [] });
+			await approvalRequest.edit({ content: Texts.events.rejection.requestDenied, embeds: [embedToUpdate], components: [] });
 		}
 
 		Utils.client.users.fetch(discordUuid).then(async (user: User) => {
 			try {
-				user.send(rejectedText);
-				await interaction.reply({ content: `Un message a été envoyé à <@${discordUuid}> pour l'informer du rejet.`, ephemeral: true });
+				user.send(Texts.events.rejection.messageSentToUserToInformRejection);
+				await interaction.reply({ content: Texts.events.rejection.informedUserAboutRejection.replace('$discordUuid$', discordUuid), ephemeral: true });
 			}
 			catch {
-				await interaction.reply('Impossible d\'envoyer un message à cet utilisateur en raison de ses paramètres de confidentialité.');
+				await interaction.reply(Texts.errors.cantSendMessageToUser);
 			}
 		}).catch(async () => {
-			await interaction.reply(noDiscordUserWithThisUuidText);
+			await interaction.reply(Texts.errors.noDiscordUserWithThisUuid);
 		});
 	}
 	catch (e) {
@@ -111,24 +105,24 @@ export async function confirmUsernameChange(interaction: ButtonInteraction) {
 		}
 		catch (e) {
 			if (e.name == 'SequelizeUniqueConstraintError') {
-				await interaction.reply(Texts.register.usernameUsedWithAnotherAccount);
+				await interaction.reply(Texts.errors.usernameUsedWithAnotherAccount);
 				return;
 			}
-			await interaction.reply(Constants.errorMessages.unknownError);
+			await interaction.reply(Texts.errors.database.unknownError);
 		}
 
-		await interaction.message.edit({ content: '✅ La mise à jour de username a été complétée.', embeds: [embedToUpdate], components: [] });
+		await interaction.message.edit({ content: Texts.events.usernameChangeConfirmation.messageUpdate, embeds: [embedToUpdate], components: [] });
 
 		Utils.client.users.fetch(discordUuid).then(async user => {
 			try {
-				await user.send('Ton username Minecraft a été mis à jour dans la whitelist.');
-				await interaction.reply({ content: `Un message a été envoyé à <@${discordUuid}> pour l'informer de la mise à jour du username.`, ephemeral: true });
+				await user.send(Texts.events.usernameChangeConfirmation.messageSentToConfirmUsernameChange);
+				await interaction.reply({ content: Texts.events.usernameChangeConfirmation.informedUserAboutUpdate, ephemeral: true });
 			}
 			catch {
-				await interaction.reply('Impossible d\'envoyer un message à cet utilisateur en raison de ses paramètres de confidentialité.');
+				await interaction.reply(Texts.errors.cantSendMessageToUser);
 			}
 		}).catch(async () => {
-			await interaction.reply(noDiscordUserWithThisUuidText);
+			await interaction.reply(Texts.errors.noDiscordUserWithThisUuid);
 		});
 	}
 	catch (e) {
@@ -143,8 +137,8 @@ export async function deleteUser(interaction: ButtonInteraction) {
 
 		const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
 		embedToUpdate.color = Colors.Red;
-		await interaction.message.edit({ content: '🗑️ L\'utilisateur a été supprimé de la base de données', embeds: [embedToUpdate], components: [] });
-		await interaction.reply({ content: 'L\'utilisateur a été supprimé de la base de données.', ephemeral: true });
+		await interaction.message.edit({ content: Texts.commands.deleteEntry.messageUpdate, embeds: [embedToUpdate], components: [] });
+		await interaction.reply({ content: Texts.commands.deleteEntry.reply, ephemeral: true });
 	}
 	catch (e) {
 		await interaction.reply(e.message);
@@ -153,7 +147,7 @@ export async function deleteUser(interaction: ButtonInteraction) {
 
 export async function confirmEndSeason(interaction: ButtonInteraction) {
 	try {
-		await interaction.message.edit({ content: 'La saison a pris fin !', components: [] });
+		await interaction.message.edit({ content: Texts.commands.endSeason.seasonEnded, components: [] });
 
 		// Sending the data about to be deleted to the user performing the command
 		const users = await DatabaseService.getUsers();
@@ -161,7 +155,7 @@ export async function confirmEndSeason(interaction: ButtonInteraction) {
 			await (await Utils.client.users.fetch(interaction.member.user.id)).send({
 				files: [{
 					attachment: Buffer.from(JSON.stringify(users)),
-					name: 'sauvegarde_saison.json'
+					name: Constants.filenameSeasonSave
 				}]
 			}).catch(async () =>
 				// People using this commands are admins, therefore they should have their DMs turned on for the server anyways
@@ -169,7 +163,7 @@ export async function confirmEndSeason(interaction: ButtonInteraction) {
 			);
 		}
 
-		await interaction.reply({ content: 'Nouvelle saison !', ephemeral: true });
+		await interaction.reply({ content: Texts.commands.endSeason.newSeasonBegins, ephemeral: true });
 		DatabaseService.tags.sync({ force: true });
 		await (await Utils.fetchPlayerRole(interaction.guild)).delete();
 
@@ -178,6 +172,6 @@ export async function confirmEndSeason(interaction: ButtonInteraction) {
 		if (botChannel) await botChannel.delete();
 	}
 	catch {
-		await interaction.reply({ content: 'Une erreur est survenue !', ephemeral: true });
+		await interaction.reply({ content: Texts.errors.generic, ephemeral: true });
 	}
 }

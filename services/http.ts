@@ -1,12 +1,11 @@
 import http = require('https');
+import * as Constants from '../bot-constants';
+import * as Texts from '../texts';
 import { MojangApiError, UserFromMojangApi } from '../models';
-const mojangApiUrl = 'https://api.mojang.com';
 
-const unableToConnectText = 'Unable to connect to Mojang\'s api';
-
-export function getUuidAndFormatedUsernameFromUsername(username: string): Promise<UserFromMojangApi | MojangApiError> {
+export function getMojangUser(username: string): Promise<UserFromMojangApi> {
 	return new Promise((resolve, reject) => {
-		const req = http.get(`${mojangApiUrl}/users/profiles/minecraft/${username}`, (res) => {
+		const req = http.get(`${Constants.mojangApiUrl}/users/profiles/minecraft/${username}`, (res) => {
 			let body: any = [];
 			res.on('data', function (chunk) {
 				body.push(chunk);
@@ -18,11 +17,14 @@ export function getUuidAndFormatedUsernameFromUsername(username: string): Promis
 				catch (e) {
 					reject(e);
 				}
-				resolve(body);
+				if ((body as MojangApiError).errorMessage != null) {
+					reject(new Error(Texts.errors.api.noMojangAccountWithThatUsername));
+				}
+				resolve(body as UserFromMojangApi);
 			});
 		});
 		req.on('error', () => {
-			reject(new Error(unableToConnectText));
+			reject(new Error(Texts.errors.api.couldNotConnectToApi));
 		});
 		req.end();
 	});

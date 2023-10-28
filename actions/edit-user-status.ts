@@ -1,7 +1,7 @@
 import * as DatabaseService from '../services/database';
 import * as Constants from '../bot-constants';
-import * as Texts from '../texts'
-import * as Utils from '../utils'
+import * as Texts from '../texts';
+import * as Utils from '../utils';
 import { ChatInputCommandInteraction } from 'discord.js';
 
 export async function editUserStatus(interaction: ChatInputCommandInteraction, status: number) {

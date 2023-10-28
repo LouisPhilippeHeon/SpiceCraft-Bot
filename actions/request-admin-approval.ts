@@ -1,7 +1,7 @@
 import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, ButtonInteraction } from 'discord.js';
 import * as Texts from '../texts';
 import * as Models from '../models';
-import * as Utils from '../utils'
+import * as Utils from '../utils';
 
 let discordUuid: string;
 
@@ -11,17 +11,17 @@ export async function sendApprovalRequest(interaction: ButtonInteraction, userna
 
 	const approve = new ButtonBuilder()
 		.setCustomId(`approve-${discordUuid}`)
-		.setLabel('Approuver')
+		.setLabel(Texts.embeds.components.approve)
 		.setStyle(ButtonStyle.Success);
 
 	const reject = new ButtonBuilder()
 		.setCustomId(`reject-${discordUuid}`)
-		.setLabel('Rejeter')
+		.setLabel(Texts.embeds.components.reject)
 		.setStyle(ButtonStyle.Danger);
 
 	const approvalRequestEmbed = new EmbedBuilder()
-		.setTitle(Texts.requestAdminApproval.approvalRequestTitle.replace('$discordUsername$', interaction.user.username))
-		.setDescription(Texts.requestAdminApproval.approvalRequestDescription.replace('$discordUuid$', discordUuid).replace('$username$', username))
+		.setTitle(Texts.embeds.titles.approvalRequest.replace('$discordUsername$', interaction.user.username))
+		.setDescription(Texts.embeds.descriptions.approvalRequest.replace('$discordUuid$', discordUuid).replace('$username$', username))
 		.setThumbnail(interaction.user.displayAvatarURL({ size: 256 }));
 
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(approve, reject);
@@ -35,12 +35,12 @@ export async function sendUsernameChangeRequest(interaction: ButtonInteraction, 
 
 	const approve = new ButtonBuilder()
 		.setCustomId(`update-${discordUuid}-${userFromMojangApi.id}`)
-		.setLabel('Approuver')
+		.setLabel(Texts.embeds.components.approve)
 		.setStyle(ButtonStyle.Success);
 
 	const approvalRequestEmbed = new EmbedBuilder()
-		.setTitle(Texts.requestAdminApproval.usernameChangeRequestTitle.replace('$discordUsername$', interaction.user.username))
-		.setDescription(Texts.requestAdminApproval.userNameChangeRequestDescription.replace('$discordUuid$', discordUuid).replace('$username$', userFromMojangApi.name))
+		.setTitle(Texts.embeds.titles.usernameChangeRequest.replace('$discordUsername$', interaction.user.username))
+		.setDescription(Texts.embeds.descriptions.usernameChangeRequest.replace('$discordUuid$', discordUuid).replace('$username$', userFromMojangApi.name))
 		.setThumbnail(interaction.user.displayAvatarURL({ size: 256 }));
 
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(approve);

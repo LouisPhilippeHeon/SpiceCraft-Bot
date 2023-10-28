@@ -1,5 +1,5 @@
 import { Client, Events } from 'discord.js';
-import * as DatabaseService from '../services/database'
+import * as DatabaseService from '../services/database';
 
 module.exports = {
 	name: Events.ClientReady,

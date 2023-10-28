@@ -1,24 +1,23 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
-
-const instructionsForRegistering = 'Pour vous inscrire veuillez cliquer sur le bouton. Le bot va vous envoyer un message privé pour compléter votre inscription.\n**Si vous avez entré un nom d\'utilisateur erroné lors de la configuration initiale, cliquez sur le bouton à nouveau.**';
+import * as Texts from '../../texts';
 
 export const data = new SlashCommandBuilder()
 	.setName('afficher-bouton-inscription')
-	.setDescription('Envoie un message avec un bouton permettant de s\'inscrire.')
+	.setDescription(Texts.commands.showInscriptionButton.description)
 	.setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 export async function execute(interaction: ChatInputCommandInteraction) {
 	const register = new ButtonBuilder()
 		.setCustomId('inscription')
-		.setLabel('S\'inscrire')
+		.setLabel(Texts.embeds.components.register)
 		.setStyle(ButtonStyle.Primary);
 
 	const row = new ActionRowBuilder<ButtonBuilder>()
 		.addComponents(register);
 
-	await interaction.deleteReply('Fait !');
+	await interaction.deleteReply(Texts.commands.showInscriptionButton.done);
 
 	await interaction.channel.send({
-		content: instructionsForRegistering,
+		content: Texts.commands.showInscriptionButton.instructions,
 		components: [row]
 	});
 }

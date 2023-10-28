@@ -1,8 +1,19 @@
 import { ChannelType, Client, Colors, GatewayIntentBits, Guild, PermissionsBitField, Role, TextChannel } from "discord.js";
-import * as Models from './models'
-import * as Constants from './bot-constants'
-import * as Config from './config'
-export const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.DirectMessages, GatewayIntentBits.DirectMessageReactions, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildPresences] }) as Models.ClientWithCommands;
+import * as Models from './models';
+import * as Constants from './bot-constants';
+import * as Config from './config';
+export const client = new Client({
+	intents: [
+		GatewayIntentBits.Guilds,
+		GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.MessageContent,
+		GatewayIntentBits.DirectMessages,
+		GatewayIntentBits.DirectMessageReactions,
+		GatewayIntentBits.GuildMessageReactions,
+		GatewayIntentBits.GuildMembers,
+		GatewayIntentBits.GuildPresences
+	]
+}) as Models.ClientWithCommands;
 
 // structuredClone dosen't work in some circumstances
 export function deepCloneWithJson(objectToClone: any): any {
@@ -18,15 +29,15 @@ export async function fetchBotChannel(guild: Guild): Promise<TextChannel> {
 		type: ChannelType.GuildText,
 		permissionOverwrites: [
 			{
-			  id: guild.roles.everyone,
-			  deny: [PermissionsBitField.Flags.ViewChannel]
+				id: guild.roles.everyone,
+				deny: [PermissionsBitField.Flags.ViewChannel]
 			},
 			{
 				// Highest role of bot
 				id: client.guilds.cache.get(Config.guildId).members.cache.get(client.user.id).roles.highest,
 				allow: [PermissionsBitField.Flags.ViewChannel]
 			}
-		 ],
+		],
 	});
 }
 
