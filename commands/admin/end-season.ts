@@ -12,7 +12,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 		.setStyle(ButtonStyle.Danger);
 
 	const cancel = new ButtonBuilder()
-		.setCustomId('cancel')
+		.setCustomId('dissmiss')
 		.setLabel(Texts.embeds.components.cancel)
 		.setStyle(ButtonStyle.Secondary);
 

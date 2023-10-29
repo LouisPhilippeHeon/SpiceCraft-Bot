@@ -1,4 +1,4 @@
-import { ChannelType, Client, Colors, GatewayIntentBits, Guild, PermissionsBitField, Role, TextChannel } from "discord.js";
+import { ChannelType, Client, Colors, GatewayIntentBits, Guild, GuildMember, Message, PermissionsBitField, Role, TextChannel } from "discord.js";
 import * as Models from './models';
 import * as Constants from './bot-constants';
 import * as Config from './config';
@@ -50,4 +50,9 @@ export async function fetchPlayerRole(guild: Guild): Promise<Role> {
 		color: Colors.Green,
 		reason: 'Le rôle pour les joueurs n\'existait pas, il a été créé.',
 	});
+}
+
+export async function findApprovalRequestOfMember(guild: Guild, memberUuid: string): Promise<Message> {
+	const whitelistChannel = await fetchBotChannel(guild);
+	return Array.from((await whitelistChannel.messages.fetch({ limit: 100 })).values()).find(message => message.embeds[0]?.description.includes(memberUuid));
 }

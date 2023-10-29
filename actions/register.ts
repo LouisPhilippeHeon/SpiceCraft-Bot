@@ -151,7 +151,7 @@ async function getRulesAcknowledgment(channel: DMChannel) {
 async function updateAdminApprovalRequest(dmChannel: DMChannel) {
 	const whitelistChannel = await Utils.fetchBotChannel(interactionReference.guild);
 	// Find approval request for the user in the whitelist channel
-	const approvalRequest = Array.from((await whitelistChannel.messages.fetch({ limit: 100 })).values()).find(message => message.embeds[0]?.description.includes(`<@${discordUuid}>`));
+	const approvalRequest = await Utils.findApprovalRequestOfMember(interactionReference.guild, discordUuid)
 	// If message is too old to be updated
 	if (approvalRequest === undefined) {
 		await whitelistChannel.send(Texts.register.awaitingApprovalUserChangedMinecraftUsername.replace('$discordUuid$', discordUuid).replace('$minecraftUsername$', userFromMojangApi.name));
