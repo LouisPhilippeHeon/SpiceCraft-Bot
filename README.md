@@ -5,15 +5,7 @@
 `npm start`
 # Mettre à jour les commandes
 
-Transpiler les fichiers TypeScript en fichiers JavaScript
-
-`npx tsc`
-
-Exécuter deploy-commands.js
-
-`node ./dist/deploy-commands.js`
+`ts-node ./deploy-commands.ts`
 # Informations importantes
 
-Le bot doit **avoir la permission de lire les logs, gérer les channels et de gérer les rôles**.
-
-Le serveur doit contenir un channel nommé **whitelist** (configurable dans `bot-constants.ts`)
+Le bot doit avoir les permissions pour **lire les logs, gérer les channels et gérer les rôles**.
