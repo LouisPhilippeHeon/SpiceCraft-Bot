@@ -1,7 +1,7 @@
 import * as Constants from '../bot-constants';
-import * as HttpService from '../services/http';
-import * as DatabaseService from '../services/database';
-import * as RequestAdminApproval from './request-admin-approval';
+import * as HttpService from './http';
+import * as DatabaseService from './database';
+import * as AdminApprovalService from './admin-approval';
 import * as Texts from '../texts';
 import * as Utils from '../utils';
 import * as Models from '../models';
@@ -16,31 +16,7 @@ let userFromMojangApi: Models.UserFromMojangApi;
 let interactionReference: ButtonInteraction;
 let discordUuid: string;
 
-export async function handleInscriptionButtonClick(interaction: ButtonInteraction) {
-	interactionReference = interaction;
-	discordUuid = interactionReference.user.id;
 
-	try {
-		const userFromDb = await DatabaseService.getUserByDiscordUuid(discordUuid);
-
-		if (userFromDb.inscription_status === Constants.inscriptionStatus.rejected) {
-			await interactionReference.reply({ content: Texts.register.adminsAlreadyDeniedRequest, ephemeral: true });
-			return;
-		}
-
-		await updateExistingUser(userFromDb).catch(async () => {
-			await interactionReference.reply({ content: Texts.register.dmsAreClosed, ephemeral: true });
-		});
-	}
-	// User does not exist in the database and should be created
-	catch (e) {
-		if (e.message === Texts.errors.database.userDoesNotExist) {
-			await registerNewUser().catch(async () => await interactionReference.reply({ content: Texts.register.dmsAreClosed, ephemeral: true }));
-			return;
-		}
-		await interactionReference.reply(Texts.errors.generic);
-	}
-};
 
 async function updateExistingUser(userFromDb: Models.UserFromDb) {
 	await interactionReference.reply({ content: Texts.register.messageSentInDms, ephemeral: true });
@@ -76,19 +52,19 @@ async function updateExistingUser(userFromDb: Models.UserFromDb) {
 			return;
 		}
 		try {
-			// If user is already approved
-			if (userFromDb.inscription_status === Constants.inscriptionStatus.approved) {
-				try {
-					await DatabaseService.getUserByMinecraftUuid(userFromMojangApi.id);
-					await dmChannel.send(Texts.errors.usernameUsedWithAnotherAccount);
-				}
-				catch {
-					await RequestAdminApproval.sendUsernameChangeRequest(interactionReference, userFromMojangApi);
-					await dmChannel.send(Texts.register.usernameUpdated);
-				}
-			}
-			else {
+			// User awaiting approval, edit approval request instead of creating another request
+			if (userFromDb.inscription_status !== Constants.inscriptionStatus.approved) {
 				await updateAdminApprovalRequest(dmChannel);
+				return;
+			}
+			// If user is already approved, change username
+			try {
+				await DatabaseService.getUserByMinecraftUuid(userFromMojangApi.id);
+				await dmChannel.send(Texts.errors.usernameUsedWithAnotherAccount);
+			}
+			catch {
+				await AdminApprovalService.createUsernameChangeRequest(interactionReference.user, interactionReference.guild, userFromMojangApi);
+				await dmChannel.send(Texts.register.usernameUpdated);
 			}
 		}
 		catch (e) {
@@ -151,7 +127,7 @@ async function getRulesAcknowledgment(channel: DMChannel) {
 async function updateAdminApprovalRequest(dmChannel: DMChannel) {
 	const whitelistChannel = await Utils.fetchBotChannel(interactionReference.guild);
 	// Find approval request for the user in the whitelist channel
-	const approvalRequest = await Utils.findApprovalRequestOfMember(interactionReference.guild, discordUuid)
+	const approvalRequest = await AdminApprovalService.findApprovalRequestOfMember(interactionReference.guild, discordUuid)
 	// If message is too old to be updated
 	if (approvalRequest === undefined) {
 		await whitelistChannel.send(Texts.register.awaitingApprovalUserChangedMinecraftUsername.replace('$discordUuid$', discordUuid).replace('$minecraftUsername$', userFromMojangApi.name));
@@ -169,7 +145,7 @@ async function updateAdminApprovalRequest(dmChannel: DMChannel) {
 async function saveNewUserToDb(channel: DMChannel) {
 	try {
 		await DatabaseService.createUser(userFromMojangApi.id, discordUuid);
-		await RequestAdminApproval.sendApprovalRequest(interactionReference, userFromMojangApi.name);
+		await AdminApprovalService.createApprovalRequest(interactionReference.user, interactionReference.guild, userFromMojangApi.name);
 		await channel.send(Texts.register.waitForAdminApprobation);
 	}
 	catch (e) {
