@@ -129,7 +129,7 @@ export async function confirmEndSeason(interaction: ButtonInteraction) {
 	// Sending the data about to be deleted to the user performing the command
 	const users = await DatabaseService.getUsers();
 	if (users.length > 0) {
-		await (await Utils.client.users.fetch(interaction.member.user.id)).send({
+		await interaction.user.send({
 			files: [{
 				attachment: Buffer.from(JSON.stringify(users)),
 				name: Constants.filenameSeasonSave
