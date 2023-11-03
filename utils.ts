@@ -51,3 +51,32 @@ export async function fetchPlayerRole(guild: Guild): Promise<Role> {
 		reason: 'Le rôle pour les joueurs n\'existait pas, il a été créé.',
 	});
 }
+
+export function formatDate(dateToFormat: Date) {
+	let parts = dateToFormat.toString().split(" ");
+	let datePart = parts[0];
+	let timePart = parts[1];
+
+	let dateParts = datePart.split("-");
+	let year = Number(dateParts[0]);
+	let month = Number(dateParts[1]);
+	let day = Number(dateParts[2]);
+
+	let timeParts = timePart.split(":");
+	let hours = Number(timeParts[0]);
+	let minutes = Number(timeParts[1]);
+
+	let date = new Date(year, month - 1, day, hours, minutes);
+
+	let options = {
+		weekday: 'long',
+		day: 'numeric',
+		month: 'long',
+		year: 'numeric',
+		hour: '2-digit',
+		minute: '2-digit'
+	} as Intl.DateTimeFormatOptions;
+
+	var formattedDate = date.toLocaleDateString('fr-FR', options);
+	return formattedDate;
+}

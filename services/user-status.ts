@@ -13,7 +13,7 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
 		let role = await Utils.fetchPlayerRole(interaction.guild);
 		(status === Constants.inscriptionStatus.approved) ? await member.roles.add(role.id) : await member.roles.remove(role.id);
 
-		const interactionReplyMessage = Texts.editUserStatus.statusChanged.replace('$discordUuid$', idToEdit).replace('$status$', Texts.getStatusName(status));
+		const interactionReplyMessage = Texts.services.userStatus.statusChanged.replace('$discordUuid$', idToEdit).replace('$status$', Texts.getStatusName(status));
 
 		if (status === Constants.inscriptionStatus.awaitingApproval) {
 			await interaction.reply(interactionReplyMessage);
@@ -29,7 +29,7 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
 			await interaction.reply(interactionReplyMessage);
 		}
 		catch {
-			await interaction.reply(interactionReplyMessage + '\n' + Texts.editUserStatus.cantSendDm);
+			await interaction.reply(interactionReplyMessage + '\n' + Texts.services.userStatus.cantSendDm);
 		}
 	}).catch(async (e) => {
 		await interaction.reply(e.message);
@@ -37,6 +37,6 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
 }
 
 function getMessageToSendToUser(status: number): string {
-	if (status == Constants.inscriptionStatus.approved) return Texts.editUserStatus.dmAddedToWhitelist;
-	if (status == Constants.inscriptionStatus.rejected) return Texts.editUserStatus.dmRemovedFromWhitelist;
+	if (status == Constants.inscriptionStatus.approved) return Texts.services.userStatus.dmAddedToWhitelist;
+	if (status == Constants.inscriptionStatus.rejected) return Texts.services.userStatus.dmRemovedFromWhitelist;
 }

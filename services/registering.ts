@@ -18,15 +18,15 @@ let dmChannel: DMChannel;
 
 export async function updateExistingUser(userFromDb: Models.UserFromDb, buttonInteraction: ButtonInteraction) {
 	interaction = buttonInteraction;
-	await interaction.reply({ content: Texts.register.messageSentInDms, ephemeral: true });
-	const usernameMessage = await interaction.user.send(Texts.register.askWhatIsNewMinecraftUsername);
+	await interaction.reply({ content: Texts.services.registering.messageSentInDms, ephemeral: true });
+	const usernameMessage = await interaction.user.send(Texts.services.registering.askWhatIsNewMinecraftUsername);
 	dmChannel = usernameMessage.channel as DMChannel;
 	const collectorFilter = (message: Message) => message.author.id == interaction.user.id;
 	const usernameCollector = dmChannel.createMessageCollector({ filter: collectorFilter, max: 1, time: Constants.timeToWaitForUserInputBeforeTimeout });
 
 	usernameCollector.on('end', async (usernameCollected: Collection<string, Message<boolean>>) => {
 		if (usernameCollected.size === 0) {
-			await usernameMessage.reply(Texts.register.timeoutAnswer);
+			await usernameMessage.reply(Texts.services.registering.timeoutAnswer);
 			return;
 		}
 
@@ -37,7 +37,7 @@ export async function updateExistingUser(userFromDb: Models.UserFromDb, buttonIn
 		}
 		catch (e) {
 			if (e.message === Texts.errors.api.noMojangAccountWithThatUsername) {
-				await dmChannel.send(Texts.register.minecraftAccountDoesNotExist.replace('$minecraftUsername$', usernameSentByUser));
+				await dmChannel.send(Texts.services.registering.minecraftAccountDoesNotExist.replace('$minecraftUsername$', usernameSentByUser));
 				return;
 			}
 			await dmChannel.send(e.message);
@@ -45,7 +45,7 @@ export async function updateExistingUser(userFromDb: Models.UserFromDb, buttonIn
 		}
 
 		if (userFromDb.minecraft_uuid == userFromMojangApi.id) {
-			await dmChannel.send(Texts.register.sameMinecraftAccountAsBefore);
+			await dmChannel.send(Texts.services.registering.sameMinecraftAccountAsBefore);
 			return;
 		}
 		try {
@@ -61,7 +61,7 @@ export async function updateExistingUser(userFromDb: Models.UserFromDb, buttonIn
 			}
 			catch {
 				await AdminApprovalService.createUsernameChangeRequest(interaction.user, interaction.guild, userFromMojangApi);
-				await dmChannel.send(Texts.register.usernameUpdated);
+				await dmChannel.send(Texts.services.registering.usernameUpdated);
 			}
 		}
 		catch (e) {
@@ -76,15 +76,15 @@ export async function updateExistingUser(userFromDb: Models.UserFromDb, buttonIn
 
 export async function registerNewUser(buttonInteraction: ButtonInteraction) {
 	interaction = buttonInteraction;
-	const usernameMessage = await interaction.user.send(Texts.register.askWhatIsMinecraftUsername);
-	await interaction.reply({ content: Texts.register.messageSentInDms, ephemeral: true });
+	const usernameMessage = await interaction.user.send(Texts.services.registering.askWhatIsMinecraftUsername);
+	await interaction.reply({ content: Texts.services.registering.messageSentInDms, ephemeral: true });
 	dmChannel = usernameMessage.channel as DMChannel;
 	const collectorFilter = (message: Message) => message.author.id == interaction.user.id;
 	const usernameCollector = dmChannel.createMessageCollector({ filter: collectorFilter, max: 1, time: Constants.timeToWaitForUserInputBeforeTimeout });
 
 	usernameCollector.on('end', async (usernameCollected: Collection<string, Message<boolean>>) => {
 		if (usernameCollected.size === 0) {
-			await usernameMessage.reply(Texts.register.timeoutAnswer);
+			await usernameMessage.reply(Texts.services.registering.timeoutAnswer);
 			return;
 		}
 
@@ -95,7 +95,7 @@ export async function registerNewUser(buttonInteraction: ButtonInteraction) {
 		}
 		catch (e) {
 			if (e.message === Texts.errors.api.noMojangAccountWithThatUsername) {
-				await dmChannel.send(Texts.register.minecraftAccountDoesNotExist.replace('$minecraftUsername$', usernameSentByUser));
+				await dmChannel.send(Texts.services.registering.minecraftAccountDoesNotExist.replace('$minecraftUsername$', usernameSentByUser));
 				return;
 			}
 			await dmChannel.send(e.message);
@@ -106,7 +106,7 @@ export async function registerNewUser(buttonInteraction: ButtonInteraction) {
 }
 
 async function getRulesAcknowledgment() {
-	const rulesMessage = await dmChannel.send({ content: Texts.register.reactToAcceptRules, embeds: [rulesEmbed] });
+	const rulesMessage = await dmChannel.send({ content: Texts.services.registering.reactToAcceptRules, embeds: [rulesEmbed] });
 	rulesMessage.react('✅');
 
 	const emojiFilter = (reaction: MessageReaction, user: User) => {
@@ -116,7 +116,7 @@ async function getRulesAcknowledgment() {
 	rulesMessage.awaitReactions({ filter: emojiFilter, max: 1, time: Constants.timeToWaitForUserInputBeforeTimeout, errors: ['time'] }).then(async () => {
 		await saveNewUserToDb();
 	}).catch(async () => {
-		await rulesMessage.reply(Texts.register.timeoutAnswer);
+		await rulesMessage.reply(Texts.services.registering.timeoutAnswer);
 	});
 }
 
@@ -126,23 +126,23 @@ async function updateAdminApprovalRequest() {
 	const approvalRequest = await AdminApprovalService.findApprovalRequestOfMember(interaction.guild, interaction.user.id)
 	// If message is too old to be updated
 	if (approvalRequest === undefined) {
-		await whitelistChannel.send(Texts.register.awaitingApprovalUserChangedMinecraftUsername.replace('$discordUuid$', interaction.user.id).replace('$minecraftUsername$', userFromMojangApi.name));
+		await whitelistChannel.send(Texts.services.registering.awaitingApprovalUserChangedMinecraftUsername.replace('$discordUuid$', interaction.user.id).replace('$minecraftUsername$', userFromMojangApi.name));
 	}
 	else {
 		const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
-		embedToUpdate.description = Texts.register.embedDescription.replace('$discordUuid$', interaction.user.id).replace('$minecraftUsername$', userFromMojangApi.name);
+		embedToUpdate.description = Texts.services.registering.embedDescription.replace('$discordUuid$', interaction.user.id).replace('$minecraftUsername$', userFromMojangApi.name);
 		await approvalRequest.edit({ embeds: [embedToUpdate] });
 	}
 
 	await DatabaseService.changeMinecraftUuid(interaction.user.id, userFromMojangApi.id);
-	await dmChannel.send(Texts.register.requestSucessfullyUpdated);
+	await dmChannel.send(Texts.services.registering.requestSucessfullyUpdated);
 }
 
 async function saveNewUserToDb() {
 	try {
 		await DatabaseService.createUser(userFromMojangApi.id, interaction.user.id);
 		await AdminApprovalService.createApprovalRequest(interaction.user, interaction.guild, userFromMojangApi.name);
-		await dmChannel.send(Texts.register.waitForAdminApprobation);
+		await dmChannel.send(Texts.services.registering.waitForAdminApprobation);
 	}
 	catch (e) {
 		if (e.message === Texts.errors.database.notUnique) {

@@ -1,28 +1,39 @@
 import * as Constants from './bot-constants';
 
-export enum register {
-	timeoutAnswer = 'Temps de réponse maximum dépassé, veuillez réessayer en cliqant le bouton `S\'inscrire` à nouveau.',
-	messageSentInDms = 'Merci de répondre au bot qui vous a envoyé un message en privé !',
-	adminsAlreadyDeniedRequest = '🚫 Les administrateurs ont déjà refusé ta demande ! 🚫',
-	askWhatIsMinecraftUsername = 'Quel est ton nom d\'utilisateur sur Minecraft ?',
-	askWhatIsNewMinecraftUsername = 'Quel est le bon nom d\'utilisateur ?',
-	reactToAcceptRules = 'Réagit avec ✅ pour indiquer que tu a lu et accepté les règles.',
-	errorWhileConnectingToMojangServer = '❌ Une erreur s\'est produite lorsque nous avons tenté de se connecter aux serveurs de Mojang afin d\'obtenir plus d\'informations sur ton compte. Si le problème persiste, contacte les administrateurs. ❌',
-	requestSucessfullyUpdated = 'Ta demande à été mise à jour avec succès !',
-	waitForAdminApprobation = 'Ton inscription est en attente d\'approbation par les administrateurs, je t\'enverrais un message quand elle sera acceptée!',
-	usernameUpdated = 'Ton nom d\'utilisateur a été changé avec succès, je t\'envoie un message lorsque le nom d\'utilisateur sera mis à jour dans la whitelist.',
-	embedDescription = 'Compte Discord : <@$discordUuid$>.\nUsername Minecraft : $minecraftUsername$.',
-	awaitingApprovalUserChangedMinecraftUsername = '<@$discordUuid$> a changé son username Minecraft pour \`$minecraftUsername$\` dans sa demande d\'ajout à la whitelist.',
-	minecraftAccountDoesNotExist = '❌ Le compte Minecraft « $minecraftUsername$ » n\'existe pas! Tu peux cliquer à nouveau le bouton \`S\'inscrire\` pour réessayer. ❌',
-	dmsAreClosed = 'Tes paramètres de confidentialité m\'empêchent de t\'envoyer des messages. Change ces paramètres pour pouvoir compléter ton inscription.',
-	sameMinecraftAccountAsBefore = 'Pas besoin de mettre à jour ton nom d\'utilisateur, car il est identique à celui associé au compte Minecraft dans la whitelist.'
-}
+export namespace services {
+	enum htmlService {
+		template = '<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Utilisateurs</title><style>h1, h2, h3, h4, h5, h6, p, table { font-family: arial, sans-serif;color: #d4dfe4;} html {background-color: #141414;padding: 0 40px;}table { border-collapse: collapse; width: 100%;border-spacing:0;}td,th{border:1px solid #4d4d4d;padding:8px;}tr:nth-child(even){background-color: #303030;}.user{display: flex; align-items: center; height:auto;}td:nth-child(3){text-align:center;}img{height: 50px;border-radius: 5px;margin-right: 10px;}.date:first-letter {text-transform: capitalize;}</style></head><body><h1>Utilisateurs de SpiceCraft</h1><table><tr><th>Utilisateur</th><th>Nom d\'utilisateur Minecraft</th><th>Statut</th><th>Date d\'inscription</th><th>Dernière modification</th></tr>$tableRows$</table></body><script>async function fetchUsername (minecraftUuid) { const apiUrl = `https://sessionserver.mojang.com/session/minecraft/profile/${minecraftUuid}`; const response = await fetch("https://corsproxy.io/?" + apiUrl, {}); const user = await response.json(); document.getElementById(minecraftUuid).innerHTML = user.name;}</script></html>',
+		rowTemplate = '<tr><td><div class="user"><img src="$imgUrl$" alt="Photo de profil de $username$">$username$</div></td><td id="$minecraftUuid$"><button onclick="fetchUsername(\'$minecraftUuid$\')">Afficher</button></td><td>$status$</td><td class="date">$createdAt$</td><td class="date">$updatedAt$</td></tr>'	
+	}
 
-export enum editUserStatus {
-	dmAddedToWhitelist = 'Tu a été ajouté à la whitelist de SpiceCraft.',
-	dmRemovedFromWhitelist = 'Tu a été retiré de la whitelist de SpiceCraft. Contacte les administrateurs pour plus de détails.',
-	cantSendDm = 'Attention : Impossible d\'envoyer un message à cet utilisateur en raison de ses paramètres de confidentialité !',
-	statusChanged = 'Le statut de <@$discordUuid$> à été changé pour "$status$".'
+	export enum userStatusService {
+		dmAddedToWhitelist = 'Tu a été ajouté à la whitelist de SpiceCraft.',
+		dmRemovedFromWhitelist = 'Tu a été retiré de la whitelist de SpiceCraft. Contacte les administrateurs pour plus de détails.',
+		cantSendDm = 'Attention : Impossible d\'envoyer un message à cet utilisateur en raison de ses paramètres de confidentialité !',
+		statusChanged = 'Le statut de <@$discordUuid$> à été changé pour "$status$".'
+	}
+
+	export enum registeringService {
+		timeoutAnswer = 'Temps de réponse maximum dépassé, veuillez réessayer en cliqant le bouton `S\'inscrire` à nouveau.',
+		messageSentInDms = 'Merci de répondre au bot qui vous a envoyé un message en privé !',
+		adminsAlreadyDeniedRequest = '🚫 Les administrateurs ont déjà refusé ta demande ! 🚫',
+		askWhatIsMinecraftUsername = 'Quel est ton nom d\'utilisateur sur Minecraft ?',
+		askWhatIsNewMinecraftUsername = 'Quel est le bon nom d\'utilisateur ?',
+		reactToAcceptRules = 'Réagit avec ✅ pour indiquer que tu a lu et accepté les règles.',
+		errorWhileConnectingToMojangServer = '❌ Une erreur s\'est produite lorsque nous avons tenté de se connecter aux serveurs de Mojang afin d\'obtenir plus d\'informations sur ton compte. Si le problème persiste, contacte les administrateurs. ❌',
+		requestSucessfullyUpdated = 'Ta demande à été mise à jour avec succès !',
+		waitForAdminApprobation = 'Ton inscription est en attente d\'approbation par les administrateurs, je t\'enverrais un message quand elle sera acceptée!',
+		usernameUpdated = 'Ton nom d\'utilisateur a été changé avec succès, je t\'envoie un message lorsque le nom d\'utilisateur sera mis à jour dans la whitelist.',
+		embedDescription = 'Compte Discord : <@$discordUuid$>.\nUsername Minecraft : $minecraftUsername$.',
+		awaitingApprovalUserChangedMinecraftUsername = '<@$discordUuid$> a changé son username Minecraft pour \`$minecraftUsername$\` dans sa demande d\'ajout à la whitelist.',
+		minecraftAccountDoesNotExist = '❌ Le compte Minecraft « $minecraftUsername$ » n\'existe pas! Tu peux cliquer à nouveau le bouton \`S\'inscrire\` pour réessayer. ❌',
+		dmsAreClosed = 'Tes paramètres de confidentialité m\'empêchent de t\'envoyer des messages. Change ces paramètres pour pouvoir compléter ton inscription.',
+		sameMinecraftAccountAsBefore = 'Pas besoin de mettre à jour ton nom d\'utilisateur, car il est identique à celui associé au compte Minecraft dans la whitelist.'
+	}
+
+	export import html = htmlService;
+	export import userStatus = userStatusService;
+	export import registering = registeringService;
 }
 
 export namespace events {

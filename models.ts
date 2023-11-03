@@ -18,8 +18,8 @@ export interface UserFromDb {
     discord_uuid: string;
     minecraft_uuid: string;
     inscription_status: number;
-    created_at: Date;
-    update_at: Date;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface MojangApiError {

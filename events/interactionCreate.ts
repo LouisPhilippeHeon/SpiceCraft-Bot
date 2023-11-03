@@ -205,18 +205,18 @@ export async function inscription(interaction: ButtonInteraction) {
 		const userFromDb = await DatabaseService.getUserByDiscordUuid(discordUuid);
 
 		if (userFromDb.inscription_status === Constants.inscriptionStatus.rejected) {
-			await interaction.reply({ content: Texts.register.adminsAlreadyDeniedRequest, ephemeral: true });
+			await interaction.reply({ content: Texts.services.registering.adminsAlreadyDeniedRequest, ephemeral: true });
 			return;
 		}
 
 		await RegisteringService.updateExistingUser(userFromDb, interaction).catch(async () => {
-			await interaction.reply({ content: Texts.register.dmsAreClosed, ephemeral: true });
+			await interaction.reply({ content: Texts.services.registering.dmsAreClosed, ephemeral: true });
 		});
 	}
 	// User does not exist in the database and should be created
 	catch (e) {
 		if (e.message === Texts.errors.database.userDoesNotExist) {
-			await RegisteringService.registerNewUser(interaction).catch(async () => await interaction.reply({ content: Texts.register.dmsAreClosed, ephemeral: true }));
+			await RegisteringService.registerNewUser(interaction).catch(async () => await interaction.reply({ content: Texts.services.registering.dmsAreClosed, ephemeral: true }));
 			return;
 		}
 		await interaction.reply(Texts.errors.generic);

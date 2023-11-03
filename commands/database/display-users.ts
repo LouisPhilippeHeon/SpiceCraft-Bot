@@ -3,6 +3,7 @@ import * as DatabaseService from '../../services/database';
 import * as Constants from '../../bot-constants';
 import * as Texts from '../../texts';
 import * as Models from '../../models';
+import * as HtmlService from '../../services/html';
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -21,6 +22,7 @@ module.exports = {
 			option.setName('format')
 				.setDescription(Texts.commands.displayUsers.formatOptionDescription)
 				.addChoices(
+					{ name: 'HTML', value: 'html' },
 					{ name: 'JSON', value: 'json' },
 					{ name: 'Message', value: 'message' }
 				)),
@@ -40,6 +42,11 @@ module.exports = {
 			return;
 		}
 
+		if (format === 'html') {
+			await sendAsHtml(interaction, usersFromDb, status);
+			return;
+		}
+
 		await sendMessages(interaction, createMessages(usersFromDb), status);
 	}
 };
@@ -53,12 +60,21 @@ async function sendAsJson(interaction: ChatInputCommandInteraction, usersFromDb:
 	});
 };
 
+async function sendAsHtml(interaction: ChatInputCommandInteraction, usersFromDb: Models.UserFromDb[], status: number) {
+	await interaction.reply({
+		files: [{
+			attachment: Buffer.from(HtmlService.buildHtml(usersFromDb)),
+			name: 'test.html'
+		}]
+	});
+}
+
 function createMessages(usersFromDb: Models.UserFromDb[]): string[] {
 	const messages = [];
 	let currentMessage = '';
 
 	// Cuts data in multiple messages in order to bypass the 2000 caracter limit of Discord messages
-	usersFromDb.forEach((user: Models.UserFromDb) => {
+	usersFromDb.forEach(user => {
 		if (currentMessage.length > 1844) {
 			messages.push(currentMessage);
 			currentMessage = '';
