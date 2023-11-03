@@ -1,20 +1,20 @@
 import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import * as DatabaseService from '../../services/database';
 import * as HttpService from '../../services/http';
-import * as Texts from '../../texts';
+import * as Strings from '../../strings';
 import * as Models from '../../models';
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('modifier-username')
-        .setDescription(Texts.commands.editUsername.description)
+        .setDescription(Strings.commands.editUsername.description)
         .addStringOption(option =>
             option.setName('discord-uuid')
-                .setDescription(Texts.commands.editUsername.userOptionDescription)
+                .setDescription(Strings.commands.editUsername.userOptionDescription)
                 .setRequired(true))
         .addStringOption(option =>
             option.setName('username')
-                .setDescription(Texts.commands.editUsername.newUsernameOptionDescription)
+                .setDescription(Strings.commands.editUsername.newUsernameOptionDescription)
                 .setRequired(true))
         .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
     async execute(interaction: ChatInputCommandInteraction) {
@@ -24,11 +24,11 @@ module.exports = {
         try {
             let mojangUser = await getMojangAccountForNewUsername(newUsername, discordUuid);
             await DatabaseService.changeMinecraftUuid(discordUuid, mojangUser.id);
-            await interaction.reply(Texts.commands.editUsername.confirmationMessage);
+            await interaction.reply(Strings.commands.editUsername.confirmationMessage);
         }
         catch (e) {
             if (e.name == 'SequelizeUniqueConstraintError') {
-                await interaction.reply(Texts.errors.usernameUsedWithAnotherAccount);
+                await interaction.reply(Strings.errors.usernameUsedWithAnotherAccount);
                 return;
             }
             await interaction.reply(e.message);
@@ -41,7 +41,7 @@ async function getMojangAccountForNewUsername(newUsername: string, discordUuid: 
     let userFromMojangApi = await HttpService.getMojangUser(newUsername);
 
     if (userFromDb.minecraft_uuid == userFromMojangApi.id) {
-        throw new Error(Texts.commands.editUsername.usernameIdenticalToPreviousOne);
+        throw new Error(Strings.commands.editUsername.usernameIdenticalToPreviousOne);
     }
     return userFromMojangApi;
 }

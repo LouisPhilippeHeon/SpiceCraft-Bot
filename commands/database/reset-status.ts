@@ -1,15 +1,15 @@
 import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { editUserStatus } from '../../services/user-status';
 import { inscriptionStatus } from '../../bot-constants';
-import * as Texts from '../../texts';
+import * as Strings from '../../strings';
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('reinitialiser-statut')
-		.setDescription(Texts.commands.resetStatus.description)
+		.setDescription(Strings.commands.resetStatus.description)
 		.addUserOption(option =>
 			option.setName('membre')
-				.setDescription(Texts.commands.resetStatus.userOptionDescription)
+				.setDescription(Strings.commands.resetStatus.userOptionDescription)
 				.setRequired(true))
 		.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
 	async execute(interaction: ChatInputCommandInteraction) {

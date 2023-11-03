@@ -1,5 +1,5 @@
 const Sequelize = require('sequelize');
-import * as Texts from '../texts';
+import * as Strings from '../strings';
 import * as Models from '../models';
 
 const sequelize = new Sequelize('database', 'user', 'password', {
@@ -35,22 +35,22 @@ export async function createUser(minecraftUuid: string, discordUuid: string) {
 	}
 	catch (error) {
 		if (error.name === 'SequelizeUniqueConstraintError') {
-			throw new Error(Texts.errors.database.notUnique);
+			throw new Error(Strings.errors.database.notUnique);
 		}
 
-		throw new Error(Texts.errors.database.unknownError);
+		throw new Error(Strings.errors.database.unknownError);
 	}
 };
 
 export async function changeStatus(discordUuid: string, newStatus: number) {
 	if (![0, 1, 2].includes(newStatus)) {
-		throw new Error(Texts.errors.database.invalidStatus);
+		throw new Error(Strings.errors.database.invalidStatus);
 	}
 
 	const affectedRows = await this.tags.update({ inscription_status: newStatus }, { where: { discord_uuid: discordUuid } });
 
 	if (affectedRows[0] === 0) {
-		throw new Error(Texts.errors.database.userDoesNotExist);
+		throw new Error(Strings.errors.database.userDoesNotExist);
 	}
 };
 
@@ -58,7 +58,7 @@ export async function changeMinecraftUuid(discordUuid: string, minecraftUuid: st
 	const affectedRows = await this.tags.update({ minecraft_uuid: minecraftUuid }, { where: { discord_uuid: discordUuid } });
 
 	if (affectedRows[0] === 0) {
-		throw new Error(Texts.errors.database.userDoesNotExist);
+		throw new Error(Strings.errors.database.userDoesNotExist);
 	}
 };
 
@@ -69,7 +69,7 @@ export async function getUserByDiscordUuid(discordUuid: string): Promise<Models.
 		return structuredClone(tag.get({ plain: true }))
 	}
 
-	throw new Error(Texts.errors.database.userDoesNotExist);
+	throw new Error(Strings.errors.database.userDoesNotExist);
 };
 
 export async function getUserByMinecraftUuid(minecraftUuid: string): Promise<Models.UserFromDb> {
@@ -79,7 +79,7 @@ export async function getUserByMinecraftUuid(minecraftUuid: string): Promise<Mod
 		return structuredClone(tag.get({ plain: true }))
 	}
 
-	throw new Error(Texts.errors.database.userDoesNotExist);
+	throw new Error(Strings.errors.database.userDoesNotExist);
 };
 
 export async function getUsers(status?: number): Promise<Models.UserFromDb[]> {
@@ -89,6 +89,6 @@ export async function getUsers(status?: number): Promise<Models.UserFromDb[]> {
 
 export async function deleteEntry(discordUuid: string) {
 	const tagToDelete = await this.tags.findOne({ where: { discord_uuid: discordUuid } })
-	if (tagToDelete === null) throw new Error(Texts.errors.database.userDoesNotExist);
+	if (tagToDelete === null) throw new Error(Strings.errors.database.userDoesNotExist);
 	tagToDelete.destroy();
 }

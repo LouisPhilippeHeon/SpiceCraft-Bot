@@ -1,6 +1,6 @@
 import http = require('https');
 import * as Constants from '../bot-constants';
-import * as Texts from '../texts';
+import * as Strings from '../strings';
 import { MojangApiError, UserFromMojangApi } from '../models';
 
 export function getMojangUser(username: string): Promise<UserFromMojangApi> {
@@ -18,13 +18,13 @@ export function getMojangUser(username: string): Promise<UserFromMojangApi> {
 					reject(e);
 				}
 				if ((body as MojangApiError).errorMessage != null) {
-					reject(new Error(Texts.errors.api.noMojangAccountWithThatUsername));
+					reject(new Error(Strings.errors.api.noMojangAccountWithThatUsername));
 				}
 				resolve(body as UserFromMojangApi);
 			});
 		});
 		req.on('error', () => {
-			reject(new Error(Texts.errors.api.couldNotConnectToApi));
+			reject(new Error(Strings.errors.api.couldNotConnectToApi));
 		});
 		req.end();
 	});

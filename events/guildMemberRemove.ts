@@ -2,7 +2,7 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, Events, Gui
 import * as DatabaseService from '../services/database';
 import * as AdminApprovalService from '../services/admin-approval';
 import * as Utils from '../utils';
-import * as Texts from '../texts';
+import * as Strings from '../strings';
 import * as Constants from '../bot-constants';
 
 module.exports = {
@@ -21,17 +21,17 @@ module.exports = {
 
 			const confirmDelete = new ButtonBuilder()
 				.setCustomId(`delete-${member.user.id}`)
-				.setLabel(Texts.embeds.components.yes)
+				.setLabel(Strings.embeds.components.yes)
 				.setStyle(ButtonStyle.Danger);
 
 			const ignore = new ButtonBuilder()
 				.setCustomId('dissmiss')
-				.setLabel(Texts.embeds.components.ignore)
+				.setLabel(Strings.embeds.components.ignore)
 				.setStyle(ButtonStyle.Secondary);
 
 			const deleteEmbed = new EmbedBuilder()
-				.setTitle(Texts.embeds.titles.userLeft)
-				.setDescription(Texts.embeds.descriptions.userLeft.replace('$discordUuid$', member.user.id));
+				.setTitle(Strings.embeds.titles.userLeft)
+				.setDescription(Strings.embeds.descriptions.userLeft.replace('$discordUuid$', member.user.id));
 
 			const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmDelete, ignore);
 

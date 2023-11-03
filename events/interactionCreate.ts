@@ -4,7 +4,7 @@ import * as Models from '../models';
 import * as DatabaseService from '../services/database';
 import * as Utils from '../utils';
 import * as Constants from '../bot-constants';
-import * as Texts from '../texts';
+import * as Strings from '../strings';
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, GuildMember, Message, User } from 'discord.js';
 
 const erreurCommandeText = 'Une erreur s\'est produite lors de l\'exécution de cette commande!';
@@ -67,15 +67,15 @@ export async function approveUser(interaction: ButtonInteraction) {
 
 		await member.roles.add(role);
 		try {
-			await member.send(Texts.events.approbation.messageSentToPlayerToConfirmInscription);
-			await interaction.message.edit({ content: Texts.events.approbation.requestGranted, embeds: [embedToUpdate], components: [] });
-			await interaction.reply({ content: Texts.events.approbation.successReply.replace('$discordUuid$', discordUuid), ephemeral: true });
+			await member.send(Strings.events.approbation.messageSentToPlayerToConfirmInscription);
+			await interaction.message.edit({ content: Strings.events.approbation.requestGranted, embeds: [embedToUpdate], components: [] });
+			await interaction.reply({ content: Strings.events.approbation.successReply.replace('$discordUuid$', discordUuid), ephemeral: true });
 		}
 		catch {
-			await interaction.reply(Texts.errors.cantSendMessageToUser);
+			await interaction.reply(Strings.errors.cantSendMessageToUser);
 		}
 	}).catch(async () => {
-		await interaction.reply(Texts.errors.noDiscordUserWithThisUuid);
+		await interaction.reply(Strings.errors.noDiscordUserWithThisUuid);
 		await interaction.message.delete();
 	});
 }
@@ -85,15 +85,15 @@ export async function rejectUser(interaction: ButtonInteraction) {
 
 	const confirmRejection = new ButtonBuilder()
 		.setCustomId(`confirm-reject-${discordUuid}-${interaction.message.id}`)
-		.setLabel(Texts.embeds.components.reject)
+		.setLabel(Strings.embeds.components.reject)
 		.setStyle(ButtonStyle.Danger);
 	const cancel = new ButtonBuilder()
 		.setCustomId('dissmiss')
-		.setLabel(Texts.embeds.components.cancel)
+		.setLabel(Strings.embeds.components.cancel)
 		.setStyle(ButtonStyle.Secondary);
 
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmRejection, cancel);
-	await interaction.reply({ content: Texts.events.rejection.askConfirmation.replace('$discordUuid$', discordUuid), components: [row] });
+	await interaction.reply({ content: Strings.events.rejection.askConfirmation.replace('$discordUuid$', discordUuid), components: [row] });
 }
 
 async function confirmRejectUser(interaction: ButtonInteraction) {
@@ -110,20 +110,20 @@ async function confirmRejectUser(interaction: ButtonInteraction) {
 
 	interaction.guild.members.fetch(discordUuid).then(async member => {
 		try {
-			await member.send(Texts.events.rejection.messageSentToUserToInformRejection);
-			await interaction.reply({ content: Texts.events.rejection.informedUserAboutRejection.replace('$discordUuid$', discordUuid), ephemeral: true });
+			await member.send(Strings.events.rejection.messageSentToUserToInformRejection);
+			await interaction.reply({ content: Strings.events.rejection.informedUserAboutRejection.replace('$discordUuid$', discordUuid), ephemeral: true });
 
 			if (approvalRequest !== undefined) {
 				const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
 				embedToUpdate.color = Colors.Red;
-				await approvalRequest.edit({ content: Texts.events.rejection.requestDenied, embeds: [embedToUpdate], components: [] });
+				await approvalRequest.edit({ content: Strings.events.rejection.requestDenied, embeds: [embedToUpdate], components: [] });
 			}
 		}
 		catch {
-			await interaction.reply(Texts.errors.cantSendMessageToUser);
+			await interaction.reply(Strings.errors.cantSendMessageToUser);
 		}
 	}).catch(async () => {
-		await interaction.reply(Texts.errors.noDiscordUserWithThisUuid + '\n' + Texts.events.rejection.userStillInBdExplanation);
+		await interaction.reply(Strings.errors.noDiscordUserWithThisUuid + '\n' + Strings.events.rejection.userStillInBdExplanation);
 		if (approvalRequest !== undefined) approvalRequest.delete();
 	});
 }
@@ -141,24 +141,24 @@ async function confirmUsernameChange(interaction: ButtonInteraction) {
 	}
 	catch (e) {
 		if (e.name === 'SequelizeUniqueConstraintError') {
-			await interaction.reply(Texts.errors.usernameUsedWithAnotherAccount);
+			await interaction.reply(Strings.errors.usernameUsedWithAnotherAccount);
 			return;
 		}
-		await interaction.reply(Texts.errors.database.unknownError);
+		await interaction.reply(Strings.errors.database.unknownError);
 	}
 
-	await interaction.message.edit({ content: Texts.events.usernameChangeConfirmation.messageUpdate, embeds: [embedToUpdate], components: [] });
+	await interaction.message.edit({ content: Strings.events.usernameChangeConfirmation.messageUpdate, embeds: [embedToUpdate], components: [] });
 
 	interaction.guild.members.fetch(discordUuid).then(async member => {
 		try {
-			await member.send(Texts.events.usernameChangeConfirmation.messageSentToConfirmUsernameChange);
-			await interaction.reply({ content: Texts.events.usernameChangeConfirmation.informedUserAboutUpdate.replace('$discordUuid$', discordUuid), ephemeral: true });
+			await member.send(Strings.events.usernameChangeConfirmation.messageSentToConfirmUsernameChange);
+			await interaction.reply({ content: Strings.events.usernameChangeConfirmation.informedUserAboutUpdate.replace('$discordUuid$', discordUuid), ephemeral: true });
 		}
 		catch {
-			await interaction.reply(Texts.errors.cantSendMessageToUser);
+			await interaction.reply(Strings.errors.cantSendMessageToUser);
 		}
 	}).catch(async () => {
-		await interaction.reply(Texts.errors.noDiscordUserWithThisUuid);
+		await interaction.reply(Strings.errors.noDiscordUserWithThisUuid);
 	});
 }
 
@@ -168,12 +168,12 @@ async function deleteUser(interaction: ButtonInteraction) {
 	await DatabaseService.deleteEntry(discordUuid);
 	const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
 	embedToUpdate.color = Colors.Red;
-	await interaction.message.edit({ content: Texts.commands.deleteEntry.messageUpdate, embeds: [embedToUpdate], components: [] });
-	await interaction.reply({ content: Texts.commands.deleteEntry.reply, ephemeral: true });
+	await interaction.message.edit({ content: Strings.commands.deleteEntry.messageUpdate, embeds: [embedToUpdate], components: [] });
+	await interaction.reply({ content: Strings.commands.deleteEntry.reply, ephemeral: true });
 }
 
 async function confirmEndSeason(interaction: ButtonInteraction) {
-	await interaction.message.edit({ content: Texts.commands.endSeason.seasonEnded, components: [] });
+	await interaction.message.edit({ content: Strings.commands.endSeason.seasonEnded, components: [] });
 
 	// Sending the data about to be deleted to the user performing the command
 	const users = await DatabaseService.getUsers();
@@ -189,7 +189,7 @@ async function confirmEndSeason(interaction: ButtonInteraction) {
 		);
 	}
 
-	await interaction.reply({ content: Texts.commands.endSeason.newSeasonBegins, ephemeral: true });
+	await interaction.reply({ content: Strings.commands.endSeason.newSeasonBegins, ephemeral: true });
 	DatabaseService.tags.sync({ force: true });
 	await (await Utils.fetchPlayerRole(interaction.guild)).delete();
 
@@ -205,20 +205,20 @@ export async function inscription(interaction: ButtonInteraction) {
 		const userFromDb = await DatabaseService.getUserByDiscordUuid(discordUuid);
 
 		if (userFromDb.inscription_status === Constants.inscriptionStatus.rejected) {
-			await interaction.reply({ content: Texts.services.registering.adminsAlreadyDeniedRequest, ephemeral: true });
+			await interaction.reply({ content: Strings.services.registering.adminsAlreadyDeniedRequest, ephemeral: true });
 			return;
 		}
 
 		await RegisteringService.updateExistingUser(userFromDb, interaction).catch(async () => {
-			await interaction.reply({ content: Texts.services.registering.dmsAreClosed, ephemeral: true });
+			await interaction.reply({ content: Strings.services.registering.dmsAreClosed, ephemeral: true });
 		});
 	}
 	// User does not exist in the database and should be created
 	catch (e) {
-		if (e.message === Texts.errors.database.userDoesNotExist) {
-			await RegisteringService.registerNewUser(interaction).catch(async () => await interaction.reply({ content: Texts.services.registering.dmsAreClosed, ephemeral: true }));
+		if (e.message === Strings.errors.database.userDoesNotExist) {
+			await RegisteringService.registerNewUser(interaction).catch(async () => await interaction.reply({ content: Strings.services.registering.dmsAreClosed, ephemeral: true }));
 			return;
 		}
-		await interaction.reply(Texts.errors.generic);
+		await interaction.reply(Strings.errors.generic);
 	}
 };

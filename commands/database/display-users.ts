@@ -1,18 +1,18 @@
 import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import * as DatabaseService from '../../services/database';
 import * as Constants from '../../bot-constants';
-import * as Texts from '../../texts';
+import * as Strings from '../../strings';
 import * as Models from '../../models';
 import * as HtmlService from '../../services/html';
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('afficher')
-		.setDescription(Texts.commands.displayUsers.description)
+		.setDescription(Strings.commands.displayUsers.description)
 		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
 		.addStringOption(option =>
 			option.setName('statut')
-				.setDescription(Texts.commands.displayUsers.statusOptionDescription)
+				.setDescription(Strings.commands.displayUsers.statusOptionDescription)
 				.addChoices(
 					{ name: 'Approuvé', value: Constants.inscriptionStatus.approved.toString() },
 					{ name: 'Rejeté', value: Constants.inscriptionStatus.rejected.toString() },
@@ -20,7 +20,7 @@ module.exports = {
 				))
 		.addStringOption(option =>
 			option.setName('format')
-				.setDescription(Texts.commands.displayUsers.formatOptionDescription)
+				.setDescription(Strings.commands.displayUsers.formatOptionDescription)
 				.addChoices(
 					{ name: 'HTML', value: 'html' },
 					{ name: 'JSON', value: 'json' },
@@ -33,7 +33,7 @@ module.exports = {
 		const usersFromDb = await DatabaseService.getUsers(status);
 
 		if (usersFromDb.length === 0) {
-			await interaction.reply(Texts.commands.displayUsers.noUserFound);
+			await interaction.reply(Strings.commands.displayUsers.noUserFound);
 			return;
 		}
 
@@ -55,7 +55,7 @@ async function sendAsJson(interaction: ChatInputCommandInteraction, usersFromDb:
 	await interaction.reply({
 		files: [{
 			attachment: Buffer.from(JSON.stringify(usersFromDb)),
-			name: (status) ? Texts.commands.displayUsers.fileNameWithStatus.replace('$status$', Texts.getStatusName(status)) : Texts.commands.displayUsers.filename
+			name: (status) ? Strings.commands.displayUsers.fileNameWithStatus.replace('$status$', Strings.getStatusName(status)) : Strings.commands.displayUsers.filename
 		}]
 	});
 };
@@ -79,10 +79,10 @@ function createMessages(usersFromDb: Models.UserFromDb[]): string[] {
 			messages.push(currentMessage);
 			currentMessage = '';
 		}
-		currentMessage += Texts.commands.displayUsers.databaseEntryLine
+		currentMessage += Strings.commands.displayUsers.databaseEntryLine
 			.replace('$discordUuid$', user.discord_uuid)
 			.replace('$minecraftUuid$', user.minecraft_uuid)
-			.replace('$statusEmoji$', Texts.statusToEmoji(user.inscription_status));
+			.replace('$statusEmoji$', Strings.statusToEmoji(user.inscription_status));
 	});
 	messages.push(currentMessage);
 
@@ -92,8 +92,8 @@ function createMessages(usersFromDb: Models.UserFromDb[]): string[] {
 async function sendMessages(interaction: ChatInputCommandInteraction, messages: string[], status: number) {
 	await interaction.reply({
 		content: (status)
-			? Texts.commands.displayUsers.displayingUsersWithStatus.replace('$status$', Texts.getStatusName(status))
-			: Texts.commands.displayUsers.displayingAllUsers
+			? Strings.commands.displayUsers.displayingUsersWithStatus.replace('$status$', Strings.getStatusName(status))
+			: Strings.commands.displayUsers.displayingAllUsers
 	});
 
 	messages.forEach(async message => {

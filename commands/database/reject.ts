@@ -1,19 +1,19 @@
 import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { editUserStatus } from '../../services/user-status';
 import { inscriptionStatus } from '../../bot-constants';
-import * as Texts from '../../texts';
+import * as Strings from '../../strings';
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('rejeter')
-		.setDescription(Texts.commands.reject.description)
+		.setDescription(Strings.commands.reject.description)
 		.addUserOption(option =>
 			option.setName('membre')
-				.setDescription(Texts.commands.reject.userOptionDescription)
+				.setDescription(Strings.commands.reject.userOptionDescription)
 				.setRequired(true))
 		.addBooleanOption(option =>
 			option.setName('silencieux')
-				.setDescription(Texts.commands.reject.silentOptionDescription))
+				.setDescription(Strings.commands.reject.silentOptionDescription))
 		.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
 	async execute(interaction: ChatInputCommandInteraction) {
 		await editUserStatus(interaction, inscriptionStatus.rejected);
