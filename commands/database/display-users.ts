@@ -43,7 +43,7 @@ module.exports = {
 		}
 
 		if (format === 'html') {
-			await sendAsHtml(interaction, usersFromDb, status);
+			await sendAsHtml(interaction, usersFromDb);
 			return;
 		}
 
@@ -58,9 +58,9 @@ async function sendAsJson(interaction: ChatInputCommandInteraction, usersFromDb:
 			name: (status) ? Strings.commands.displayUsers.fileNameWithStatus.replace('$status$', Strings.getStatusName(status)) : Strings.commands.displayUsers.filename
 		}]
 	});
-};
+}
 
-async function sendAsHtml(interaction: ChatInputCommandInteraction, usersFromDb: Models.UserFromDb[], status: number) {
+async function sendAsHtml(interaction: ChatInputCommandInteraction, usersFromDb: Models.UserFromDb[]) {
 	await interaction.reply({
 		files: [{
 			attachment: Buffer.from(HtmlService.buildHtml(usersFromDb)),
@@ -87,7 +87,7 @@ function createMessages(usersFromDb: Models.UserFromDb[]): string[] {
 	messages.push(currentMessage);
 
 	return messages;
-};
+}
 
 async function sendMessages(interaction: ChatInputCommandInteraction, messages: string[], status: number) {
 	await interaction.reply({
@@ -99,4 +99,4 @@ async function sendMessages(interaction: ChatInputCommandInteraction, messages: 
 	messages.forEach(async message => {
 		await interaction.channel.send({ content: message });
 	});
-};
+}

@@ -77,6 +77,5 @@ export function formatDate(dateToFormat: Date) {
 		minute: '2-digit'
 	} as Intl.DateTimeFormatOptions;
 
-	var formattedDate = date.toLocaleDateString('fr-FR', options);
-	return formattedDate;
+	return date.toLocaleDateString('fr-FR', options);
 }

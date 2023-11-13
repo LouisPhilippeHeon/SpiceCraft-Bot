@@ -28,4 +28,4 @@ export function getMojangUser(username: string): Promise<UserFromMojangApi> {
 		});
 		req.end();
 	});
-};
+}

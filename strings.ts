@@ -20,7 +20,6 @@ export namespace services {
 		askWhatIsMinecraftUsername = 'Quel est ton nom d\'utilisateur sur Minecraft ?',
 		askWhatIsNewMinecraftUsername = 'Quel est le bon nom d\'utilisateur ?',
 		reactToAcceptRules = 'Réagit avec ✅ pour indiquer que tu a lu et accepté les règles.',
-		errorWhileConnectingToMojangServer = '❌ Une erreur s\'est produite lorsque nous avons tenté de se connecter aux serveurs de Mojang afin d\'obtenir plus d\'informations sur ton compte. Si le problème persiste, contacte les administrateurs. ❌',
 		requestSucessfullyUpdated = 'Ta demande à été mise à jour avec succès !',
 		waitForAdminApprobation = 'Ton inscription est en attente d\'approbation par les administrateurs, je t\'enverrais un message quand elle sera acceptée!',
 		usernameUpdated = 'Ton nom d\'utilisateur a été changé avec succès, je t\'envoie un message lorsque le nom d\'utilisateur sera mis à jour dans la whitelist.',

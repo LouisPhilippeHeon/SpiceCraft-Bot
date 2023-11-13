@@ -14,7 +14,7 @@ module.exports = {
 			const whitelistChannel = await Utils.fetchBotChannel(member.guild);
 
 			if (userFromDb.inscription_status == Constants.inscriptionStatus.awaitingApproval) {
-				(await AdminApprovalService.findApprovalRequestOfMember(member.guild, member.user.id)).delete();
+				await (await AdminApprovalService.findApprovalRequestOfMember(member.guild, member.user.id)).delete();
 				await DatabaseService.deleteEntry(member.user.id);
 				return;
 			}

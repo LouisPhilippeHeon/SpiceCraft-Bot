@@ -21,8 +21,8 @@ export async function createApprovalRequest(user: User, guild: Guild, username: 
 
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(approve, reject);
 
-	(await Utils.fetchBotChannel(guild)).send({ embeds: [approvalRequestEmbed], components: [row] });
-};
+	await (await Utils.fetchBotChannel(guild)).send({ embeds: [approvalRequestEmbed], components: [row] });
+}
 
 export async function createUsernameChangeRequest(user: User, guild: Guild, userFromMojangApi: Models.UserFromMojangApi) {
 	const approve = new ButtonBuilder()

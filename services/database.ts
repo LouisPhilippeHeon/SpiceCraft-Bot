@@ -40,7 +40,7 @@ export async function createUser(minecraftUuid: string, discordUuid: string) {
 
 		throw new Error(Strings.errors.database.unknownError);
 	}
-};
+}
 
 export async function changeStatus(discordUuid: string, newStatus: number) {
 	if (![0, 1, 2].includes(newStatus)) {
@@ -52,7 +52,7 @@ export async function changeStatus(discordUuid: string, newStatus: number) {
 	if (affectedRows[0] === 0) {
 		throw new Error(Strings.errors.database.userDoesNotExist);
 	}
-};
+}
 
 export async function changeMinecraftUuid(discordUuid: string, minecraftUuid: string) {
 	const affectedRows = await this.tags.update({ minecraft_uuid: minecraftUuid }, { where: { discord_uuid: discordUuid } });
@@ -60,7 +60,7 @@ export async function changeMinecraftUuid(discordUuid: string, minecraftUuid: st
 	if (affectedRows[0] === 0) {
 		throw new Error(Strings.errors.database.userDoesNotExist);
 	}
-};
+}
 
 export async function getUserByDiscordUuid(discordUuid: string): Promise<Models.UserFromDb> {
 	const tag = await this.tags.findOne({ where: { discord_uuid: discordUuid } });
@@ -70,7 +70,7 @@ export async function getUserByDiscordUuid(discordUuid: string): Promise<Models.
 	}
 
 	throw new Error(Strings.errors.database.userDoesNotExist);
-};
+}
 
 export async function getUserByMinecraftUuid(minecraftUuid: string): Promise<Models.UserFromDb> {
 	const tag = await this.tags.findOne({ where: { minecraft_uuid: minecraftUuid } });
@@ -80,7 +80,7 @@ export async function getUserByMinecraftUuid(minecraftUuid: string): Promise<Mod
 	}
 
 	throw new Error(Strings.errors.database.userDoesNotExist);
-};
+}
 
 export async function getUsers(status?: number): Promise<Models.UserFromDb[]> {
 	if (status == null) return await this.tags.findAll({ raw: true });

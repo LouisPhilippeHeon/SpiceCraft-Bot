@@ -5,7 +5,7 @@ import * as DatabaseService from '../services/database';
 import * as Utils from '../utils';
 import * as Constants from '../bot-constants';
 import * as Strings from '../strings';
-import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, GuildMember, Message, User } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, Message } from 'discord.js';
 
 const erreurCommandeText = 'Une erreur s\'est produite lors de l\'exécution de cette commande!';
 
@@ -124,7 +124,7 @@ async function confirmRejectUser(interaction: ButtonInteraction) {
 		}
 	}).catch(async () => {
 		await interaction.reply(Strings.errors.noDiscordUserWithThisUuid + '\n' + Strings.events.rejection.userStillInBdExplanation);
-		if (approvalRequest !== undefined) approvalRequest.delete();
+		if (approvalRequest !== undefined) await approvalRequest.delete();
 	});
 }
 
@@ -221,4 +221,4 @@ export async function inscription(interaction: ButtonInteraction) {
 		}
 		await interaction.reply(Strings.errors.generic);
 	}
-};
+}
