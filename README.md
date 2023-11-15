@@ -14,35 +14,38 @@ Permet à l'administrateur d'accepter la demande (et indiquer que le membre est 
 
 # Commandes
 
-`/afficher-bouton-inscription`<br>
+`/afficher-bouton-inscription` <sub><sup>(permission requise : administrateur)</sup></sub><br>
 Envoie dans le channel ou l'utilisateur envoie la commande un message permettant aux membres de s'inscrire.
 
-`/approuver`<br>
+`/approuver` <sub><sup>(permission requise : bannir des membres)</sup></sub><br>
 Approuver une demande sans passer par le message automatisé. La commande suggère en autocomplétion des membres.
 
-`/rejeter`<br>
+`/rejeter` <sub><sup>(permission requise : bannir des membres)</sup></sub><br>
 Rejeter une demande sans passer par le message automatisé. La commande suggère en autocomplétion des membres.
 
-`/reinitialiser-statut`<br>
+`/reinitialiser-statut` <sub><sup>(permission requise : bannir des membres)</sup></sub><br>
 Remettre le statut en attente. La commande suggère en autocomplétion des membres.
 
-`/afficher`<br>
+`/afficher` <sub><sup>(permission requise : administrateur)</sup></sub><br>
 Affiche les éléments de la base de données, soit au format d'une page web HTML téléchargable, soit au format JSON, soit sous forme de message.
 
-`/supprimer-entree`<br>
+`/supprimer-entree` <sub><sup>(permission requise : bannir des membres)</sup></sub><br>
 Supprime un membre de la base de données. Prends en paramètre le UUID Discord du membre, ainsi il est possible de supprimer des membres qui ne sont plus sur le serveur.
 
-`/edit-username`<br>
+`/edit-username` <sub><sup>(permission requise : bannir des membres)</sup></sub><br>
 L'administrateur peut manuellement modifier le username Minecraft d'un joueur. Valide avec l'API de Mojang que le nom d'utilisateur existe bel et bien.
 
-`/terminer-saison`<br>
-Efface la base de données et supprime le channel du bot
+`/terminer-saison` <sub><sup>(permission requise : administrateur)</sup></sub><br>
+Efface la base de données et supprime le channel du bot.
+
+# Pourquoi ai-je créé ce bot ?
+Pour faire les inscriptions, j'avais l'habitude de faire remplir un formulaire Google Doc aux membres du serveur. Certains mettaient des nom d'utilisateurs qui n'existaient pas ou se trompaient dans leur nom d'utilisateur, et c'étais toujours désagréable de gérer ces changements à faire. Aussi, j'aurais apprécié avoir des alertes sur Discord lorsqu'un utilisateur complète le formulaire au lieu de devoir aller consulter les résultats moi-même manuellement.
 
 # Pour démarrer
 
-`npm install`
+Installer les dépendances : `npm install`
 
-`npm start`
+Démarrer le projet : `npm start`
 
 Mettre à jour les commandes : `ts-node ./deploy-commands.ts`
 ## Informations importantes
