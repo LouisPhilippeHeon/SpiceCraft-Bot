@@ -111,11 +111,17 @@ export namespace commands {
 		userOptionDescription = 'Modifier l\'entrée pour quel UUID Discord ?',
 		newUsernameOptionDescription = 'Quel est le nouveau nom d\'utilisateur ?'
 	}
+
 	enum endSeasonCommand {
 		warning = `Attention ! Êtes vous certain de vouloir terminer la saison en cours? La base de donnée sera effacée, les rôles seront remis à zéro et tous les messages sur le channel #${Constants.whitelistChannelName} seront effacés.`,
 		description = `Efface la base de données, efface les messages de #${Constants.whitelistChannelName} et supprime le rôle ${Constants.playerRoleName}.`,
 		seasonEnded = 'La saison a pris fin !',
 		newSeasonBegins = 'Nouvelle saison !'
+	}
+
+	enum displayUsernameCommand {
+		description = 'Affiche le nom d\'utilisateur Minecraft d\'un membre.',
+		userOptionDescription = 'Membre dont il faut afficher le nom d\'utilisateur Minecraft.'
 	}
 
 	export import showInscriptionButton = showInscriptionButtonCommand;
@@ -126,6 +132,7 @@ export namespace commands {
 	export import reject = rejectCommand;
 	export import editUsername = editUsernameCommand;
 	export import endSeason = endSeasonCommand;
+	export import displayUsername = displayUsernameCommand;
 }
 
 export namespace errors {
@@ -136,7 +143,8 @@ export namespace errors {
 
 	enum apiErrors {
 		couldNotConnectToApi = 'Erreur lors de la connexion à l\'API de Mojang.',
-		noMojangAccountWithThatUsername = 'Aucun compte Mojang n\'a ce nom d\'utilisateur !'
+		noMojangAccountWithThatUsername = 'Aucun compte Mojang n\'a ce nom d\'utilisateur !',
+		noMojangAccountWithThatUuid = 'Aucun compte Mojang n\'a ce UUID !'
 	}
 
 	enum databaseErrors {
