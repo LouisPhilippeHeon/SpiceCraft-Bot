@@ -12,10 +12,16 @@ module.exports = {
 				.setDescription(Strings.commands.displayUsername.userOptionDescription)
 				.setRequired(true)),
     async execute(interaction: ChatInputCommandInteraction) {
+        const discordUuid = interaction.options.getUser('membre').id;
+        const userFromDb = await DatabaseService.getUserByDiscordUuid(discordUuid);
+
+        if (!userFromDb) {
+            await interaction.reply(Strings.errors.database.userDoesNotExist);
+            return;
+        }
+
         try {
-            const discordUuid = interaction.options.getUser('membre').id;
-            const minecraftUuid = (await DatabaseService.getUserByDiscordUuid(discordUuid)).minecraft_uuid;
-            const usernameMinecraft = await HttpService.getUsernameFromUuid(minecraftUuid);
+            const usernameMinecraft = await HttpService.getUsernameFromUuid(userFromDb.minecraft_uuid);
             await interaction.reply(usernameMinecraft);
         }
         catch (e) {
@@ -23,4 +29,3 @@ module.exports = {
         }
     }
 };
-

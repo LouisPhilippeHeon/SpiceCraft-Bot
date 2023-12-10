@@ -11,9 +11,10 @@ module.exports = {
 	async execute(member: GuildMember) {
 		try {
 			const userFromDb = await DatabaseService.getUserByDiscordUuid(member.user.id);
-			const whitelistChannel = await Utils.fetchBotChannel(member.guild);
+			if (!userFromDb) return;
 
-			if (userFromDb.inscription_status == Constants.inscriptionStatus.awaitingApproval) {
+			// If user leaves server before his request was approved
+			if (userFromDb.inscription_status === Constants.inscriptionStatus.awaitingApproval) {
 				await (await AdminApprovalService.findApprovalRequestOfMember(member.guild, member.user.id)).delete();
 				await DatabaseService.deleteEntry(member.user.id);
 				return;
@@ -38,6 +39,7 @@ module.exports = {
 
 			const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmDelete, ignore);
 
+			const whitelistChannel = await Utils.fetchBotChannel(member.guild);
 			await whitelistChannel.send({ embeds: [deleteEmbed], components: [row] });
 		}
 		catch { }

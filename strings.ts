@@ -28,7 +28,7 @@ export namespace services {
 		embedDescription = 'Compte Discord : <@$discordUuid$>.\nUsername Minecraft : $minecraftUsername$.',
 		awaitingApprovalUserChangedMinecraftUsername = '<@$discordUuid$> a changé son username Minecraft pour \`$minecraftUsername$\` dans sa demande d\'ajout à la whitelist.',
 		minecraftAccountDoesNotExist = '❌ Le compte Minecraft « $minecraftUsername$ » n\'existe pas! Tu peux cliquer à nouveau le bouton \`S\'inscrire\` pour réessayer. ❌',
-		dmsAreClosed = 'Tes paramètres de confidentialité m\'empêchent de t\'envoyer des messages. Change ces paramètres pour pouvoir compléter ton inscription.',
+		dmsAreClosed = 'Tes paramètres de confidentialité m\'empêchent de t\'envoyer des messages. Change ces paramètres pour continuer.',
 		sameMinecraftAccountAsBefore = 'Pas besoin de mettre à jour ton nom d\'utilisateur, car il est identique à celui associé au compte Minecraft dans la whitelist.'
 	}
 
@@ -41,21 +41,24 @@ export namespace events {
 	enum approbationButton {
 		messageSentToPlayerToConfirmInscription = 'Tu a été ajouté à la whitelist. Si tu n\'arrive pas à te connecter, ton username Minecraft est peut-être incorrect. Si c\'est le cas, clique à nouveau sur le bouton d\'inscription.',
 		requestGranted = '✅ La demande a été approuvée.',
-		successReply = 'Un message a été envoyé à <@$discordUuid$> pour l\'informer de son ajout à la whitelist.'
+		success = 'Un message a été envoyé à <@$discordUuid$> pour l\'informer de son ajout à la whitelist.',
+		successNoDm = '<@$discordUuid$> a été ajouté à la whitelist. Cependant, ses paramètres de confidentialité m\'empêchent de lui envoyer un message afin de lui en informer.'
 	}
 
 	enum rejectionButton {
 		messageSentToUserToInformRejection = 'Désolé, mais les administrateurs ont choisi de ne pas t\'ajouter à la whitelist. Contacte-les pour plus de détails.',
 		requestDenied = '❌ La demande a été rejetée.',
 		askConfirmation = 'Êtes vous certain de vouloir rejeter <@$discordUuid$> ?',
-		informedUserAboutRejection = 'Un message a été envoyé à <@$discordUuid$> pour l\'informer du rejet.',
+		success = 'Un message a été envoyé à <@$discordUuid$> pour l\'informer du rejet.',
+		successNoDm = '<@$discordUuid$> a été ajouté rejeté. Cependant, ses paramètres de confidentialité m\'empêchent de lui envoyer un message afin de lui en informer.',
 		userStillInBdExplanation = 'Cet utilisateur est encore dans la base de données, avec le statut "rejeté", donc s\'il rejoint à nouveau le serveur, le bot se souvient que l\'utilisateur est rejeté. Si tu souhaite le supprimer, tu peux utiliser la commande /supprimer-entree'
 	}
 
 	enum usernameChangeConfirmationButton {
 		messageUpdate = '✅ La mise à jour de username a été complétée.',
 		messageSentToConfirmUsernameChange = 'Ton username Minecraft a été mis à jour dans la whitelist.',
-		informedUserAboutUpdate = 'Un message a été envoyé à <@$discordUuid$> pour l\'informer de la mise à jour du username.'
+		success = 'Un message a été envoyé à <@$discordUuid$> pour l\'informer de la mise à jour du username.',
+		successNoDm = 'Mise a jour du compte Minecraft de <@$discordUuid$> effectuée avec succès. Cependant, ses paramètres de confidentialité m\'empêchent de lui envoyer un message afin de lui en informer.'
 	}
 
 	enum registerButton {

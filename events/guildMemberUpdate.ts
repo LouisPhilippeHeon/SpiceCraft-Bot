@@ -7,14 +7,20 @@ module.exports = {
 	name: Events.GuildMemberUpdate,
 	once: false,
 	async execute(oldMember: GuildMember, newMember: GuildMember) {
-		if (oldMember.roles.cache.some(role => role.name === Constants.playerRoleName) && !newMember.roles.cache.some(role => role.name === Constants.playerRoleName)) {
+		const oldMemberWasPlayer = oldMember.roles.cache.some(role => role.name === Constants.playerRoleName);
+		const newMemberIsPlayer = newMember.roles.cache.some(role => role.name === Constants.playerRoleName);
+
+		if (oldMemberWasPlayer && !newMemberIsPlayer) {
 			try {
 				const latestMemberRoleUpdateLog = await newMember.guild.fetchAuditLogs({ type: AuditLogEvent.MemberRoleUpdate, limit: 1 });
-				const executor = newMember.guild.members.resolve(latestMemberRoleUpdateLog.entries.first().executor);
-				if (executor.user.id !== clientId) await DatabaseService.deleteEntry(newMember.user.id);
+				const executor = latestMemberRoleUpdateLog.entries.first().executor;
+
+				if (executor.id !== clientId)
+					await DatabaseService.deleteEntry(newMember.user.id);
 			}
 			catch (e) {
-				if (e.code === 50013) console.log('Le bot n\'a pas la permission de lire les logs.');
+				if (e.code === 50013) console.error('Le bot n\'a pas la permission de lire les logs.');
+				else console.error(e);
 			}
 		}
 	}

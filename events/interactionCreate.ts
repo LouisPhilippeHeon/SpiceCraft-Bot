@@ -14,21 +14,42 @@ module.exports = {
 	once: false,
 	async execute(interaction: Models.InteractionWithCommands) {
 		if (interaction.isButton()) {
+			const command = interaction.customId.split('_')[0];
 			try {
-				// TODO Validate permissions, unauthorized user could tamper with requests
-				if (interaction.customId === 'inscription') await inscription(interaction);
-				if (interaction.customId === 'dissmiss') await interaction.message.delete();
-				if (interaction.customId === 'confirm-new-season') await confirmEndSeason(interaction);
-				if (interaction.customId === 'register-first-time' || interaction.customId === 'register-not-first-time') await register(interaction);
-				if (interaction.customId.startsWith('confirm-reject')) await confirmRejectUser(interaction);
-				if (interaction.customId.startsWith('approve')) await approveUser(interaction);
-				if (interaction.customId.startsWith('reject')) await rejectUser(interaction);
-				if (interaction.customId.startsWith('update')) await confirmUsernameChange(interaction);
-				if (interaction.customId.startsWith('delete')) await deleteUser(interaction);
+				switch (command) {
+					case 'inscription':
+						await inscription(interaction);
+						break;
+					case 'dissmiss':
+						await interaction.message.delete();
+						break;
+					case 'confirm-new-season':
+						await confirmEndSeason(interaction);
+						break;
+					case 'register-first-time':
+					case 'register-not-first-time':
+						await register(interaction);
+						break;
+					case 'confirm-reject':
+						await confirmRejectUser(interaction);
+						break;
+					case 'approve':
+						await approveUser(interaction);
+						break;
+					case 'reject':
+						await rejectUser(interaction);
+						break;
+					case 'update':
+						await confirmUsernameChange(interaction);
+						break;
+					case 'delete':
+						await deleteUser(interaction);
+						break;
+				}
 			}
 			catch (e) {
 				console.error(e);
-				if (!interaction.replied) await interaction.reply({ content: e.message, ephemeral: true });
+				if (!interaction.replied) await interaction.reply({content: Strings.errors.generic, ephemeral: true});
 			}
 		}
 
@@ -63,22 +84,28 @@ async function approveUser(interaction: ButtonInteraction) {
 	const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
 	embedToUpdate.color = Colors.Green;
 
-	interaction.guild.members.fetch(discordUuid).then(async member => {
-		let role = await Utils.fetchPlayerRole(interaction.guild);
-
-		await member.roles.add(role);
-		try {
-			await member.send(Strings.events.approbation.messageSentToPlayerToConfirmInscription);
-			await interaction.message.edit({ content: Strings.events.approbation.requestGranted, embeds: [embedToUpdate], components: [] });
-			await interaction.reply({ content: Strings.events.approbation.successReply.replace('$discordUuid$', discordUuid), ephemeral: true });
-		}
-		catch {
-			await interaction.reply(Strings.errors.cantSendMessageToUser);
-		}
-	}).catch(async () => {
+	let member;
+	try {
+		member = await interaction.guild.members.fetch(discordUuid);
+	}
+	catch {
 		await interaction.reply(Strings.errors.noDiscordUserWithThisUuid);
 		await interaction.message.delete();
-	});
+		return;
+	}
+
+	let role = await Utils.fetchPlayerRole(interaction.guild);
+
+	await member.roles.add(role);
+	await interaction.message.edit({ content: Strings.events.approbation.requestGranted, embeds: [embedToUpdate], components: [] });
+
+	try {
+		await member.send(Strings.events.approbation.messageSentToPlayerToConfirmInscription);
+		await interaction.reply({ content: Strings.events.approbation.success.replace('$discordUuid$', discordUuid), ephemeral: true });
+	}
+	catch {
+		await interaction.reply({ content: Strings.events.approbation.successNoDm.replace('$discordUuid$', discordUuid), ephemeral: true });
+	}
 }
 
 async function rejectUser(interaction: ButtonInteraction) {
@@ -112,58 +139,63 @@ async function confirmRejectUser(interaction: ButtonInteraction) {
 	await interaction.message.delete();
 	await DatabaseService.changeStatus(discordUuid, Constants.inscriptionStatus.rejected);
 
-	interaction.guild.members.fetch(discordUuid).then(async member => {
-		try {
-			await member.send(Strings.events.rejection.messageSentToUserToInformRejection);
-			await interaction.reply({ content: Strings.events.rejection.informedUserAboutRejection.replace('$discordUuid$', discordUuid), ephemeral: true });
-
-			if (approvalRequest !== undefined) {
-				const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
-				embedToUpdate.color = Colors.Red;
-				await approvalRequest.edit({ content: Strings.events.rejection.requestDenied, embeds: [embedToUpdate], components: [] });
-			}
-		}
-		catch {
-			await interaction.reply(Strings.errors.cantSendMessageToUser);
-		}
-	}).catch(async () => {
+	let member;
+	try {
+		member = await interaction.guild.members.fetch(discordUuid);
+	}
+	catch (e) {
 		await interaction.reply(Strings.errors.noDiscordUserWithThisUuid + '\n' + Strings.events.rejection.userStillInBdExplanation);
 		if (approvalRequest !== undefined) await approvalRequest.delete();
-	});
+		return;
+	}
+
+	if (approvalRequest !== undefined) {
+		const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
+		embedToUpdate.color = Colors.Red;
+		await approvalRequest.edit({ content: Strings.events.rejection.requestDenied, embeds: [embedToUpdate], components: [] });
+	}
+
+	try {
+		await member.send(Strings.events.rejection.messageSentToUserToInformRejection);
+		await interaction.reply({ content: Strings.events.rejection.success.replace('$discordUuid$', discordUuid), ephemeral: true });
+	}
+	catch {
+		await interaction.reply({ content: Strings.events.rejection.successNoDm.replace('$discordUuid$', discordUuid), ephemeral: true });
+	}
 }
 
 async function confirmUsernameChange(interaction: ButtonInteraction) {
 	const discordUuid = interaction.customId.split('_')[1];
 	const minecraftUuid = interaction.customId.split('_')[2];
+	let member;
 
-	const approvalRequest = interaction.message;
-	const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
-	embedToUpdate.color = Colors.Green;
+	try {
+		member = await interaction.guild.members.fetch(discordUuid);
+	}
+	catch (e) {
+		await interaction.reply(Strings.errors.noDiscordUserWithThisUuid);
+		await interaction.message.delete();
+		return;
+	}
 
 	try {
 		await DatabaseService.changeMinecraftUuid(discordUuid, minecraftUuid);
 	}
 	catch (e) {
-		if (e.name === 'SequelizeUniqueConstraintError') {
-			await interaction.reply(Strings.errors.usernameUsedWithAnotherAccount);
-			return;
-		}
-		await interaction.reply(Strings.errors.database.unknownError);
+		await interaction.reply(e);
 	}
 
+	const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
+	embedToUpdate.color = Colors.Green;
 	await interaction.message.edit({ content: Strings.events.usernameChangeConfirmation.messageUpdate, embeds: [embedToUpdate], components: [] });
 
-	interaction.guild.members.fetch(discordUuid).then(async member => {
-		try {
-			await member.send(Strings.events.usernameChangeConfirmation.messageSentToConfirmUsernameChange);
-			await interaction.reply({ content: Strings.events.usernameChangeConfirmation.informedUserAboutUpdate.replace('$discordUuid$', discordUuid), ephemeral: true });
-		}
-		catch {
-			await interaction.reply(Strings.errors.cantSendMessageToUser);
-		}
-	}).catch(async () => {
-		await interaction.reply(Strings.errors.noDiscordUserWithThisUuid);
-	});
+	try {
+		await member.send(Strings.events.usernameChangeConfirmation.messageSentToConfirmUsernameChange);
+		await interaction.reply({ content: Strings.events.usernameChangeConfirmation.success.replace('$discordUuid$', discordUuid), ephemeral: true });
+	}
+	catch {
+		await interaction.reply({ content: Strings.events.usernameChangeConfirmation.successNoDm.replace('$discordUuid$', discordUuid), ephemeral: true});
+	}
 }
 
 async function deleteUser(interaction: ButtonInteraction) {
@@ -204,33 +236,16 @@ async function confirmEndSeason(interaction: ButtonInteraction) {
 
 async function inscription(interaction: ButtonInteraction) {
 	let discordUuid = interaction.user.id;
+	const userFromDb = await DatabaseService.getUserByDiscordUuid(discordUuid);
 
-	try {
-		const userFromDb = await DatabaseService.getUserByDiscordUuid(discordUuid);
-
-		if (userFromDb.inscription_status === Constants.inscriptionStatus.rejected) {
+	if (userFromDb) {
+		if (userFromDb.inscription_status === Constants.inscriptionStatus.rejected)
 			await interaction.reply({ content: Strings.services.registering.adminsAlreadyDeniedRequest, ephemeral: true });
-			return;
-		}
-
-		await RegisteringService.updateExistingUser(userFromDb, interaction).catch(async () => {
-			await interaction.reply({ content: Strings.services.registering.dmsAreClosed, ephemeral: true });
-		});
+		else
+			await RegisteringService.updateExistingUser(userFromDb, interaction);
 	}
-	// User does not exist in the database and should be created
-	catch (e) {
-		if (e.message === Strings.errors.database.userDoesNotExist) {
-			try {
-				await askIfFistTimeUser(interaction);
-				ephemeralInteractions.set(interaction.user.id, interaction)
-			}
-			catch (e) {
-				console.error(e.message);
-			}
-			return;
-		}
-		await interaction.reply(Strings.errors.generic);
-	}
+	else
+		await askIfFistTimeUser(interaction);
 }
 
 async function askIfFistTimeUser(interaction: ButtonInteraction) {
@@ -253,17 +268,19 @@ async function askIfFistTimeUser(interaction: ButtonInteraction) {
 	});
 
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(firstTime, notFirstTime);
-	await interaction.reply(({ content: 'As-tu déjà joué sur SpiceCraft ?', components: [row], ephemeral: true }));
+	await interaction.reply(({ content: Strings.events.register.askIfFirstTimePlaying, components: [row], ephemeral: true }));
+
+	ephemeralInteractions.set(interaction.user.id, interaction);
 }
 
 async function register(interaction: ButtonInteraction) {
 	const interactionWithEphemeral = ephemeralInteractions.get(interaction.user.id);
 
+	// Disable buttons and style the one that was clicked
 	if (interactionWithEphemeral) {
 		let components = (await interactionWithEphemeral.fetchReply()).components[0].components;
 		const row = new ActionRowBuilder<ButtonBuilder>();
 
-		// Disable buttons and style the one that was clicked
 		components.forEach((component: ButtonComponent) => {
 			const wasClicked = component.customId === interaction.customId;
 
@@ -280,13 +297,5 @@ async function register(interaction: ButtonInteraction) {
 	}
 
 	ephemeralInteractions.delete(interaction.user.id);
-
-	if (interaction.customId === 'register-first-time') {
-		await interaction.reply({ content: Strings.services.registering.messageSentInDmsNewUser, ephemeral: true });
-		await RegisteringService.registerUser(interaction, true);
-	}
-	else {
-		await interaction.reply({ content: Strings.services.registering.messageSentInDms, ephemeral: true });
-		await RegisteringService.registerUser(interaction, false);
-	}
+	await RegisteringService.registerUser(interaction, (interaction.customId === 'register-first-time'));
 }

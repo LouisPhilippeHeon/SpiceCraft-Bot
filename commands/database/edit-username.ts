@@ -27,10 +27,6 @@ module.exports = {
             await interaction.reply(Strings.commands.editUsername.confirmationMessage);
         }
         catch (e) {
-            if (e.name == 'SequelizeUniqueConstraintError') {
-                await interaction.reply(Strings.errors.usernameUsedWithAnotherAccount);
-                return;
-            }
             await interaction.reply(e.message);
         }
     }
@@ -38,10 +34,14 @@ module.exports = {
 
 async function getMojangAccountForNewUsername(newUsername: string, discordUuid: string): Promise<Models.UserFromMojangApi> {
     let userFromDb = await DatabaseService.getUserByDiscordUuid(discordUuid);
+
+    if (!userFromDb)
+        throw new Error(Strings.errors.database.userDoesNotExist);
+
     let userFromMojangApi = await HttpService.getMojangUser(newUsername);
 
-    if (userFromDb.minecraft_uuid == userFromMojangApi.id) {
+    if (userFromDb.minecraft_uuid == userFromMojangApi.id)
         throw new Error(Strings.commands.editUsername.usernameIdenticalToPreviousOne);
-    }
+
     return userFromMojangApi;
 }

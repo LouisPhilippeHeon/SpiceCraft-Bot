@@ -24,7 +24,7 @@ module.exports = {
 				.addChoices(
 					{ name: 'HTML', value: 'html' },
 					{ name: 'JSON', value: 'json' },
-					{ name: 'Message', value: 'message' }
+					{ name: 'Messages', value: 'messages' }
 				)),
 	async execute(interaction: ChatInputCommandInteraction) {
 		const status: number = interaction.options.getString('statut') ? Number(interaction.options.getString('statut')) : null;
@@ -37,17 +37,17 @@ module.exports = {
 			return;
 		}
 
-		if (format === 'json') {
-			await sendAsJson(interaction, usersFromDb, status);
-			return;
+		switch (format) {
+			case 'json':
+				await sendAsJson(interaction, usersFromDb, status);
+				break;
+			case 'html':
+				await sendAsHtml(interaction, usersFromDb);
+				break;
+			default:
+				await sendMessages(interaction, createMessages(usersFromDb), status);
+				break;
 		}
-
-		if (format === 'html') {
-			await sendAsHtml(interaction, usersFromDb);
-			return;
-		}
-
-		await sendMessages(interaction, createMessages(usersFromDb), status);
 	}
 };
 
@@ -55,7 +55,7 @@ async function sendAsJson(interaction: ChatInputCommandInteraction, usersFromDb:
 	await interaction.reply({
 		files: [{
 			attachment: Buffer.from(JSON.stringify(usersFromDb)),
-			name: (status) ? Strings.commands.displayUsers.fileNameWithStatus.replace('$status$', Strings.getStatusName(status)) : Strings.commands.displayUsers.filename
+			name: (status) ? Strings.commands.displayUsers.filenameJsonWithStatus.replace('$status$', Strings.getStatusName(status)) : Strings.commands.displayUsers.filenameJson
 		}]
 	});
 }
@@ -64,7 +64,7 @@ async function sendAsHtml(interaction: ChatInputCommandInteraction, usersFromDb:
 	await interaction.reply({
 		files: [{
 			attachment: Buffer.from(HtmlService.buildHtml(usersFromDb)),
-			name: 'test.html'
+			name: Strings.commands.displayUsers.filenameHtml
 		}]
 	});
 }

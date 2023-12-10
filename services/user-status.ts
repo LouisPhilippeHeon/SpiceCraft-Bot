@@ -11,9 +11,13 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
 		await DatabaseService.changeStatus(idToEdit, status);
 
 		let role = await Utils.fetchPlayerRole(interaction.guild);
-		(status === Constants.inscriptionStatus.approved) ? await member.roles.add(role.id) : await member.roles.remove(role.id);
+		(status === Constants.inscriptionStatus.approved)
+			? await member.roles.add(role.id)
+			: await member.roles.remove(role.id);
 
-		const interactionReplyMessage = Strings.services.userStatus.statusChanged.replace('$discordUuid$', idToEdit).replace('$status$', Strings.getStatusName(status));
+		const interactionReplyMessage = Strings.services.userStatus.statusChanged
+			.replace('$discordUuid$', idToEdit.toString())
+			.replace('$status$', Strings.getStatusName(status));
 
 		if (status === Constants.inscriptionStatus.awaitingApproval) {
 			await interaction.reply(interactionReplyMessage);
@@ -30,7 +34,7 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
 			await interaction.reply(interactionReplyMessage + '\n' + Strings.services.userStatus.cantSendDm);
 		}
 	}).catch(async (e) => {
-		await interaction.reply(e.message);
+		await interaction.reply(Strings.errors.noDiscordUserWithThisUuid);
 	});
 }
 
