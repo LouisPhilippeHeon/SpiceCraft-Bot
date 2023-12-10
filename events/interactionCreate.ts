@@ -4,7 +4,8 @@ import * as DatabaseService from '../services/database';
 import * as Utils from '../utils';
 import * as Constants from '../bot-constants';
 import * as Strings from '../strings';
-import { ButtonComponent, Events, ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, Message } from 'discord.js';
+import { ButtonComponent, Events, ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, Message, PermissionFlagsBits } from 'discord.js';
+import * as assert from "assert";
 
 // Ephemeral messages cannot be fetched, therefore the reference must be kept
 const ephemeralInteractions = new Map<string, ButtonInteraction>();
@@ -15,15 +16,19 @@ module.exports = {
 	async execute(interaction: Models.InteractionWithCommands) {
 		if (interaction.isButton()) {
 			const command = interaction.customId.split('_')[0];
+			const member = interaction.guild.members.resolve(interaction.user);
 			try {
+				assert(member);
 				switch (command) {
 					case 'inscription':
 						await inscription(interaction);
 						break;
 					case 'dissmiss':
+						assert(member.permissions.has(PermissionFlagsBits.BanMembers));
 						await interaction.message.delete();
 						break;
 					case 'confirm-new-season':
+						assert(member.permissions.has(PermissionFlagsBits.Administrator));
 						await confirmEndSeason(interaction);
 						break;
 					case 'register-first-time':
@@ -31,25 +36,35 @@ module.exports = {
 						await register(interaction);
 						break;
 					case 'confirm-reject':
+						assert(member.permissions.has(PermissionFlagsBits.BanMembers));
 						await confirmRejectUser(interaction);
 						break;
 					case 'approve':
+						assert(member.permissions.has(PermissionFlagsBits.BanMembers));
 						await approveUser(interaction);
 						break;
 					case 'reject':
+						assert(member.permissions.has(PermissionFlagsBits.BanMembers));
 						await rejectUser(interaction);
 						break;
 					case 'update':
+						assert(member.permissions.has(PermissionFlagsBits.BanMembers));
 						await confirmUsernameChange(interaction);
 						break;
 					case 'delete':
+						assert(member.permissions.has(PermissionFlagsBits.Administrator));
 						await deleteUser(interaction);
 						break;
 				}
 			}
 			catch (e) {
+				if (e.code === 'ERR_ASSERTION') {
+					if (!interaction.replied) await interaction.reply({ content: Strings.errors.unauthorized, ephemeral: true });
+					return;
+				}
+
 				console.error(e);
-				if (!interaction.replied) await interaction.reply({content: Strings.errors.generic, ephemeral: true});
+				if (!interaction.replied) await interaction.reply({ content: Strings.errors.generic, ephemeral: true });
 			}
 		}
 
