@@ -32,7 +32,7 @@ Affiche les éléments de la base de données, soit au format d'une page web HTM
 `/supprimer-entree` <sub><sup>(permission requise : bannir des membres)</sup></sub><br>
 Supprime un membre de la base de données. Prends en paramètre le UUID Discord du membre, ainsi il est possible de supprimer des membres qui ne sont plus sur le serveur.
 
-`/edit-username` <sub><sup>(permission requise : bannir des membres)</sup></sub><br>
+`/modifier-username` <sub><sup>(permission requise : bannir des membres)</sup></sub><br>
 L'administrateur peut manuellement modifier le username Minecraft d'un joueur. Valide avec l'API de Mojang que le nom d'utilisateur existe bel et bien.
 
 `/terminer-saison` <sub><sup>(permission requise : administrateur)</sup></sub><br>
@@ -45,7 +45,7 @@ Pour faire les inscriptions, j'avais l'habitude de faire remplir un formulaire G
 
 Installer les dépendances : `npm install`
 
-Démarrer le projet : `npm start`
+Démarrer le projet : `npm debug`
 
 Mettre à jour les commandes : `ts-node ./deploy-commands.ts`
 ## Informations importantes
