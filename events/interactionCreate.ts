@@ -1,13 +1,13 @@
-import { Events } from 'discord.js';
 import * as RegisteringService from '../services/registering';
 import * as Models from '../models';
 import * as DatabaseService from '../services/database';
 import * as Utils from '../utils';
 import * as Constants from '../bot-constants';
 import * as Strings from '../strings';
-import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, Message } from 'discord.js';
+import { ButtonComponent, Events, ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, Message } from 'discord.js';
 
-const erreurCommandeText = 'Une erreur s\'est produite lors de l\'exécution de cette commande!';
+// Ephemeral messages cannot be fetched, therefore the reference must be kept
+const ephemeralInteractions = new Map<string, ButtonInteraction>();
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -15,9 +15,11 @@ module.exports = {
 	async execute(interaction: Models.InteractionWithCommands) {
 		if (interaction.isButton()) {
 			try {
+				// TODO Validate permissions, unauthorized user could tamper with requests
 				if (interaction.customId === 'inscription') await inscription(interaction);
 				if (interaction.customId === 'dissmiss') await interaction.message.delete();
 				if (interaction.customId === 'confirm-new-season') await confirmEndSeason(interaction);
+				if (interaction.customId === 'register-first-time' || interaction.customId === 'register-not-first-time') await register(interaction);
 				if (interaction.customId.startsWith('confirm-reject')) await confirmRejectUser(interaction);
 				if (interaction.customId.startsWith('approve')) await approveUser(interaction);
 				if (interaction.customId.startsWith('reject')) await rejectUser(interaction);
@@ -25,8 +27,8 @@ module.exports = {
 				if (interaction.customId.startsWith('delete')) await deleteUser(interaction);
 			}
 			catch (e) {
-				await interaction.reply({ content: e.message, ephemeral: true });
-				console.error(e.message);
+				console.error(e);
+				if (!interaction.replied) await interaction.reply({ content: e.message, ephemeral: true });
 			}
 		}
 
@@ -35,7 +37,7 @@ module.exports = {
 		const command = interaction.client.commands.get(interaction.commandName);
 
 		if (!command) {
-			console.error(`Aucune commande ne corresponsant à ${interaction.commandName} n'a été trouvée.`);
+			console.error(Strings.errors.commandNotFound.replace('$command$', interaction.commandName));
 			return;
 		}
 
@@ -44,18 +46,17 @@ module.exports = {
 		}
 		catch (error) {
 			console.error(error);
-			if (interaction.replied || interaction.deferred) {
-				await interaction.followUp({ content: erreurCommandeText, ephemeral: true });
-			}
-			else {
-				await interaction.reply({ content: erreurCommandeText, ephemeral: true });
-			}
+
+			if (interaction.replied || interaction.deferred)
+				await interaction.followUp({ content: Strings.errors.commandExecution, ephemeral: true });
+			else
+				await interaction.reply({ content: Strings.errors.commandExecution, ephemeral: true });
 		}
 	}
 }
 
-export async function approveUser(interaction: ButtonInteraction) {
-	const discordUuid = interaction.customId.split('-')[1];
+async function approveUser(interaction: ButtonInteraction) {
+	const discordUuid = interaction.customId.split('_')[1];
 	await DatabaseService.changeStatus(discordUuid, Constants.inscriptionStatus.approved);
 
 	const approvalRequest = interaction.message;
@@ -80,25 +81,28 @@ export async function approveUser(interaction: ButtonInteraction) {
 	});
 }
 
-export async function rejectUser(interaction: ButtonInteraction) {
-	const discordUuid = interaction.customId.split('-')[1];
+async function rejectUser(interaction: ButtonInteraction) {
+	const discordUuid = interaction.customId.split('_')[1];
 
-	const confirmRejection = new ButtonBuilder()
-		.setCustomId(`confirm-reject-${discordUuid}-${interaction.message.id}`)
-		.setLabel(Strings.embeds.components.reject)
-		.setStyle(ButtonStyle.Danger);
-	const cancel = new ButtonBuilder()
-		.setCustomId('dissmiss')
-		.setLabel(Strings.embeds.components.cancel)
-		.setStyle(ButtonStyle.Secondary);
+	const confirmRejection = new ButtonBuilder({
+		customId: `confirm-reject_${discordUuid}_${interaction.message.id}`,
+		label: Strings.components.buttons.reject,
+		style: ButtonStyle.Danger
+	});
+
+	const cancel = new ButtonBuilder({
+		customId: 'dissmiss',
+		label: Strings.components.buttons.cancel,
+		style: ButtonStyle.Secondary
+	});
 
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmRejection, cancel);
 	await interaction.reply({ content: Strings.events.rejection.askConfirmation.replace('$discordUuid$', discordUuid), components: [row] });
 }
 
 async function confirmRejectUser(interaction: ButtonInteraction) {
-	const discordUuid = interaction.customId.split('-')[2];
-	const messageUuid = interaction.customId.split('-')[3];
+	const discordUuid = interaction.customId.split('_')[1];
+	const messageUuid = interaction.customId.split('_')[2];
 
 	const whitelistChannel = await Utils.fetchBotChannel(interaction.guild);
 	let approvalRequest: Message;
@@ -129,8 +133,8 @@ async function confirmRejectUser(interaction: ButtonInteraction) {
 }
 
 async function confirmUsernameChange(interaction: ButtonInteraction) {
-	const discordUuid = interaction.customId.split('-')[1];
-	const minecraftUuid = interaction.customId.split('-')[2];
+	const discordUuid = interaction.customId.split('_')[1];
+	const minecraftUuid = interaction.customId.split('_')[2];
 
 	const approvalRequest = interaction.message;
 	const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
@@ -164,7 +168,7 @@ async function confirmUsernameChange(interaction: ButtonInteraction) {
 
 async function deleteUser(interaction: ButtonInteraction) {
 	await interaction.message.delete();
-	const discordUuid = interaction.customId.split('-')[1];
+	const discordUuid = interaction.customId.split('_')[1];
 	await DatabaseService.deleteEntry(discordUuid);
 	const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
 	embedToUpdate.color = Colors.Red;
@@ -198,7 +202,7 @@ async function confirmEndSeason(interaction: ButtonInteraction) {
 	if (botChannel) await botChannel.delete();
 }
 
-export async function inscription(interaction: ButtonInteraction) {
+async function inscription(interaction: ButtonInteraction) {
 	let discordUuid = interaction.user.id;
 
 	try {
@@ -216,9 +220,73 @@ export async function inscription(interaction: ButtonInteraction) {
 	// User does not exist in the database and should be created
 	catch (e) {
 		if (e.message === Strings.errors.database.userDoesNotExist) {
-			await RegisteringService.registerNewUser(interaction).catch(async () => await interaction.reply({ content: Strings.services.registering.dmsAreClosed, ephemeral: true }));
+			try {
+				await askIfFistTimeUser(interaction);
+				ephemeralInteractions.set(interaction.user.id, interaction)
+			}
+			catch (e) {
+				console.error(e.message);
+			}
 			return;
 		}
 		await interaction.reply(Strings.errors.generic);
+	}
+}
+
+async function askIfFistTimeUser(interaction: ButtonInteraction) {
+	// Avoid having mutiple of these messages, because it means user could go to register process multiple times
+	if (ephemeralInteractions.get(interaction.user.id)) {
+		await (ephemeralInteractions.get(interaction.user.id).deleteReply());
+		ephemeralInteractions.delete(interaction.user.id);
+	}
+
+	const firstTime = new ButtonBuilder({
+		customId: 'register-not-first-time',
+		label: Strings.components.buttons.yes,
+		style: ButtonStyle.Secondary
+	});
+
+	const notFirstTime = new ButtonBuilder({
+		customId: 'register-first-time',
+		label: Strings.components.buttons.no,
+		style: ButtonStyle.Secondary
+	});
+
+	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(firstTime, notFirstTime);
+	await interaction.reply(({ content: 'As-tu déjà joué sur SpiceCraft ?', components: [row], ephemeral: true }));
+}
+
+async function register(interaction: ButtonInteraction) {
+	const interactionWithEphemeral = ephemeralInteractions.get(interaction.user.id);
+
+	if (interactionWithEphemeral) {
+		let components = (await interactionWithEphemeral.fetchReply()).components[0].components;
+		const row = new ActionRowBuilder<ButtonBuilder>();
+
+		// Disable buttons and style the one that was clicked
+		components.forEach((component: ButtonComponent) => {
+			const wasClicked = component.customId === interaction.customId;
+
+			const newComponent = new ButtonBuilder({
+				customId: component.customId,
+				label: component.label,
+				style: (wasClicked) ? ButtonStyle.Primary : component.style,
+				disabled: true
+			});
+
+			row.addComponents(newComponent);
+		});
+		await interactionWithEphemeral.editReply({components: [row]})
+	}
+
+	ephemeralInteractions.delete(interaction.user.id);
+
+	if (interaction.customId === 'register-first-time') {
+		await interaction.reply({ content: Strings.services.registering.messageSentInDmsNewUser, ephemeral: true });
+		await RegisteringService.registerUser(interaction, true);
+	}
+	else {
+		await interaction.reply({ content: Strings.services.registering.messageSentInDms, ephemeral: true });
+		await RegisteringService.registerUser(interaction, false);
 	}
 }

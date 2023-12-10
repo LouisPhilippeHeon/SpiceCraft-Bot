@@ -20,9 +20,7 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
 			return;
 		}
 
-		if (interaction.options.getBoolean('silencieux')) {
-			return;
-		}
+		if (interaction.options.getBoolean('silencieux')) return;
 
 		try {
 			await member.send(getMessageToSendToUser(status));

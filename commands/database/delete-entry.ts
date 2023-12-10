@@ -23,6 +23,7 @@ module.exports = {
 			await member.roles.remove(role.id);
 		}
 		catch (e) {
+			// If user is no longer a member, ignore error thrown while trying to remove role
 			if (e.message !== 'Unknown Member')
 				await interaction.reply(e.message);
 		}

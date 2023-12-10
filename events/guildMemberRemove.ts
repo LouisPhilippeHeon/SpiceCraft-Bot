@@ -19,19 +19,22 @@ module.exports = {
 				return;
 			}
 
-			const confirmDelete = new ButtonBuilder()
-				.setCustomId(`delete-${member.user.id}`)
-				.setLabel(Strings.embeds.components.yes)
-				.setStyle(ButtonStyle.Danger);
+			const confirmDelete = new ButtonBuilder({
+				customId: `delete_${member.user.id}`,
+				label: Strings.components.buttons.yes,
+				style: ButtonStyle.Danger
+			});
 
-			const ignore = new ButtonBuilder()
-				.setCustomId('dissmiss')
-				.setLabel(Strings.embeds.components.ignore)
-				.setStyle(ButtonStyle.Secondary);
+			const ignore = new ButtonBuilder({
+				customId: 'dissmiss',
+				label: Strings.components.buttons.ignore,
+				style: ButtonStyle.Secondary
+			});
 
-			const deleteEmbed = new EmbedBuilder()
-				.setTitle(Strings.embeds.titles.userLeft)
-				.setDescription(Strings.embeds.descriptions.userLeft.replace('$discordUuid$', member.user.id));
+			const deleteEmbed = new EmbedBuilder({
+				title: Strings.components.titles.userLeft,
+				description: Strings.components.descriptions.userLeft.replace('$discordUuid$', member.user.id)
+			});
 
 			const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmDelete, ignore);
 

@@ -8,16 +8,15 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction: ChatInputCommandInteraction) {
 	const confirm = new ButtonBuilder()
 		.setCustomId('confirm-new-season')
-		.setLabel(Strings.embeds.components.endSeason)
+		.setLabel(Strings.components.buttons.endSeason)
 		.setStyle(ButtonStyle.Danger);
 
 	const cancel = new ButtonBuilder()
 		.setCustomId('dissmiss')
-		.setLabel(Strings.embeds.components.cancel)
+		.setLabel(Strings.components.buttons.cancel)
 		.setStyle(ButtonStyle.Secondary);
 
-	const row = new ActionRowBuilder<ButtonBuilder>()
-		.addComponents(confirm, cancel);
+	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirm, cancel);
 
 	await interaction.reply({
 		content: Strings.commands.endSeason.warning,

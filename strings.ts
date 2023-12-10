@@ -14,10 +14,12 @@ export namespace services {
 	}
 
 	export enum registeringService {
-		timeoutAnswer = 'Temps de réponse maximum dépassé, veuillez réessayer en cliqant le bouton `S\'inscrire` à nouveau.',
-		messageSentInDms = 'Merci de répondre au bot qui vous a envoyé un message en privé !',
+		timeoutAnswer = 'Temps de réponse maximum dépassé, réessaye en cliqant le bouton `S\'inscrire` à nouveau.',
+		messageSentInDms = 'Merci de répondre au bot qui t\'a a envoyé un message en privé !',
+		messageSentInDmsNewUser = 'Bienvenue, nous sommes heureux de t\'accueillir ! Merci de répondre au bot qui t\'a envoyé un message en privé !',
 		adminsAlreadyDeniedRequest = '🚫 Les administrateurs ont déjà refusé ta demande ! 🚫',
 		askWhatIsMinecraftUsername = 'Quel est ton nom d\'utilisateur sur Minecraft ?',
+		askWhoInvitedNewPlayer = 'Qui t\'a invité sur SpiceCraft ? Inscrit son nom d\'utilisateur Discord.',
 		askWhatIsNewMinecraftUsername = 'Quel est le bon nom d\'utilisateur ?',
 		reactToAcceptRules = 'Réagit avec ✅ pour indiquer que tu a lu et accepté les règles.',
 		requestSucessfullyUpdated = 'Ta demande à été mise à jour avec succès !',
@@ -56,9 +58,14 @@ export namespace events {
 		informedUserAboutUpdate = 'Un message a été envoyé à <@$discordUuid$> pour l\'informer de la mise à jour du username.'
 	}
 
+	enum registerButton {
+		askIfFirstTimePlaying = 'As-tu déjà joué sur SpiceCraft ?'
+	}
+
 	export import approbation = approbationButton;
 	export import rejection = rejectionButton;
 	export import usernameChangeConfirmation = usernameChangeConfirmationButton;
+	export import register = registerButton;
 }
 
 export namespace commands {
@@ -85,8 +92,9 @@ export namespace commands {
 		displayingUsersWithStatus = 'Affichage des utilisateurs avec le statut "$status$"',
 		displayingAllUsers = 'Affichage de tous les utilisateurs',
 		databaseEntryLine = '<@$discordUuid$> | [Afficher](<https://api.mojang.com/user/profile/$minecraftUuid$>) | $statusEmoji$\n',
-		filename = 'utilisateurs.json',
-		fileNameWithStatus = 'utilisateurs_$status$.json',
+		filenameJson = 'utilisateurs.json',
+		filenameJsonWithStatus = 'utilisateurs_$status$.json',
+		filenameHtml = 'utilisateurs.html',
 		description = 'Affiche les utilisateurs inscrit selon leur statut (optionnel).',
 		statusOptionDescription = 'Rechercher les utilisateur avec un statut particulier.',
 		formatOptionDescription = 'Afficher les données avec quel format?'
@@ -139,7 +147,9 @@ export namespace errors {
 	export const cantSendMessageToUser = 'Impossible d\'envoyer un message à cet utilisateur en raison de ses paramètres de confidentialité.';
 	export const usernameUsedWithAnotherAccount = '⚠️ Un autre joueur est déjà inscrit avec ce nom d\'utilisateur Minecraft. S\'il s\'agit bien de ton nom d\'utilisateur, contacte un administrateur. ⚠️';
 	export const noDiscordUserWithThisUuid = 'Cet utilisateur Discord n\'est pas membre du serveur.';
-	export const generic = 'Une erreur est inconnue survenue !';
+	export const generic = 'Une erreur inconnue est survenue !';
+	export const commandExecution = 'Une erreur s\'est produite lors de l\'exécution de cette commande!';
+	export const commandNotFound = `Aucune commande ne corresponsant à $command$ n'a été trouvée.`
 
 	enum apiErrors {
 		couldNotConnectToApi = 'Erreur lors de la connexion à l\'API de Mojang.',
@@ -150,6 +160,7 @@ export namespace errors {
 	enum databaseErrors {
 		userDoesNotExist = 'Cet utilisateur n\'est pas inscrit.',
 		notUnique = 'Ce UUID Minecraft ou Discord existe déjà dans la base de données.',
+		notUniqueMinecraft = 'Un autre joueur s\'est inscrit avec ce compte Minecraft.',
 		unknownError = 'Une erreur inconnue est survenue lors de l\'écriture dans la base de données.',
 		invalidStatus = 'Statut invalide'
 	}
@@ -158,12 +169,13 @@ export namespace errors {
 	export import api = apiErrors;
 }
 
-export namespace embeds {
-	enum embedComponents {
+export namespace components {
+	enum buttonComponents {
 		cancel = 'Annuler',
 		approve = 'Approuver',
 		reject = 'Rejeter',
 		yes = 'Oui',
+		no = 'Non',
 		ignore = 'Ignorer',
 		endSeason = 'Oui, terminer la saison',
 		register = 'S\'inscrire',
@@ -179,12 +191,13 @@ export namespace embeds {
 
 	enum embedDescription {
 		approvalRequest = 'Compte Discord : <@$discordUuid$>.\nUsername Minecraft : $username$.',
+		approvalRequestNewUser = 'Compte Discord : <@$discordUuid$>.\nUsername Minecraft : $username$.\nPersonne qui a invité : $inviter$.',
 		usernameChangeRequest = 'Compte Discord : <@$discordUuid$>.\nNouveau username Minecraft : $username$.',
 		userLeft = 'Compte Discord : <@$discordUuid$>.',
 		rules = '1. Jouer sur le serveur signifie que vous avez pris connaissance des règles.\n2. Il est possible de construire une base dans l\'overworld à l\'extérieur d\'un carré de 600 blocs de largeur autour de 0,0 (donc, si une des coordonnées excède +300 ou -300, vous pouvez construire votre base). Ce carré est donc réservé pour les boutiques!\n3. Assurez vous que vos constructions sur le toit du nether soient spawn-proof.\n4. Aucun grief ou vol n\'est toléré. Cela inclut boutiques, maisons et farms.\n5. Aucun hack, cheat, xray, minimap ou tout autre avantage injuste n\'est toléré, ceci inclut les ressource packs, clients, mods et autres. Les seules modifications du client autorisées sont Optifine, Iris, Sodium, Phosphore et Litematica.\n6. Le PVP est toléré uniquement si tous les participants y consentent.\n7. Les pranks sont acceptés, à condition d\'être inoffensifs et de bon goût.\n8. Respectez le territoire des autres joueurs. Ne construisez pas proche du territoire d\'un autre sans son accord.\n9. Il est interdit d\'être toxique, méchant ou rude avec un autre joueur, sur Discord ou dans le serveur Minecraft directement.\n10. La seed est privée, par conséquent il est interdit d\'essayer de la découvrir. Si un joueur est en possession de la seed du serveur, il lui est interdit de l\'utiliser pour obtenir un avantage, cela inclut trouver les slime chunks, certains biomes, des portails de l\'end, etc...\n11. Si vous voyez un ou des joueurs enfreindre ces règlements, veuillez aviser un admin le plus rapiement possible sur Discord.\n12. Si un joueur enfreint un de ces règlements, les conséquences sont à la discrétion des administrateurs.\n13. Les conséquences peuvent aller jusqu\'à un bannissement permanent, tout comme elles peuvent être plus légères.'
 	}
 
-	export import components = embedComponents;
+	export import buttons = buttonComponents;
 	export import titles = embedTitles;
 	export import descriptions = embedDescription;
 }

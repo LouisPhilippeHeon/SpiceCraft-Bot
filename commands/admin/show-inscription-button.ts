@@ -8,13 +8,11 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction: ChatInputCommandInteraction) {
 	const register = new ButtonBuilder()
 		.setCustomId('inscription')
-		.setLabel(Strings.embeds.components.register)
+		.setLabel(Strings.components.buttons.register)
 		.setStyle(ButtonStyle.Primary);
 
 	const row = new ActionRowBuilder<ButtonBuilder>()
 		.addComponents(register);
-
-	await interaction.deleteReply(Strings.commands.showInscriptionButton.done);
 
 	await interaction.channel.send({
 		content: Strings.commands.showInscriptionButton.instructions,
