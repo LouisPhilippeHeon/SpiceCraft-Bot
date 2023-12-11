@@ -3,7 +3,7 @@ import * as Constants from './bot-constants';
 export namespace services {
 	enum htmlService {
 		template = '<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Utilisateurs</title><style>h1, h2, h3, h4, h5, h6, p, table { font-family: arial, sans-serif;color: #d4dfe4;} html {background-color: #141414;padding: 0 40px;}table { border-collapse: collapse; width: 100%;border-spacing:0;}td,th{border:1px solid #4d4d4d;padding:8px;}tr:nth-child(even){background-color: #303030;}.user{display: flex; align-items: center; height:auto;}td:nth-child(3){text-align:center;}img{height: 50px;border-radius: 5px;margin-right: 10px;}.date:first-letter {text-transform: capitalize;}</style></head><body><h1>Utilisateurs de SpiceCraft</h1><table><tr><th>Utilisateur</th><th>Nom d\'utilisateur Minecraft</th><th>Statut</th><th>Date d\'inscription</th><th>Dernière modification</th></tr>$tableRows$</table></body><script>async function fetchUsername (minecraftUuid) { const apiUrl = `https://sessionserver.mojang.com/session/minecraft/profile/${minecraftUuid}`; const response = await fetch("https://corsproxy.io/?" + apiUrl, {}); const user = await response.json(); document.getElementById(minecraftUuid).innerHTML = user.name;}</script></html>',
-		rowTemplate = '<tr><td><div class="user"><img src="$imgUrl$" alt="Photo de profil de $username$">$username$</div></td><td id="$minecraftUuid$"><button onclick="fetchUsername(\'$minecraftUuid$\')">Afficher</button></td><td>$status$</td><td class="date">$createdAt$</td><td class="date">$updatedAt$</td></tr>'	
+		rowTemplate = '<tr><td><div class="user"><img src="$imgUrl$" alt="Photo de profil de $username$">$username$</div></td><td id="$minecraftUuid$"><button onclick="fetchUsername(\'$minecraftUuid$\')">Afficher</button></td><td>$status$</td><td class="date">$createdAt$</td><td class="date">$updatedAt$</td></tr>'
 	}
 
 	export enum userStatusService {
@@ -48,7 +48,7 @@ export namespace events {
 	enum rejectionButton {
 		messageSentToUserToInformRejection = 'Désolé, mais les administrateurs ont choisi de ne pas t\'ajouter à la whitelist. Contacte-les pour plus de détails.',
 		requestDenied = '❌ La demande a été rejetée.',
-		askConfirmation = 'Êtes vous certain de vouloir rejeter <@$discordUuid$> ?',
+		askConfirmation = 'Es-tu certain de vouloir rejeter <@$discordUuid$> ?',
 		success = 'Un message a été envoyé à <@$discordUuid$> pour l\'informer du rejet.',
 		successNoDm = '<@$discordUuid$> a été ajouté rejeté. Cependant, ses paramètres de confidentialité m\'empêchent de lui envoyer un message afin de lui en informer.',
 		userStillInBdExplanation = 'Cet utilisateur est encore dans la base de données, avec le statut "rejeté", donc s\'il rejoint à nouveau le serveur, le bot se souvient que l\'utilisateur est rejeté. Si tu souhaite le supprimer, tu peux utiliser la commande /supprimer-entree'
@@ -74,7 +74,7 @@ export namespace events {
 export namespace commands {
 	enum showInscriptionButtonCommand {
 		description = 'Envoie un message avec un bouton permettant de s\'inscrire.',
-		instructions = 'Pour vous inscrire veuillez cliquer sur le bouton. Le bot va vous envoyer un message privé pour compléter votre inscription.\n**Si vous avez entré un nom d\'utilisateur erroné lors de la configuration initiale, cliquez sur le bouton à nouveau.**',
+		instructions = 'Pour t\'inscrire, clique sur le bouton. Le bot va t\'envoyer un message privé pour compléter l\'inscription.\n**Si tu as entré un nom d\'utilisateur erroné lors de la configuration initiale, clique sur le bouton à nouveau.**',
 		done = 'Fait !'
 	}
 
@@ -124,7 +124,7 @@ export namespace commands {
 	}
 
 	enum endSeasonCommand {
-		warning = `Attention ! Êtes vous certain de vouloir terminer la saison en cours? La base de donnée sera effacée, les rôles seront remis à zéro et tous les messages sur le channel #${Constants.whitelistChannelName} seront effacés.`,
+		warning = `Attention ! Es-tu certain de vouloir terminer la saison en cours? La base de donnée sera effacée, les rôles seront remis à zéro et tous les messages sur le channel #${Constants.whitelistChannelName} seront effacés.`,
 		description = `Efface la base de données, efface les messages de #${Constants.whitelistChannelName} et supprime le rôle ${Constants.playerRoleName}.`,
 		seasonEnded = 'La saison a pris fin !',
 		newSeasonBegins = 'Nouvelle saison !'
