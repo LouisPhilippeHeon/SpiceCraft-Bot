@@ -21,6 +21,8 @@ module.exports = {
         const discordUuid = interaction.options.getString('discord-uuid');
         const newUsername = interaction.options.getString('username');
 
+        // TODO Change in whitelist
+
         try {
             let mojangUser = await getMojangAccountForNewUsername(newUsername, discordUuid);
             await DatabaseService.changeMinecraftUuid(discordUuid, mojangUser.id);

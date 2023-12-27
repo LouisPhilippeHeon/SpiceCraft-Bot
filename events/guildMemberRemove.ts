@@ -42,6 +42,8 @@ module.exports = {
 			const whitelistChannel = await Utils.fetchBotChannel(member.guild);
 			await whitelistChannel.send({ embeds: [deleteEmbed], components: [row] });
 		}
-		catch { }
+		catch (e) {
+			console.error(e);
+		}
 	}
 }

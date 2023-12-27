@@ -21,6 +21,7 @@ module.exports = {
 			let member = await interaction.guild.members.fetch(discordUuid);
 			let role = await Utils.fetchPlayerRole(interaction.guild);
 			await member.roles.remove(role.id);
+			// TODO Remove from whitelist
 		}
 		catch (e) {
 			// If user is no longer a member, ignore error thrown while trying to remove role

@@ -17,7 +17,7 @@ export async function createApprovalRequest(user: User, guild: Guild, username: 
 	let description: string;
 
 	if (inviter)
-		description = Strings.components.descriptions.approvalRequestNewUser.replace('$discordUuid$', user.id).replace('$username$', username).replace('$inviter$', inviter);
+		description = Strings.components.descriptions.approvalRequestNewUser.replace('$discordUuid$', user.id).replace('$username$', username).replace('$inviter$', inviter.substring(0, 32));
 	else
 		description = Strings.components.descriptions.approvalRequest.replace('$discordUuid$', user.id).replace('$username$', username);
 

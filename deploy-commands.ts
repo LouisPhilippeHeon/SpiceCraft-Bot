@@ -41,7 +41,7 @@ const rest = new REST().setToken(token);
 
 		console.log(`Rafraichissement réussi de ${data.length} commandes slash.`);
 	}
-	catch (error) {
-		console.error(error);
+	catch (e) {
+		console.error(e);
 	}
 })();

@@ -6,6 +6,8 @@ import * as Constants from '../bot-constants';
 import * as Strings from '../strings';
 import { ButtonComponent, Events, ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, Message, PermissionFlagsBits } from 'discord.js';
 import * as assert from "assert";
+import * as RconService from '../services/rcon';
+import * as HttpService from '../services/http';
 
 // Ephemeral messages cannot be fetched, therefore the reference must be kept
 const ephemeralInteractions = new Map<string, ButtonInteraction>();
@@ -14,80 +16,88 @@ module.exports = {
 	name: Events.InteractionCreate,
 	once: false,
 	async execute(interaction: Models.InteractionWithCommands) {
-		if (interaction.isButton()) {
-			const command = interaction.customId.split('_')[0];
-			const member = interaction.guild.members.resolve(interaction.user);
-			try {
-				assert(member);
-				switch (command) {
-					case 'inscription':
-						await inscription(interaction);
-						break;
-					case 'dissmiss':
-						assert(member.permissions.has(PermissionFlagsBits.BanMembers));
-						await interaction.message.delete();
-						break;
-					case 'confirm-new-season':
-						assert(member.permissions.has(PermissionFlagsBits.Administrator));
-						await confirmEndSeason(interaction);
-						break;
-					case 'register-first-time':
-					case 'register-not-first-time':
-						await register(interaction);
-						break;
-					case 'confirm-reject':
-						assert(member.permissions.has(PermissionFlagsBits.BanMembers));
-						await confirmRejectUser(interaction);
-						break;
-					case 'approve':
-						assert(member.permissions.has(PermissionFlagsBits.BanMembers));
-						await approveUser(interaction);
-						break;
-					case 'reject':
-						assert(member.permissions.has(PermissionFlagsBits.BanMembers));
-						await rejectUser(interaction);
-						break;
-					case 'update':
-						assert(member.permissions.has(PermissionFlagsBits.BanMembers));
-						await confirmUsernameChange(interaction);
-						break;
-					case 'delete':
-						assert(member.permissions.has(PermissionFlagsBits.Administrator));
-						await deleteUser(interaction);
-						break;
-				}
-			}
-			catch (e) {
-				if (e.code === 'ERR_ASSERTION') {
-					if (!interaction.replied) await interaction.reply({ content: Strings.errors.unauthorized, ephemeral: true });
-					return;
-				}
+		if (interaction.isButton())
+			handleButtonInteraction(interaction);
 
-				console.error(e);
-				if (!interaction.replied) await interaction.reply({ content: Strings.errors.generic, ephemeral: true });
-			}
+		else if (interaction.isChatInputCommand())
+			handleChatInputCommand(interaction);
+	}
+}
+
+async function handleButtonInteraction(interaction: ButtonInteraction) {
+	const command = interaction.customId.split('_')[0];
+	const member = interaction.guild.members.resolve(interaction.user);
+	try {
+		assert(member);
+		switch (command) {
+			case 'inscription':
+				await inscription(interaction);
+				break;
+			case 'dissmiss':
+				assert(member.permissions.has(PermissionFlagsBits.BanMembers));
+				await interaction.message.delete();
+				break;
+			case 'confirm-new-season':
+				assert(member.permissions.has(PermissionFlagsBits.Administrator));
+				await confirmEndSeason(interaction);
+				break;
+			case 'register-first-time':
+			case 'register-not-first-time':
+				await register(interaction);
+				break;
+			case 'confirm-reject':
+				assert(member.permissions.has(PermissionFlagsBits.BanMembers));
+				await confirmRejectUser(interaction);
+				break;
+			case 'approve':
+				assert(member.permissions.has(PermissionFlagsBits.BanMembers));
+				await approveUser(interaction);
+				break;
+			case 'reject':
+				assert(member.permissions.has(PermissionFlagsBits.BanMembers));
+				await rejectUser(interaction);
+				break;
+			case 'update':
+				assert(member.permissions.has(PermissionFlagsBits.BanMembers));
+				await confirmUsernameChange(interaction);
+				break;
+			case 'delete':
+				assert(member.permissions.has(PermissionFlagsBits.Administrator));
+				await deleteUser(interaction);
+				break;
 		}
-
-		if (!interaction.isChatInputCommand()) return;
-
-		const command = interaction.client.commands.get(interaction.commandName);
-
-		if (!command) {
-			console.error(Strings.errors.commandNotFound.replace('$command$', interaction.commandName));
+	}
+	catch (e) {
+		if (e.code === 'ERR_ASSERTION') {
+			if (!interaction.replied) await interaction.reply({ content: Strings.errors.unauthorized, ephemeral: true });
 			return;
 		}
 
-		try {
-			await command.execute(interaction);
-		}
-		catch (error) {
-			console.error(error);
+		console.error(e);
+		if (!interaction.replied) await interaction.reply({ content: Strings.errors.generic, ephemeral: true });
+	}
+}
 
-			if (interaction.replied || interaction.deferred)
-				await interaction.followUp({ content: Strings.errors.commandExecution, ephemeral: true });
-			else
-				await interaction.reply({ content: Strings.errors.commandExecution, ephemeral: true });
-		}
+async function handleChatInputCommand(interaction: Models.InteractionWithCommands) {
+	if (!interaction.isChatInputCommand()) return;
+
+	const command = interaction.client.commands.get(interaction.commandName);
+
+	if (!command) {
+		console.error(Strings.errors.commandNotFound.replace('$command$', interaction.commandName));
+		return;
+	}
+
+	try {
+		await command.execute(interaction);
+	}
+	catch (error) {
+		console.error(error);
+
+		if (interaction.replied || interaction.deferred)
+			await interaction.followUp({ content: Strings.errors.commandExecution, ephemeral: true });
+		else
+			await interaction.reply({ content: Strings.errors.commandExecution, ephemeral: true });
 	}
 }
 
@@ -113,6 +123,16 @@ async function approveUser(interaction: ButtonInteraction) {
 
 	await member.roles.add(role);
 	await interaction.message.edit({ content: Strings.events.approbation.requestGranted, embeds: [embedToUpdate], components: [] });
+
+	try {
+		const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
+		const username = await HttpService.getUsernameFromUuid(user.minecraft_uuid);
+		RconService.whitelistAdd(username);
+	}
+	catch {
+		// TODO Could not automatically add player to whitelist. click here once added manually
+		// TODO Create embed
+	}
 
 	try {
 		await member.send(Strings.events.approbation.messageSentToPlayerToConfirmInscription);
@@ -143,6 +163,7 @@ async function rejectUser(interaction: ButtonInteraction) {
 }
 
 async function confirmRejectUser(interaction: ButtonInteraction) {
+	// TODO Remove from whitelist
 	const discordUuid = interaction.customId.split('_')[1];
 	const messageUuid = interaction.customId.split('_')[2];
 
@@ -184,6 +205,8 @@ async function confirmUsernameChange(interaction: ButtonInteraction) {
 	const minecraftUuid = interaction.customId.split('_')[2];
 	let member;
 
+	// TODO Remove old username and add new one in whitelist using RCON
+
 	try {
 		member = await interaction.guild.members.fetch(discordUuid);
 	}
@@ -209,11 +232,12 @@ async function confirmUsernameChange(interaction: ButtonInteraction) {
 		await interaction.reply({ content: Strings.events.usernameChangeConfirmation.success.replace('$discordUuid$', discordUuid), ephemeral: true });
 	}
 	catch {
-		await interaction.reply({ content: Strings.events.usernameChangeConfirmation.successNoDm.replace('$discordUuid$', discordUuid), ephemeral: true});
+		await interaction.reply({ content: Strings.events.usernameChangeConfirmation.successNoDm.replace('$discordUuid$', discordUuid), ephemeral: true });
 	}
 }
 
 async function deleteUser(interaction: ButtonInteraction) {
+	// TODO Remove from whitelist
 	await interaction.message.delete();
 	const discordUuid = interaction.customId.split('_')[1];
 	await DatabaseService.deleteEntry(discordUuid);
@@ -308,7 +332,7 @@ async function register(interaction: ButtonInteraction) {
 
 			row.addComponents(newComponent);
 		});
-		await interactionWithEphemeral.editReply({components: [row]})
+		await interactionWithEphemeral.editReply({ components: [row] })
 	}
 
 	ephemeralInteractions.delete(interaction.user.id);
