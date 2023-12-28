@@ -341,6 +341,15 @@ async function deleteUser(interaction: ButtonInteraction) {
 	const discordUuid = interaction.customId.split('_')[1];
 
 	try {
+		const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
+		await RconService.whitelistRemove(user.minecraft_uuid);
+	}
+	catch {
+		await interaction.reply(Strings.errors.rcon.remove);
+		return;
+	}
+
+	try {
 		// Member might have already been deleted, in this case, it will throw an error
 		await DatabaseService.deleteEntry(discordUuid);
 	}
@@ -349,15 +358,6 @@ async function deleteUser(interaction: ButtonInteraction) {
 	const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
 	embedToUpdate.color = Colors.Red;
 	await interaction.message.edit({ content: Strings.commands.deleteEntry.messageUpdate, embeds: [embedToUpdate], components: [] });
-
-	try {
-		const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
-		await RconService.whitelistRemove(user.minecraft_uuid);
-	}
-	catch {
-		await interaction.reply(Strings.errors.rcon.remove);
-		return;
-	}
 
 	await interaction.reply({ content: Strings.commands.deleteEntry.reply, ephemeral: true });
 }
