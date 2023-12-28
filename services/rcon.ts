@@ -1,7 +1,10 @@
 import { rconConnexions } from '../config';
 import * as Strings from '../strings';
+import * as HttpService from './http';
 
-export async function whitelistAdd(username: string) {
+export async function whitelistAdd(uuid: string) {
+	const username = await HttpService.getUsernameFromUuid(uuid);
+
 	try {
 		for (const rcon of rconConnexions) {
 			await rcon.connect();
@@ -14,7 +17,9 @@ export async function whitelistAdd(username: string) {
 	}
 }
 
-export async function whitelistRemove(username: string) {
+export async function whitelistRemove(uuid: string) {
+	const username = await HttpService.getUsernameFromUuid(uuid);
+
 	try {
 		for (const rcon of rconConnexions) {
 			await rcon.connect();
@@ -27,7 +32,10 @@ export async function whitelistRemove(username: string) {
 	}
 }
 
-export async function whitelistReplaceUsername(newUsername: string, oldUsername: string) {
+export async function whitelistReplaceUsername(newUuid: string, oldUuid: string) {
+	const newUsername = await HttpService.getUsernameFromUuid(newUuid);
+	const oldUsername = await HttpService.getUsernameFromUuid(oldUuid);
+
 	try {
 		for (const rcon of rconConnexions) {
 			await rcon.connect();

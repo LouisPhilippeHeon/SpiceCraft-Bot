@@ -7,7 +7,6 @@ import * as Strings from '../strings';
 import { ButtonComponent, Events, ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, Message, PermissionFlagsBits } from 'discord.js';
 import * as assert from "assert";
 import * as RconService from '../services/rcon';
-import * as HttpService from '../services/http';
 
 // Ephemeral messages cannot be fetched, therefore the reference must be kept
 const ephemeralInteractions = new Map<string, ButtonInteraction>();
@@ -130,8 +129,7 @@ async function approveUser(interaction: ButtonInteraction) {
 
 	try {
 		const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
-		const username = await HttpService.getUsernameFromUuid(user.minecraft_uuid);
-		await RconService.whitelistAdd(username);
+		await RconService.whitelistAdd(user.minecraft_uuid);
 	}
 	catch {
 		const confirmManualAdditionToWhitelist = new ButtonBuilder({
@@ -265,7 +263,6 @@ async function confirmRejectUser(interaction: ButtonInteraction) {
 async function confirmUsernameChange(interaction: ButtonInteraction) {
 	const discordUuid = interaction.customId.split('_')[1];
 	const minecraftUuid = interaction.customId.split('_')[2];
-	const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
 
 	let member;
 	try {
@@ -282,9 +279,8 @@ async function confirmUsernameChange(interaction: ButtonInteraction) {
 	}
 
 	try {
-		const oldUsername = await HttpService.getUsernameFromUuid(user.minecraft_uuid);
-		const newUsername = await HttpService.getUsernameFromUuid(minecraftUuid);
-		await RconService.whitelistReplaceUsername(newUsername, oldUsername);
+		const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
+		await RconService.whitelistReplaceUsername(minecraftUuid, user.minecraft_uuid);
 	}
 	catch {
 		const confirmManualModificationOfWhitelist = new ButtonBuilder({
@@ -356,8 +352,7 @@ async function deleteUser(interaction: ButtonInteraction) {
 
 	try {
 		const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
-		const username = await HttpService.getUsernameFromUuid(user.minecraft_uuid);
-		await RconService.whitelistRemove(username);
+		await RconService.whitelistRemove(user.minecraft_uuid);
 	}
 	catch {
 		await interaction.reply(Strings.errors.rcon.remove);
