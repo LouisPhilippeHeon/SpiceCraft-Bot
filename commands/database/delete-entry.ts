@@ -1,5 +1,7 @@
 import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import * as DatabaseService from '../../services/database';
+import * as RconService from '../../services/rcon';
+import * as HttpService from '../../services/http';
 import * as Strings from '../../strings';
 import * as Utils from '../../utils';
 
@@ -18,10 +20,13 @@ module.exports = {
 			await DatabaseService.deleteEntry(discordUuid);
 			await interaction.reply(Strings.commands.deleteEntry.reply);
 
-			let member = await interaction.guild.members.fetch(discordUuid);
-			let role = await Utils.fetchPlayerRole(interaction.guild);
+			const member = await interaction.guild.members.fetch(discordUuid);
+			const role = await Utils.fetchPlayerRole(interaction.guild);
 			await member.roles.remove(role.id);
-			// TODO Remove from whitelist
+
+			const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
+			const username = await HttpService.getUsernameFromUuid(user.minecraft_uuid);
+			await RconService.whitelistRemove(username);
 		}
 		catch (e) {
 			// If user is no longer a member, ignore error thrown while trying to remove role

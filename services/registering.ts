@@ -128,7 +128,7 @@ async function registerFirstTimeUser() {
 
 async function getRulesAcknowledgment() {
 	const rulesMessage = await dmChannel.send({ content: Strings.services.registering.reactToAcceptRules, embeds: [rulesEmbed] });
-	rulesMessage.react('✅');
+	await rulesMessage.react('✅');
 
 	// Collect emoji reactions
 	const collectorFilter = (reaction: MessageReaction, user: User) =>  (reaction.emoji.name === '✅') && (user.id === interaction.user.id);

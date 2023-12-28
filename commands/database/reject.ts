@@ -17,6 +17,5 @@ module.exports = {
 		.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
 	async execute(interaction: ChatInputCommandInteraction) {
 		await editUserStatus(interaction, inscriptionStatus.rejected);
-		// TODO Remove from whitelist
 	}
 };

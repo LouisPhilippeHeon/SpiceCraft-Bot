@@ -38,6 +38,8 @@ export namespace services {
 }
 
 export namespace events {
+	export const clickToConfirmChangesToWhitelist = 'Clique sur le bouton lorsque c\'est fait, afin que <@$discordUuid$> soit informé du changement lié à sa demande.';
+
 	enum approbationButton {
 		messageSentToPlayerToConfirmInscription = 'Tu a été ajouté à la whitelist. Si tu n\'arrive pas à te connecter, ton username Minecraft est peut-être incorrect. Si c\'est le cas, clique à nouveau sur le bouton d\'inscription.',
 		requestGranted = '✅ La demande a été approuvée.',
@@ -50,7 +52,7 @@ export namespace events {
 		requestDenied = '❌ La demande a été rejetée.',
 		askConfirmation = 'Es-tu certain de vouloir rejeter <@$discordUuid$> ?',
 		success = 'Un message a été envoyé à <@$discordUuid$> pour l\'informer du rejet.',
-		successNoDm = '<@$discordUuid$> a été ajouté rejeté. Cependant, ses paramètres de confidentialité m\'empêchent de lui envoyer un message afin de lui en informer.',
+		successNoDm = '<@$discordUuid$> a été rejeté. Cependant, ses paramètres de confidentialité m\'empêchent de lui envoyer un message afin de lui en informer.',
 		userStillInBdExplanation = 'Cet utilisateur est encore dans la base de données, avec le statut "rejeté", donc s\'il rejoint à nouveau le serveur, le bot se souvient que l\'utilisateur est rejeté. Si tu souhaite le supprimer, tu peux utiliser la commande /supprimer-entree'
 	}
 
@@ -58,7 +60,7 @@ export namespace events {
 		messageUpdate = '✅ La mise à jour de username a été complétée.',
 		messageSentToConfirmUsernameChange = 'Ton username Minecraft a été mis à jour dans la whitelist.',
 		success = 'Un message a été envoyé à <@$discordUuid$> pour l\'informer de la mise à jour du username.',
-		successNoDm = 'Mise a jour du compte Minecraft de <@$discordUuid$> effectuée avec succès. Cependant, ses paramètres de confidentialité m\'empêchent de lui envoyer un message afin de lui en informer.'
+		successNoDm = 'Mise a jour du compte Minecraft de <@$discordUuid$> effectuée avec succès, dans la whitelist et la base de données. Cependant, ses paramètres de confidentialité m\'empêchent de lui envoyer un message afin de lui en informer.'
 	}
 
 	enum registerButton {
@@ -85,7 +87,7 @@ export namespace commands {
 
 	enum deleteEntryCommand {
 		messageUpdate = '🗑️ L\'utilisateur a été supprimé de la base de données.',
-		reply = 'L\'utilisateur à été supprimé de la base de données avec succès.',
+		reply = 'L\'utilisateur à été supprimé de la whitelist et de la base de données avec succès.',
 		description = 'Supprime une rangée dans la base de données.',
 		userIdOption = 'Retirer l\'entrée pour quel UUID Discord ?'
 	}
@@ -168,8 +170,15 @@ export namespace errors {
 		invalidStatus = 'Statut invalide'
 	}
 
+	enum rconErrors {
+		add = 'Une erreur est survenue lors de la connexion au serveur avec RCON. L\'ajout du joueur à la whitelist doit être effectuée manuellement.',
+		edit = 'Une erreur est survenue lors de la connexion au serveur avec RCON. La modification de la whitelist doit être effectuée manuellement.',
+		remove = 'Une erreur est survenue lors de la connexion au serveur avec RCON. Le retrait du joueur dans la whitelist doit être effectué manuellement.'
+	}
+
 	export import database = databaseErrors;
 	export import api = apiErrors;
+	export import rcon = rconErrors;
 }
 
 export namespace components {
@@ -182,7 +191,9 @@ export namespace components {
 		ignore = 'Ignorer',
 		endSeason = 'Oui, terminer la saison',
 		register = 'S\'inscrire',
-		doNotUpdate = 'Ne pas mettre à jour'
+		doNotUpdate = 'Ne pas mettre à jour',
+		manuallyAddedToWhitelist = 'Ajout manuel effectué',
+		manuallyEditedWhitelist = 'Modifications manuelles effectuées'
 	}
 
 	enum embedTitles {

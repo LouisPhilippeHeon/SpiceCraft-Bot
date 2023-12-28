@@ -2,40 +2,66 @@ import * as DatabaseService from '../services/database';
 import * as Constants from '../bot-constants';
 import * as Strings from '../strings';
 import * as Utils from '../utils';
-import { ChatInputCommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, GuildMember } from 'discord.js';
+import * as RconService from '../services/rcon';
+import * as HttpService from '../services/http';
 
 export async function editUserStatus(interaction: ChatInputCommandInteraction, status: number) {
 	const idToEdit = interaction.options.getUser('membre').id;
+	let member: GuildMember;
 
-	interaction.guild.members.fetch(idToEdit).then(async member => {
-		await DatabaseService.changeStatus(idToEdit, status);
+	try {
+		member = await interaction.guild.members.fetch(idToEdit);
+	}
+	catch {
+		await interaction.reply(Strings.errors.noDiscordUserWithThisUuid);
+		return;
+	}
 
-		let role = await Utils.fetchPlayerRole(interaction.guild);
-		(status === Constants.inscriptionStatus.approved)
+	await DatabaseService.changeStatus(idToEdit, status).catch(async (e) => {
+		await interaction.reply(e.message);
+		return;
+	});
+
+	try {
+		const user = await DatabaseService.getUserByDiscordUuid(idToEdit);
+		const username = await HttpService.getUsernameFromUuid(user.minecraft_uuid);
+		if (status === Constants.inscriptionStatus.approved)
+			await RconService.whitelistAdd(username);
+		else
+			await RconService.whitelistRemove(username);
+	}
+	catch {
+		await interaction.reply((status === Constants.inscriptionStatus.approved)
+				? Strings.errors.rcon.add
+				: Strings.errors.rcon.remove);
+
+		return;
+	}
+
+	let role = await Utils.fetchPlayerRole(interaction.guild);
+	(status === Constants.inscriptionStatus.approved)
 			? await member.roles.add(role.id)
 			: await member.roles.remove(role.id);
 
-		const interactionReplyMessage = Strings.services.userStatus.statusChanged
+	const interactionReplyMessage = Strings.services.userStatus.statusChanged
 			.replace('$discordUuid$', idToEdit.toString())
 			.replace('$status$', Strings.getStatusName(status));
 
-		if (status === Constants.inscriptionStatus.awaitingApproval) {
-			await interaction.reply(interactionReplyMessage);
-			return;
-		}
+	if (status === Constants.inscriptionStatus.awaitingApproval) {
+		await interaction.reply(interactionReplyMessage);
+		return;
+	}
 
-		if (interaction.options.getBoolean('silencieux')) return;
+	if (interaction.options.getBoolean('silencieux')) return;
 
-		try {
-			await member.send(getMessageToSendToUser(status));
-			await interaction.reply(interactionReplyMessage);
-		}
-		catch {
-			await interaction.reply(interactionReplyMessage + '\n' + Strings.services.userStatus.cantSendDm);
-		}
-	}).catch(async (e) => {
-		await interaction.reply(Strings.errors.noDiscordUserWithThisUuid);
-	});
+	try {
+		await member.send(getMessageToSendToUser(status));
+		await interaction.reply(interactionReplyMessage);
+	}
+	catch {
+		await interaction.reply(interactionReplyMessage + '\n' + Strings.services.userStatus.cantSendDm);
+	}
 }
 
 function getMessageToSendToUser(status: number): string {

@@ -17,10 +17,10 @@ module.exports = {
 	once: false,
 	async execute(interaction: Models.InteractionWithCommands) {
 		if (interaction.isButton())
-			handleButtonInteraction(interaction);
+			await handleButtonInteraction(interaction);
 
 		else if (interaction.isChatInputCommand())
-			handleChatInputCommand(interaction);
+			await handleChatInputCommand(interaction);
 	}
 }
 
@@ -65,6 +65,14 @@ async function handleButtonInteraction(interaction: ButtonInteraction) {
 				assert(member.permissions.has(PermissionFlagsBits.Administrator));
 				await deleteUser(interaction);
 				break;
+			case 'manually-added-whitelist':
+				assert(member.permissions.has(PermissionFlagsBits.BanMembers));
+				await manuallyAddedToWhitelist(interaction);
+				break;
+			case 'manually-modified-whitelist':
+				assert(member.permissions.has(PermissionFlagsBits.BanMembers));
+				await manuallyModifiedWhitelist(interaction);
+				break;
 		}
 	}
 	catch (e) {
@@ -103,7 +111,6 @@ async function handleChatInputCommand(interaction: Models.InteractionWithCommand
 
 async function approveUser(interaction: ButtonInteraction) {
 	const discordUuid = interaction.customId.split('_')[1];
-	await DatabaseService.changeStatus(discordUuid, Constants.inscriptionStatus.approved);
 
 	const approvalRequest = interaction.message;
 	const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
@@ -119,20 +126,36 @@ async function approveUser(interaction: ButtonInteraction) {
 		return;
 	}
 
-	let role = await Utils.fetchPlayerRole(interaction.guild);
-
-	await member.roles.add(role);
 	await interaction.message.edit({ content: Strings.events.approbation.requestGranted, embeds: [embedToUpdate], components: [] });
 
 	try {
 		const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
 		const username = await HttpService.getUsernameFromUuid(user.minecraft_uuid);
-		RconService.whitelistAdd(username);
+		await RconService.whitelistAdd(username);
 	}
 	catch {
-		// TODO Could not automatically add player to whitelist. click here once added manually
-		// TODO Create embed
+		const confirmManualAdditionToWhitelist = new ButtonBuilder({
+			customId: `manually-added-whitelist_${discordUuid}`,
+			label: Strings.components.buttons.manuallyAddedToWhitelist,
+			style: ButtonStyle.Success
+		});
+
+		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmManualAdditionToWhitelist);
+		await interaction.reply({ content: `${Strings.errors.rcon.add} ${Strings.events.clickToConfirmChangesToWhitelist.replace('$discordUuid$', discordUuid)}`, components: [row] });
+
+		return;
 	}
+
+	try {
+		await DatabaseService.changeStatus(discordUuid, Constants.inscriptionStatus.approved);
+	}
+	catch (e) {
+		await interaction.reply({ content: e.message, ephemeral: true });
+		await approvalRequest.delete();
+		return;
+	}
+	let role = await Utils.fetchPlayerRole(interaction.guild);
+	await member.roles.add(role);
 
 	try {
 		await member.send(Strings.events.approbation.messageSentToPlayerToConfirmInscription);
@@ -141,6 +164,42 @@ async function approveUser(interaction: ButtonInteraction) {
 	catch {
 		await interaction.reply({ content: Strings.events.approbation.successNoDm.replace('$discordUuid$', discordUuid), ephemeral: true });
 	}
+}
+
+async function manuallyAddedToWhitelist(interaction: ButtonInteraction) {
+	const discordUuid = interaction.customId.split('_')[1];
+	const approvalRequest = await interaction.channel.messages.fetch(interaction.message.reference.messageId);
+
+	let member;
+	try {
+		member = await interaction.guild.members.fetch(discordUuid);
+		await DatabaseService.changeStatus(discordUuid, Constants.inscriptionStatus.approved);
+	}
+	catch (e) {
+		if (member)
+			await interaction.reply({ content: e.message, ephemeral: true });
+		else
+			await interaction.reply({ content: Strings.errors.noDiscordUserWithThisUuid, ephemeral: true });
+		await interaction.message.delete();
+		await approvalRequest.delete();
+		return;
+	}
+
+	let role = await Utils.fetchPlayerRole(interaction.guild);
+	await member.roles.add(role);
+	await interaction.message.edit({ components: [] });
+
+	try {
+		await member.send(Strings.events.approbation.messageSentToPlayerToConfirmInscription);
+		await interaction.reply({ content: Strings.events.approbation.success.replace('$discordUuid$', discordUuid), ephemeral: true });
+	}
+	catch {
+		await interaction.reply({ content: Strings.events.approbation.successNoDm.replace('$discordUuid$', discordUuid), ephemeral: true });
+	}
+
+	const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
+	embedToUpdate.color = Colors.Green;
+	await approvalRequest.edit({ content: Strings.events.approbation.requestGranted, embeds: [embedToUpdate], components: [] });
 }
 
 async function rejectUser(interaction: ButtonInteraction) {
@@ -163,24 +222,27 @@ async function rejectUser(interaction: ButtonInteraction) {
 }
 
 async function confirmRejectUser(interaction: ButtonInteraction) {
-	// TODO Remove from whitelist
 	const discordUuid = interaction.customId.split('_')[1];
 	const messageUuid = interaction.customId.split('_')[2];
 
 	const whitelistChannel = await Utils.fetchBotChannel(interaction.guild);
-	let approvalRequest: Message;
-
-	approvalRequest = await whitelistChannel.messages.fetch(messageUuid).catch(() => approvalRequest = undefined);
+	let approvalRequest: Message = await whitelistChannel.messages.fetch(messageUuid).catch(() => approvalRequest = undefined);
 
 	await interaction.message.delete();
-	await DatabaseService.changeStatus(discordUuid, Constants.inscriptionStatus.rejected);
 
 	let member;
+	let statusChanged = false;
+
 	try {
+		await DatabaseService.changeStatus(discordUuid, Constants.inscriptionStatus.approved);
+		statusChanged = true;
 		member = await interaction.guild.members.fetch(discordUuid);
 	}
 	catch (e) {
-		await interaction.reply(Strings.errors.noDiscordUserWithThisUuid + '\n' + Strings.events.rejection.userStillInBdExplanation);
+		if (statusChanged)
+			await interaction.reply(Strings.errors.noDiscordUserWithThisUuid + '\n' + Strings.events.rejection.userStillInBdExplanation);
+		else
+			await interaction.reply({ content: e.message, ephemeral: true });
 		if (approvalRequest !== undefined) await approvalRequest.delete();
 		return;
 	}
@@ -203,24 +265,38 @@ async function confirmRejectUser(interaction: ButtonInteraction) {
 async function confirmUsernameChange(interaction: ButtonInteraction) {
 	const discordUuid = interaction.customId.split('_')[1];
 	const minecraftUuid = interaction.customId.split('_')[2];
+	const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
+
 	let member;
-
-	// TODO Remove old username and add new one in whitelist using RCON
-
 	try {
 		member = await interaction.guild.members.fetch(discordUuid);
+		await DatabaseService.changeMinecraftUuid(discordUuid, minecraftUuid);
 	}
 	catch (e) {
-		await interaction.reply(Strings.errors.noDiscordUserWithThisUuid);
+		if (member)
+			await interaction.reply(e);
+		else
+			await interaction.reply(Strings.errors.noDiscordUserWithThisUuid);
 		await interaction.message.delete();
 		return;
 	}
 
 	try {
-		await DatabaseService.changeMinecraftUuid(discordUuid, minecraftUuid);
+		const oldUsername = await HttpService.getUsernameFromUuid(user.minecraft_uuid);
+		const newUsername = await HttpService.getUsernameFromUuid(minecraftUuid);
+		await RconService.whitelistReplaceUsername(newUsername, oldUsername);
 	}
-	catch (e) {
-		await interaction.reply(e);
+	catch {
+		const confirmManualModificationOfWhitelist = new ButtonBuilder({
+			customId: `manually-modified-whitelist_${discordUuid}`,
+			label: Strings.components.buttons.manuallyEditedWhitelist,
+			style: ButtonStyle.Success
+		});
+
+		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmManualModificationOfWhitelist);
+		await interaction.reply({ content: `${Strings.errors.rcon.edit} ${Strings.events.clickToConfirmChangesToWhitelist.replace('$discordUuid$', discordUuid)}`, components: [row] });
+
+		return;
 	}
 
 	const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
@@ -236,14 +312,58 @@ async function confirmUsernameChange(interaction: ButtonInteraction) {
 	}
 }
 
+async function manuallyModifiedWhitelist(interaction: ButtonInteraction) {
+	const discordUuid = interaction.customId.split('_')[1];
+	const usernameChangeRequest = await interaction.channel.messages.fetch(interaction.message.reference.messageId);
+
+	let member;
+	try {
+		member = await interaction.guild.members.fetch(discordUuid);
+	}
+	catch (e) {
+		await interaction.reply({ content: Strings.errors.noDiscordUserWithThisUuid, ephemeral: true });
+		await interaction.message.delete();
+		await usernameChangeRequest.delete();
+		return;
+	}
+
+	const embedToUpdate = Utils.deepCloneWithJson(usernameChangeRequest.embeds[0]);
+	embedToUpdate.color = Colors.Green;
+	await interaction.message.edit({ content: Strings.events.usernameChangeConfirmation.messageUpdate, embeds: [embedToUpdate], components: [] });
+
+	try {
+		await member.send(Strings.events.usernameChangeConfirmation.messageSentToConfirmUsernameChange);
+		await interaction.reply({ content: Strings.events.usernameChangeConfirmation.success.replace('$discordUuid$', discordUuid), ephemeral: true });
+	}
+	catch {
+		await interaction.reply({ content: Strings.events.usernameChangeConfirmation.successNoDm.replace('$discordUuid$', discordUuid), ephemeral: true });
+	}
+}
+
 async function deleteUser(interaction: ButtonInteraction) {
-	// TODO Remove from whitelist
 	await interaction.message.delete();
 	const discordUuid = interaction.customId.split('_')[1];
-	await DatabaseService.deleteEntry(discordUuid);
+
+	try {
+		// Member might have already been deleted, in this case, it will throw an error
+		await DatabaseService.deleteEntry(discordUuid);
+	}
+	catch { }
+
 	const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
 	embedToUpdate.color = Colors.Red;
 	await interaction.message.edit({ content: Strings.commands.deleteEntry.messageUpdate, embeds: [embedToUpdate], components: [] });
+
+	try {
+		const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
+		const username = await HttpService.getUsernameFromUuid(user.minecraft_uuid);
+		await RconService.whitelistRemove(username);
+	}
+	catch {
+		await interaction.reply(Strings.errors.rcon.remove);
+		return;
+	}
+
 	await interaction.reply({ content: Strings.commands.deleteEntry.reply, ephemeral: true });
 }
 
@@ -260,7 +380,7 @@ async function confirmEndSeason(interaction: ButtonInteraction) {
 			}]
 		}).catch(async () =>
 			// People using this commands are admins, therefore they should have their DMs turned on for the server anyways
-			console.log(JSON.stringify(await DatabaseService.getUsers()))
+			console.log(JSON.stringify(users))
 		);
 	}
 

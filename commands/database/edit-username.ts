@@ -1,5 +1,6 @@
 import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import * as DatabaseService from '../../services/database';
+import * as RconService from '../../services/rcon';
 import * as HttpService from '../../services/http';
 import * as Strings from '../../strings';
 import * as Models from '../../models';
@@ -21,10 +22,13 @@ module.exports = {
         const discordUuid = interaction.options.getString('discord-uuid');
         const newUsername = interaction.options.getString('username');
 
-        // TODO Change in whitelist
-
         try {
             let mojangUser = await getMojangAccountForNewUsername(newUsername, discordUuid);
+            
+            const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
+            const oldUsername = await HttpService.getUsernameFromUuid(user.minecraft_uuid);
+            await RconService.whitelistReplaceUsername(newUsername, oldUsername);
+
             await DatabaseService.changeMinecraftUuid(discordUuid, mojangUser.id);
             await interaction.reply(Strings.commands.editUsername.confirmationMessage);
         }
