@@ -110,10 +110,7 @@ async function handleChatInputCommand(interaction: Models.InteractionWithCommand
 
 async function approveUser(interaction: ButtonInteraction) {
 	const discordUuid = interaction.customId.split('_')[1];
-
 	const approvalRequest = interaction.message;
-	const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
-	embedToUpdate.color = Colors.Green;
 
 	let member;
 	try {
@@ -124,8 +121,6 @@ async function approveUser(interaction: ButtonInteraction) {
 		await interaction.message.delete();
 		return;
 	}
-
-	await interaction.message.edit({ content: Strings.events.approbation.requestGranted, embeds: [embedToUpdate], components: [] });
 
 	try {
 		const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
@@ -138,8 +133,19 @@ async function approveUser(interaction: ButtonInteraction) {
 			style: ButtonStyle.Success
 		});
 
-		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmManualAdditionToWhitelist);
-		await interaction.reply({ content: `${Strings.errors.rcon.add} ${Strings.events.clickToConfirmChangesToWhitelist.replace('$discordUuid$', discordUuid)}`, components: [row] });
+		const reject = new ButtonBuilder({
+			customId: `reject_${discordUuid}`,
+			label: Strings.components.buttons.reject,
+			style: ButtonStyle.Danger
+		});
+
+		const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
+		embedToUpdate.color = Colors.Yellow;
+
+		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmManualAdditionToWhitelist, reject);
+		await interaction.message.edit({ content: `${Strings.errors.rcon.add} ${Strings.events.clickToConfirmChangesToWhitelist.replace('$discordUuid$', discordUuid)}`, embeds: [embedToUpdate], components: [row] });
+
+		await interaction.reply({ content: Strings.events.approbation.changeWhitelistBeforeCliking, ephemeral: true });
 
 		return;
 	}
@@ -152,8 +158,13 @@ async function approveUser(interaction: ButtonInteraction) {
 		await approvalRequest.delete();
 		return;
 	}
+
 	let role = await Utils.fetchPlayerRole(interaction.guild);
 	await member.roles.add(role);
+
+	const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
+	embedToUpdate.color = Colors.Green;
+	await interaction.message.edit({ content: Strings.events.approbation.requestGranted, embeds: [embedToUpdate], components: [] });
 
 	try {
 		await member.send(Strings.events.approbation.messageSentToPlayerToConfirmInscription);
@@ -166,26 +177,29 @@ async function approveUser(interaction: ButtonInteraction) {
 
 async function manuallyAddedToWhitelist(interaction: ButtonInteraction) {
 	const discordUuid = interaction.customId.split('_')[1];
-	const approvalRequest = await interaction.channel.messages.fetch(interaction.message.reference.messageId);
-
 	let member;
+
 	try {
 		member = await interaction.guild.members.fetch(discordUuid);
 		await DatabaseService.changeStatus(discordUuid, Constants.inscriptionStatus.approved);
 	}
 	catch (e) {
+		await interaction.message.delete();
+
 		if (member)
 			await interaction.reply({ content: e.message, ephemeral: true });
 		else
 			await interaction.reply({ content: Strings.errors.noDiscordUserWithThisUuid, ephemeral: true });
-		await interaction.message.delete();
-		await approvalRequest.delete();
+
 		return;
 	}
 
 	let role = await Utils.fetchPlayerRole(interaction.guild);
 	await member.roles.add(role);
-	await interaction.message.edit({ components: [] });
+
+	const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
+	embedToUpdate.color = Colors.Green;
+	await interaction.message.edit({ content: Strings.events.approbation.requestGranted, embeds: [embedToUpdate], components: [] });
 
 	try {
 		await member.send(Strings.events.approbation.messageSentToPlayerToConfirmInscription);
@@ -194,10 +208,6 @@ async function manuallyAddedToWhitelist(interaction: ButtonInteraction) {
 	catch {
 		await interaction.reply({ content: Strings.events.approbation.successNoDm.replace('$discordUuid$', discordUuid), ephemeral: true });
 	}
-
-	const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
-	embedToUpdate.color = Colors.Green;
-	await approvalRequest.edit({ content: Strings.events.approbation.requestGranted, embeds: [embedToUpdate], components: [] });
 }
 
 async function rejectUser(interaction: ButtonInteraction) {
@@ -263,35 +273,55 @@ async function confirmRejectUser(interaction: ButtonInteraction) {
 async function confirmUsernameChange(interaction: ButtonInteraction) {
 	const discordUuid = interaction.customId.split('_')[1];
 	const minecraftUuid = interaction.customId.split('_')[2];
-
+	const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
 	let member;
-	try {
-		member = await interaction.guild.members.fetch(discordUuid);
-		await DatabaseService.changeMinecraftUuid(discordUuid, minecraftUuid);
-	}
-	catch (e) {
-		if (member)
-			await interaction.reply(e);
-		else
-			await interaction.reply(Strings.errors.noDiscordUserWithThisUuid);
+
+	if (!user) {
+		await interaction.reply(Strings.errors.database.userDoesNotExist);
 		await interaction.message.delete();
 		return;
 	}
 
 	try {
-		const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
-		await RconService.whitelistReplaceUsername(minecraftUuid, user.minecraft_uuid);
+		member = await interaction.guild.members.fetch(discordUuid);
 	}
 	catch {
+		await interaction.reply(Strings.errors.noDiscordUserWithThisUuid);
+	}
+
+	try {
+		await RconService.whitelistReplaceUsername(minecraftUuid, user.minecraft_uuid);
+	}
+	catch (e) {
 		const confirmManualModificationOfWhitelist = new ButtonBuilder({
-			customId: `manually-modified-whitelist_${discordUuid}`,
+			customId: `manually-modified-whitelist_${discordUuid}_${minecraftUuid}`,
 			label: Strings.components.buttons.manuallyEditedWhitelist,
 			style: ButtonStyle.Success
 		});
 
-		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmManualModificationOfWhitelist);
-		await interaction.reply({ content: `${Strings.errors.rcon.edit} ${Strings.events.clickToConfirmChangesToWhitelist.replace('$discordUuid$', discordUuid)}`, components: [row] });
+		const cancel = new ButtonBuilder({
+			customId: 'dissmiss',
+			label: Strings.components.buttons.cancel,
+			style: ButtonStyle.Secondary
+		});
 
+		const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
+		embedToUpdate.color = Colors.Yellow;
+
+		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmManualModificationOfWhitelist, cancel);
+		await interaction.message.edit({ content: `${e.message} ${Strings.events.clickToConfirmChangesToWhitelist.replace('$discordUuid$', discordUuid)}`, embeds: [embedToUpdate], components: [row] });
+
+		await interaction.reply({ content: Strings.events.usernameChangeConfirmation.changeWhitelistBeforeCliking, ephemeral: true });
+
+		return;
+	}
+
+	try {
+		await DatabaseService.changeMinecraftUuid(discordUuid, minecraftUuid);
+	}
+	catch (e) {
+		await interaction.reply(e.message);
+		await interaction.message.delete();
 		return;
 	}
 
@@ -310,7 +340,7 @@ async function confirmUsernameChange(interaction: ButtonInteraction) {
 
 async function manuallyModifiedWhitelist(interaction: ButtonInteraction) {
 	const discordUuid = interaction.customId.split('_')[1];
-	const usernameChangeRequest = await interaction.channel.messages.fetch(interaction.message.reference.messageId);
+	const minecraftUuid = interaction.customId.split('_')[2];
 
 	let member;
 	try {
@@ -319,11 +349,19 @@ async function manuallyModifiedWhitelist(interaction: ButtonInteraction) {
 	catch (e) {
 		await interaction.reply({ content: Strings.errors.noDiscordUserWithThisUuid, ephemeral: true });
 		await interaction.message.delete();
-		await usernameChangeRequest.delete();
 		return;
 	}
 
-	const embedToUpdate = Utils.deepCloneWithJson(usernameChangeRequest.embeds[0]);
+	try {
+		await DatabaseService.changeMinecraftUuid(discordUuid, minecraftUuid);
+	}
+	catch (e) {
+		await interaction.reply(e.message);
+		await interaction.message.delete();
+		return;
+	}
+
+	const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
 	embedToUpdate.color = Colors.Green;
 	await interaction.message.edit({ content: Strings.events.usernameChangeConfirmation.messageUpdate, embeds: [embedToUpdate], components: [] });
 

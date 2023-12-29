@@ -44,7 +44,8 @@ export namespace events {
 		messageSentToPlayerToConfirmInscription = 'Tu a été ajouté à la whitelist. Si tu n\'arrive pas à te connecter, ton username Minecraft est peut-être incorrect. Si c\'est le cas, clique à nouveau sur le bouton d\'inscription.',
 		requestGranted = '✅ La demande a été approuvée.',
 		success = 'Un message a été envoyé à <@$discordUuid$> pour l\'informer de son ajout à la whitelist.',
-		successNoDm = '<@$discordUuid$> a été ajouté à la whitelist. Cependant, ses paramètres de confidentialité m\'empêchent de lui envoyer un message afin de lui en informer.'
+		successNoDm = '<@$discordUuid$> a été ajouté à la whitelist. Cependant, ses paramètres de confidentialité m\'empêchent de lui envoyer un message afin de lui en informer.',
+		changeWhitelistBeforeCliking = 'N\'oublies pas d\'ajouter manuellement le joueur à la whitelist AVANT de cliquer sur le bouton !'
 	}
 
 	enum rejectionButton {
@@ -60,7 +61,8 @@ export namespace events {
 		messageUpdate = '✅ La mise à jour de username a été complétée.',
 		messageSentToConfirmUsernameChange = 'Ton username Minecraft a été mis à jour dans la whitelist.',
 		success = 'Un message a été envoyé à <@$discordUuid$> pour l\'informer de la mise à jour du username.',
-		successNoDm = 'Mise a jour du compte Minecraft de <@$discordUuid$> effectuée avec succès, dans la whitelist et la base de données. Cependant, ses paramètres de confidentialité m\'empêchent de lui envoyer un message afin de lui en informer.'
+		successNoDm = 'Mise a jour du compte Minecraft de <@$discordUuid$> effectuée avec succès, dans la whitelist et la base de données. Cependant, ses paramètres de confidentialité m\'empêchent de lui envoyer un message afin de lui en informer.',
+		changeWhitelistBeforeCliking = 'N\'oublies pas de modifier manuellement la whitelist AVANT de cliquer sur le bouton !'
 	}
 
 	enum registerButton {
