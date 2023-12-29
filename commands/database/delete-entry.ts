@@ -16,15 +16,15 @@ module.exports = {
 	async execute(interaction: ChatInputCommandInteraction) {
 		const discordUuid = interaction.options.getString('discord-uuid');
 		try {
+			const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
 			await DatabaseService.deleteEntry(discordUuid);
-			await interaction.reply(Strings.commands.deleteEntry.reply);
 
 			const member = await interaction.guild.members.fetch(discordUuid);
 			const role = await Utils.fetchPlayerRole(interaction.guild);
 			await member.roles.remove(role.id);
 
-			const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
 			await RconService.whitelistRemove(user.minecraft_uuid);
+			await interaction.reply(Strings.commands.deleteEntry.reply);
 		}
 		catch (e) {
 			// If user is no longer a member, ignore error thrown while trying to remove role

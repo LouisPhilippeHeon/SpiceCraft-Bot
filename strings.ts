@@ -173,7 +173,7 @@ export namespace errors {
 	}
 
 	enum rconErrors {
-		add = 'Une erreur est survenue lors de la connexion au serveur avec RCON. L\'ajout du joueur à la whitelist doit être effectuée manuellement.',
+		add = 'Une erreur est survenue lors de la connexion au serveur avec RCON. L\'ajout du joueur à la whitelist doit être effectué manuellement.',
 		edit = 'Une erreur est survenue lors de la connexion au serveur avec RCON. La modification de la whitelist doit être effectuée manuellement.',
 		remove = 'Une erreur est survenue lors de la connexion au serveur avec RCON. Le retrait du joueur dans la whitelist doit être effectué manuellement.'
 	}

@@ -22,6 +22,11 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
 		return;
 	});
 
+	let role = await Utils.fetchPlayerRole(interaction.guild);
+	(status === Constants.inscriptionStatus.approved)
+			? await member.roles.add(role.id)
+			: await member.roles.remove(role.id);
+
 	try {
 		const user = await DatabaseService.getUserByDiscordUuid(idToEdit);
 		if (status === Constants.inscriptionStatus.approved)
@@ -36,11 +41,6 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
 
 		return;
 	}
-
-	let role = await Utils.fetchPlayerRole(interaction.guild);
-	(status === Constants.inscriptionStatus.approved)
-			? await member.roles.add(role.id)
-			: await member.roles.remove(role.id);
 
 	const interactionReplyMessage = Strings.services.userStatus.statusChanged
 			.replace('$discordUuid$', idToEdit.toString())
