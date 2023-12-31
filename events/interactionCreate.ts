@@ -118,10 +118,10 @@ async function approveUser(interaction: ButtonInteraction) {
 
 	let member;
 	try {
-		member = await interaction.guild.members.fetch(discordUuid);
+		member = await Utils.fetchGuildMember(interaction.guild, discordUuid);
 	}
-	catch {
-		await interaction.reply(Strings.errors.noDiscordUserWithThisUuid);
+	catch (e) {
+		await interaction.reply({ content: e.message, ephemeral: true });
 		await interaction.message.delete();
 		return;
 	}
@@ -130,7 +130,7 @@ async function approveUser(interaction: ButtonInteraction) {
 		const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
 		await RconService.whitelistAdd(user.minecraft_uuid);
 	}
-	catch {
+	catch (e) {
 		const confirmManualAdditionToWhitelist = new ButtonBuilder({
 			customId: `manually-added-whitelist_${discordUuid}`,
 			label: Strings.components.buttons.manuallyAddedToWhitelist,
@@ -147,7 +147,7 @@ async function approveUser(interaction: ButtonInteraction) {
 		embedToUpdate.color = Colors.Yellow;
 
 		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmManualAdditionToWhitelist, reject);
-		await interaction.message.edit({ content: `${Strings.errors.rcon.add} ${Strings.events.clickToConfirmChangesToWhitelist.replace('$discordUuid$', discordUuid)}`, embeds: [embedToUpdate], components: [row] });
+		await interaction.message.edit({ content: `${e.message} ${Strings.events.clickToConfirmChangesToWhitelist.replace('$discordUuid$', discordUuid)}`, embeds: [embedToUpdate], components: [row] });
 
 		await interaction.reply({ content: Strings.events.approbation.changeWhitelistBeforeCliking, ephemeral: true });
 
@@ -168,7 +168,7 @@ async function approveUser(interaction: ButtonInteraction) {
 
 	const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
 	embedToUpdate.color = Colors.Green;
-	await interaction.message.edit({ content: Strings.events.approbation.requestGranted, embeds: [embedToUpdate], components: [] });
+	await interaction.message.edit({ content: Strings.events.approbation.requestGranted.replace('$discordUuid$', interaction.user.id), embeds: [embedToUpdate], components: [] });
 
 	try {
 		await member.send(Strings.events.approbation.messageSentToPlayerToConfirmInscription);
@@ -184,17 +184,12 @@ async function manuallyAddedToWhitelist(interaction: ButtonInteraction) {
 	let member;
 
 	try {
-		member = await interaction.guild.members.fetch(discordUuid);
+		member = await Utils.fetchGuildMember(interaction.guild, discordUuid);
 		await DatabaseService.changeStatus(discordUuid, Constants.inscriptionStatus.approved);
 	}
 	catch (e) {
+		await interaction.reply({ content: e.message, ephemeral: true });
 		await interaction.message.delete();
-
-		if (member)
-			await interaction.reply({ content: e.message, ephemeral: true });
-		else
-			await interaction.reply({ content: Strings.errors.noDiscordUserWithThisUuid, ephemeral: true });
-
 		return;
 	}
 
@@ -203,7 +198,7 @@ async function manuallyAddedToWhitelist(interaction: ButtonInteraction) {
 
 	const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
 	embedToUpdate.color = Colors.Green;
-	await interaction.message.edit({ content: Strings.events.approbation.requestGranted, embeds: [embedToUpdate], components: [] });
+	await interaction.message.edit({ content: Strings.events.approbation.requestGranted.replace('$discordUuid$', interaction.user.id), embeds: [embedToUpdate], components: [] });
 
 	try {
 		await member.send(Strings.events.approbation.messageSentToPlayerToConfirmInscription);
@@ -248,11 +243,11 @@ async function confirmRejectUser(interaction: ButtonInteraction) {
 	try {
 		await DatabaseService.changeStatus(discordUuid, Constants.inscriptionStatus.approved);
 		statusChanged = true;
-		member = await interaction.guild.members.fetch(discordUuid);
+		member = await Utils.fetchGuildMember(interaction.guild, discordUuid);
 	}
 	catch (e) {
 		if (statusChanged)
-			await interaction.reply(Strings.errors.noDiscordUserWithThisUuid + '\n' + Strings.events.rejection.userStillInBdExplanation);
+			await interaction.reply(e.message + '\n' + Strings.events.rejection.userStillInBdExplanation.replace('$discordUuid$', discordUuid));
 		else
 			await interaction.reply({ content: e.message, ephemeral: true });
 		if (approvalRequest !== undefined) await approvalRequest.delete();
@@ -262,7 +257,7 @@ async function confirmRejectUser(interaction: ButtonInteraction) {
 	if (approvalRequest !== undefined) {
 		const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
 		embedToUpdate.color = Colors.Red;
-		await approvalRequest.edit({ content: Strings.events.rejection.requestDenied, embeds: [embedToUpdate], components: [] });
+		await approvalRequest.edit({ content: Strings.events.rejection.requestDenied.replace('$discordUuid$', interaction.user.id), embeds: [embedToUpdate], components: [] });
 	}
 
 	try {
@@ -287,10 +282,10 @@ async function confirmUsernameChange(interaction: ButtonInteraction) {
 	}
 
 	try {
-		member = await interaction.guild.members.fetch(discordUuid);
+		member = await Utils.fetchGuildMember(interaction.guild, discordUuid);
 	}
-	catch {
-		await interaction.reply(Strings.errors.noDiscordUserWithThisUuid);
+	catch (e) {
+		await interaction.reply(e.message);
 	}
 
 	try {
@@ -331,7 +326,7 @@ async function confirmUsernameChange(interaction: ButtonInteraction) {
 
 	const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
 	embedToUpdate.color = Colors.Green;
-	await interaction.message.edit({ content: Strings.events.usernameChangeConfirmation.messageUpdate, embeds: [embedToUpdate], components: [] });
+	await interaction.message.edit({ content: Strings.events.usernameChangeConfirmation.messageUpdate.replace('$discordUuid$', interaction.user.id), embeds: [embedToUpdate], components: [] });
 
 	try {
 		await member.send(Strings.events.usernameChangeConfirmation.messageSentToConfirmUsernameChange);
@@ -345,29 +340,21 @@ async function confirmUsernameChange(interaction: ButtonInteraction) {
 async function manuallyModifiedWhitelist(interaction: ButtonInteraction) {
 	const discordUuid = interaction.customId.split('_')[1];
 	const minecraftUuid = interaction.customId.split('_')[2];
-
 	let member;
-	try {
-		member = await interaction.guild.members.fetch(discordUuid);
-	}
-	catch (e) {
-		await interaction.reply({ content: Strings.errors.noDiscordUserWithThisUuid, ephemeral: true });
-		await interaction.message.delete();
-		return;
-	}
 
 	try {
+		member = await Utils.fetchGuildMember(interaction.guild, discordUuid);
 		await DatabaseService.changeMinecraftUuid(discordUuid, minecraftUuid);
 	}
 	catch (e) {
-		await interaction.reply(e.message);
+		await interaction.reply({ content: e.message, ephemeral: true });
 		await interaction.message.delete();
 		return;
 	}
 
 	const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
 	embedToUpdate.color = Colors.Green;
-	await interaction.message.edit({ content: Strings.events.usernameChangeConfirmation.messageUpdate, embeds: [embedToUpdate], components: [] });
+	await interaction.message.edit({ content: Strings.events.usernameChangeConfirmation.messageUpdate.replace('$discordUuid$', interaction.user.id), embeds: [embedToUpdate], components: [] });
 
 	try {
 		await member.send(Strings.events.usernameChangeConfirmation.messageSentToConfirmUsernameChange);
@@ -394,7 +381,7 @@ async function ban(interaction: ButtonInteraction) {
 
 	const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
 	embedToUpdate.color = Colors.Green;
-	await interaction.message.edit({ content: Strings.events.ban.messageUpdate, embeds: [embedToUpdate], components: [] });
+	await interaction.message.edit({ content: Strings.events.ban.messageUpdate.replace('$discordUuid$', interaction.user.id), embeds: [embedToUpdate], components: [] });
 
 	await interaction.reply({ content: Strings.events.ban.reply.replace('$discordUuid$', discordUuid), ephemeral: true });
 }
@@ -407,8 +394,8 @@ async function deleteUser(interaction: ButtonInteraction) {
 		const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
 		await RconService.whitelistRemove(user.minecraft_uuid);
 	}
-	catch {
-		await interaction.reply({ content: Strings.errors.rcon.remove, ephemeral: true });
+	catch (e) {
+		await interaction.reply({ content: e.message, ephemeral: true });
 		return;
 	}
 
@@ -420,9 +407,10 @@ async function deleteUser(interaction: ButtonInteraction) {
 
 	const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
 	embedToUpdate.color = Colors.Red;
+
 	await interaction.message.edit({ content: Strings.commands.deleteEntry.messageUpdate, embeds: [embedToUpdate], components: [] });
 
-	await interaction.reply({ content: Strings.commands.deleteEntry.reply, ephemeral: true });
+	await interaction.reply({ content: Strings.commands.deleteEntry.reply.replace('$discordUuid$', discordUuid), ephemeral: true });
 }
 
 async function confirmEndSeason(interaction: ButtonInteraction) {

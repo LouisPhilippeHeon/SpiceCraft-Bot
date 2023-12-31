@@ -19,12 +19,12 @@ module.exports = {
 			const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
 			await DatabaseService.deleteEntry(discordUuid);
 
-			const member = await interaction.guild.members.fetch(discordUuid);
+			const member = await Utils.fetchGuildMember(interaction.guild, discordUuid);
 			const role = await Utils.fetchPlayerRole(interaction.guild);
 			await member.roles.remove(role.id);
 
 			await RconService.whitelistRemove(user.minecraft_uuid);
-			await interaction.reply(Strings.commands.deleteEntry.reply);
+			await interaction.reply({ content: Strings.commands.deleteEntry.reply.replace('$discordUuid$', discordUuid), ephemeral: true });
 		}
 		catch (e) {
 			// If user is no longer a member, ignore error thrown while trying to remove role

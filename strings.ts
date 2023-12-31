@@ -42,7 +42,7 @@ export namespace events {
 
 	enum approbationButton {
 		messageSentToPlayerToConfirmInscription = 'Tu a été ajouté à la whitelist. Si tu n\'arrive pas à te connecter, ton username Minecraft est peut-être incorrect. Si c\'est le cas, clique à nouveau sur le bouton d\'inscription.',
-		requestGranted = '✅ La demande a été approuvée.',
+		requestGranted = '✅ La demande a été approuvée par <@$discordUuid$>.',
 		success = 'Un message a été envoyé à <@$discordUuid$> pour l\'informer de son ajout à la whitelist.',
 		successNoDm = '<@$discordUuid$> a été ajouté à la whitelist. Cependant, ses paramètres de confidentialité m\'empêchent de lui envoyer un message afin de lui en informer.',
 		changeWhitelistBeforeCliking = 'N\'oublies pas d\'ajouter manuellement le joueur à la whitelist AVANT de cliquer sur le bouton !'
@@ -50,15 +50,15 @@ export namespace events {
 
 	enum rejectionButton {
 		messageSentToUserToInformRejection = 'Désolé, mais les administrateurs ont choisi de ne pas t\'ajouter à la whitelist. Contacte-les pour plus de détails.',
-		requestDenied = '❌ La demande a été rejetée.',
+		requestDenied = '❌ La demande a été rejetée par <@$discordUuid$>.',
 		askConfirmation = 'Es-tu certain de vouloir rejeter <@$discordUuid$> ?',
 		success = 'Un message a été envoyé à <@$discordUuid$> pour l\'informer du rejet.',
 		successNoDm = '<@$discordUuid$> a été rejeté. Cependant, ses paramètres de confidentialité m\'empêchent de lui envoyer un message afin de lui en informer.',
-		userStillInBdExplanation = 'Cet utilisateur est encore dans la base de données, avec le statut "rejeté", donc s\'il rejoint à nouveau le serveur, le bot se souvient que l\'utilisateur est rejeté. Si tu souhaite le supprimer, tu peux utiliser la commande /supprimer-entree'
+		userStillInBdExplanation = 'Cet utilisateur est encore dans la base de données, avec le statut "rejeté", donc s\'il rejoint à nouveau le serveur, le bot se souvient que <@$discordUuid$> est rejeté. Si tu souhaite le supprimer, tu peux utiliser la commande /supprimer-entree'
 	}
 
 	enum usernameChangeConfirmationButton {
-		messageUpdate = '✅ La mise à jour de username a été complétée.',
+		messageUpdate = '✅ La mise à jour de username a été complétée (avec l\'autorisation de <@$discordUuid$>).',
 		messageSentToConfirmUsernameChange = 'Ton username Minecraft a été mis à jour dans la whitelist.',
 		success = 'Un message a été envoyé à <@$discordUuid$> pour l\'informer de la mise à jour du username.',
 		successNoDm = 'Mise a jour du compte Minecraft de <@$discordUuid$> effectuée avec succès, dans la whitelist et la base de données. Cependant, ses paramètres de confidentialité m\'empêchent de lui envoyer un message afin de lui en informer.',
@@ -66,7 +66,7 @@ export namespace events {
 	}
 
 	enum banButton {
-		messageUpdate = '🔨 Le joueur a été retiré de la whitelist du serveur Minecraft.',
+		messageUpdate = '🔨 Le joueur a été retiré de la whitelist du serveur Minecraft par <@$discordUuid$>.',
 		reply = '<@$discordUuid$> a été retiré du serveur Minecraft avec succès.'
 	}
 
@@ -94,8 +94,8 @@ export namespace commands {
 	}
 
 	enum deleteEntryCommand {
-		messageUpdate = '🗑️ L\'utilisateur a été supprimé de la base de données.',
-		reply = 'L\'utilisateur à été supprimé de la whitelist et de la base de données avec succès.',
+		messageUpdate = '🗑️ L\'utilisateur a été supprimé de la whitelist et de la base de données.',
+		reply = '<@$discordUuid$> à été supprimé de la whitelist et de la base de données avec succès.',
 		description = 'Supprime une rangée dans la base de données.',
 		userIdOption = 'Retirer l\'entrée pour quel UUID Discord ?'
 	}
@@ -180,9 +180,9 @@ export namespace errors {
 
 	enum rconErrors {
 		connexionError = 'Une erreur est survenue lors de la connexion au serveur avec RCON.',
-		add = `${connexionError} L'ajout du joueur à la whitelist doit être effectué manuellement.`,
-		edit = `${connexionError} La modification de la whitelist doit être effectuée manuellement.`,
-		remove = `${connexionError} Le retrait du joueur dans la whitelist doit être effectué manuellement.`
+		add = `${connexionError} L'ajout du joueur ($username$) à la whitelist doit être effectué manuellement.`,
+		edit = `${connexionError} La modification de la whitelist doit être effectuée manuellement (retrait de $oldUsername$ et ajout de $newUsername$).`,
+		remove = `${connexionError} Le retrait du joueur ($username$) dans la whitelist doit être effectué manuellement.`
 	}
 
 	export import database = databaseErrors;

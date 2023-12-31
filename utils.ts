@@ -1,7 +1,9 @@
-import { ChannelType, Client, Colors, GatewayIntentBits, Guild, PermissionsBitField, Role, TextChannel } from "discord.js";
+import { ChannelType, Client, Colors, GatewayIntentBits, Guild, GuildMember, PermissionsBitField, Role, TextChannel } from "discord.js";
 import * as Models from './models';
 import * as Constants from './bot-constants';
 import * as Config from './config';
+import * as Strings from './strings';
+
 export const client = new Client({
 	intents: [
 		GatewayIntentBits.Guilds,
@@ -52,7 +54,16 @@ export async function fetchPlayerRole(guild: Guild): Promise<Role> {
 	});
 }
 
-export function formatDate(dateToFormat: Date) {
+export async function fetchGuildMember(guild: Guild, id: string): Promise<GuildMember> {
+	try {
+		return await guild.members.fetch(id);
+	}
+	catch {
+		throw Error(Strings.errors.noDiscordUserWithThisUuid);
+	}
+}
+
+export function formatDate(dateToFormat: Date): string {
 	let parts = dateToFormat.toString().split(" ");
 	let datePart = parts[0];
 	let timePart = parts[1];

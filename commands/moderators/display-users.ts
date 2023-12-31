@@ -9,7 +9,7 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('afficher')
 		.setDescription(Strings.commands.displayUsers.description)
-		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+		.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
 		.addStringOption(option =>
 			option.setName('statut')
 				.setDescription(Strings.commands.displayUsers.statusOptionDescription)

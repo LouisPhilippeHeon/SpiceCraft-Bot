@@ -26,9 +26,10 @@ module.exports = {
             let mojangUser = await getMojangAccountForNewUsername(newUsername, discordUuid);
             
             const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
-            await RconService.whitelistReplaceUsername(mojangUser.id, user.minecraft_uuid);
 
             await DatabaseService.changeMinecraftUuid(discordUuid, mojangUser.id);
+            await RconService.whitelistReplaceUsername(mojangUser.id, user.minecraft_uuid);
+            
             await interaction.reply(Strings.commands.editUsername.confirmationMessage);
         }
         catch (e) {

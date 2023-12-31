@@ -4,15 +4,17 @@ import * as Models from '../models';
 import * as Utils from '../utils';
 
 export async function createApprovalRequest(user: User, guild: Guild, username: string, inviter: string) {
-	const approve = new ButtonBuilder()
-		.setCustomId(`approve_${user.id}`)
-		.setLabel(Strings.components.buttons.approve)
-		.setStyle(ButtonStyle.Success);
+	const approve = new ButtonBuilder({
+		customId: `approve_${user.id}`,
+		label: Strings.components.buttons.approve,
+		style: ButtonStyle.Success
+	});
 
-	const reject = new ButtonBuilder()
-		.setCustomId(`reject_${user.id}`)
-		.setLabel(Strings.components.buttons.reject)
-		.setStyle(ButtonStyle.Danger);
+	const reject = new ButtonBuilder({
+		customId: `reject_${user.id}`,
+		label: Strings.components.buttons.reject,
+		style: ButtonStyle.Danger
+	});
 
 	let description: string;
 
@@ -21,10 +23,11 @@ export async function createApprovalRequest(user: User, guild: Guild, username: 
 	else
 		description = Strings.components.descriptions.approvalRequest.replace('$discordUuid$', user.id).replace('$username$', username);
 
-	const approvalRequestEmbed = new EmbedBuilder()
-		.setTitle(Strings.components.titles.approvalRequest.replace('$discordUsername$', user.username))
-		.setDescription(description)
-		.setThumbnail(user.displayAvatarURL({ size: 256 }));
+	const approvalRequestEmbed = new EmbedBuilder({
+		title: Strings.components.titles.approvalRequest.replace('$discordUsername$', user.username),
+		description: description,
+		thumbnail: { url: user.displayAvatarURL({ size: 256 }) }
+	});
 
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(approve, reject);
 
@@ -32,20 +35,23 @@ export async function createApprovalRequest(user: User, guild: Guild, username: 
 }
 
 export async function createUsernameChangeRequest(user: User, guild: Guild, userFromMojangApi: Models.UserFromMojangApi) {
-	const approve = new ButtonBuilder()
-		.setCustomId(`update_${user.id}_${userFromMojangApi.id}`)
-		.setLabel(Strings.components.buttons.approve)
-		.setStyle(ButtonStyle.Success);
+	const approve = new ButtonBuilder({
+		customId: `update_${user.id}_${userFromMojangApi.id}`,
+		label: Strings.components.buttons.approve,
+		style: ButtonStyle.Success
+	});
 
-	const ignore = new ButtonBuilder()
-		.setCustomId('dissmiss')
-		.setLabel(Strings.components.buttons.doNotUpdate)
-		.setStyle(ButtonStyle.Secondary);
+	const ignore = new ButtonBuilder({
+		customId: 'dissmiss',
+		label: Strings.components.buttons.doNotUpdate,
+		style: ButtonStyle.Secondary
+	});
 
-	const approvalRequestEmbed = new EmbedBuilder()
-		.setTitle(Strings.components.titles.usernameChangeRequest.replace('$discordUsername$', user.username))
-		.setDescription(Strings.components.descriptions.usernameChangeRequest.replace('$discordUuid$', user.id).replace('$username$', userFromMojangApi.name))
-		.setThumbnail(user.displayAvatarURL({ size: 256 }));
+	const approvalRequestEmbed = new EmbedBuilder({
+		title: Strings.components.titles.usernameChangeRequest.replace('$discordUsername$', user.username),
+		description: Strings.components.descriptions.usernameChangeRequest.replace('$discordUuid$', user.id).replace('$username$', userFromMojangApi.name),
+		thumbnail: { url: user.displayAvatarURL({ size: 256 }) }
+	});
 
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(approve, ignore);
 

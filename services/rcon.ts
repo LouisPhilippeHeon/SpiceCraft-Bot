@@ -13,7 +13,7 @@ export async function whitelistAdd(uuid: string) {
 		}
 	}
 	catch {
-		throw new Error(Strings.errors.rcon.add);
+		throw new Error(Strings.errors.rcon.add.replace('$username$', username));
 	}
 }
 
@@ -28,7 +28,7 @@ export async function whitelistRemove(uuid: string) {
 		}
 	}
 	catch {
-		throw new Error(Strings.errors.rcon.remove);
+		throw new Error(Strings.errors.rcon.remove.replace('$username$', username));
 	}
 }
 
@@ -45,6 +45,6 @@ export async function whitelistReplaceUsername(newUuid: string, oldUuid: string)
 		}
 	}
 	catch {
-		throw new Error(Strings.errors.rcon.edit);
+		throw new Error(Strings.errors.rcon.edit.replace('$oldUsername$', oldUsername).replace('$newUsername$', newUsername));
 	}
 }

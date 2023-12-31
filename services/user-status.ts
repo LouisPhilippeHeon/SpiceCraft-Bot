@@ -10,17 +10,13 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
 	let member: GuildMember;
 
 	try {
-		member = await interaction.guild.members.fetch(idToEdit);
+		member = await Utils.fetchGuildMember(interaction.guild, idToEdit);
+		await DatabaseService.changeStatus(idToEdit, status);
 	}
-	catch {
-		await interaction.reply(Strings.errors.noDiscordUserWithThisUuid);
-		return;
-	}
-
-	await DatabaseService.changeStatus(idToEdit, status).catch(async (e) => {
+	catch (e) {
 		await interaction.reply(e.message);
 		return;
-	});
+	}
 
 	let role = await Utils.fetchPlayerRole(interaction.guild);
 	(status === Constants.inscriptionStatus.approved)
@@ -34,11 +30,8 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
 		else
 			await RconService.whitelistRemove(user.minecraft_uuid);
 	}
-	catch {
-		await interaction.reply((status === Constants.inscriptionStatus.approved)
-				? Strings.errors.rcon.add
-				: Strings.errors.rcon.remove);
-
+	catch (e) {
+		await interaction.reply(e.message);
 		return;
 	}
 
