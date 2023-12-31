@@ -65,6 +65,11 @@ export namespace events {
 		changeWhitelistBeforeCliking = 'N\'oublies pas de modifier manuellement la whitelist AVANT de cliquer sur le bouton !'
 	}
 
+	enum banButton {
+		messageUpdate = '🔨 Le joueur a été retiré de la whitelist du serveur Minecraft.',
+		reply = '<@$discordUuid$> a été retiré du serveur Minecraft avec succès.'
+	}
+
 	enum registerButton {
 		askIfFirstTimePlaying = 'As-tu déjà joué sur SpiceCraft ?'
 	}
@@ -73,6 +78,7 @@ export namespace events {
 	export import rejection = rejectionButton;
 	export import usernameChangeConfirmation = usernameChangeConfirmationButton;
 	export import register = registerButton;
+	export import ban = banButton;
 }
 
 export namespace commands {
@@ -173,9 +179,10 @@ export namespace errors {
 	}
 
 	enum rconErrors {
-		add = 'Une erreur est survenue lors de la connexion au serveur avec RCON. L\'ajout du joueur à la whitelist doit être effectué manuellement.',
-		edit = 'Une erreur est survenue lors de la connexion au serveur avec RCON. La modification de la whitelist doit être effectuée manuellement.',
-		remove = 'Une erreur est survenue lors de la connexion au serveur avec RCON. Le retrait du joueur dans la whitelist doit être effectué manuellement.'
+		connexionError = 'Une erreur est survenue lors de la connexion au serveur avec RCON.',
+		add = `${connexionError} L'ajout du joueur à la whitelist doit être effectué manuellement.`,
+		edit = `${connexionError} La modification de la whitelist doit être effectuée manuellement.`,
+		remove = `${connexionError} Le retrait du joueur dans la whitelist doit être effectué manuellement.`
 	}
 
 	export import database = databaseErrors;
@@ -201,7 +208,8 @@ export namespace components {
 	enum embedTitles {
 		approvalRequest = '$discordUsername$ veut être ajouté à la whitelist.',
 		usernameChangeRequest = '$discordUsername$ demande un changement de nom d\'utilisateur.',
-		userLeft = 'Un utilisateur a quitté. Faut-il le retirer de la base de données ?',
+		userLeft = 'Un utilisateur a quitté. Faut-il le retirer de la whitelist du serveur et de la base de données ?',
+		userBanned = 'Un utilisateur a été banni. Faut-il le bannir du serveur Minecraft en plus du sereur Discord ?',
 		rules = 'Les règles',
 	}
 
@@ -210,6 +218,7 @@ export namespace components {
 		approvalRequestNewUser = 'Compte Discord : <@$discordUuid$>.\nUsername Minecraft : $username$.\nPersonne qui a invité : $inviter$.',
 		usernameChangeRequest = 'Compte Discord : <@$discordUuid$>.\nNouveau username Minecraft : $username$.',
 		userLeft = 'Compte Discord : <@$discordUuid$>.',
+		userBanned = 'Compte Discord : <@$discordUuid$>.',
 		rules = '1. Jouer sur le serveur signifie que vous avez pris connaissance des règles.\n2. Il est possible de construire une base dans l\'overworld à l\'extérieur d\'un carré de 600 blocs de largeur autour de 0,0 (donc, si une des coordonnées excède +300 ou -300, vous pouvez construire votre base). Ce carré est donc réservé pour les boutiques!\n3. Assurez vous que vos constructions sur le toit du nether soient spawn-proof.\n4. Aucun grief ou vol n\'est toléré. Cela inclut boutiques, maisons et farms.\n5. Aucun hack, cheat, xray, minimap ou tout autre avantage injuste n\'est toléré, ceci inclut les ressource packs, clients, mods et autres. Les seules modifications du client autorisées sont Optifine, Iris, Sodium, Phosphore et Litematica.\n6. Le PVP est toléré uniquement si tous les participants y consentent.\n7. Les pranks sont acceptés, à condition d\'être inoffensifs et de bon goût.\n8. Respectez le territoire des autres joueurs. Ne construisez pas proche du territoire d\'un autre sans son accord.\n9. Il est interdit d\'être toxique, méchant ou rude avec un autre joueur, sur Discord ou dans le serveur Minecraft directement.\n10. La seed est privée, par conséquent il est interdit d\'essayer de la découvrir. Si un joueur est en possession de la seed du serveur, il lui est interdit de l\'utiliser pour obtenir un avantage, cela inclut trouver les slime chunks, certains biomes, des portails de l\'end, etc...\n11. Si vous voyez un ou des joueurs enfreindre ces règlements, veuillez aviser un admin le plus rapiement possible sur Discord.\n12. Si un joueur enfreint un de ces règlements, les conséquences sont à la discrétion des administrateurs.\n13. Les conséquences peuvent aller jusqu\'à un bannissement permanent, tout comme elles peuvent être plus légères.'
 	}
 

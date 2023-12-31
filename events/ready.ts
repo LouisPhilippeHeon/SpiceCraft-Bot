@@ -7,5 +7,5 @@ module.exports = {
 	execute(client: Client) {
 		DatabaseService.tags.sync();
 		console.log(`Prêt ! Connecté en tant que ${client.user.tag}`);
-	},
-};
+	}
+}

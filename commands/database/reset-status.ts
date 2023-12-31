@@ -15,4 +15,4 @@ module.exports = {
 	async execute(interaction: ChatInputCommandInteraction) {
 		await editUserStatus(interaction, inscriptionStatus.awaitingApproval);
 	}
-};
+}

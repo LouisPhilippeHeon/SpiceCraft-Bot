@@ -72,6 +72,10 @@ async function handleButtonInteraction(interaction: ButtonInteraction) {
 				assert(member.permissions.has(PermissionFlagsBits.BanMembers));
 				await manuallyModifiedWhitelist(interaction);
 				break;
+			case 'ban':
+				assert(member.permissions.has(PermissionFlagsBits.BanMembers));
+				await ban(interaction);
+				break;
 		}
 	}
 	catch (e) {
@@ -374,6 +378,27 @@ async function manuallyModifiedWhitelist(interaction: ButtonInteraction) {
 	}
 }
 
+async function ban(interaction: ButtonInteraction) {
+	const discordUuid = interaction.customId.split('_')[1];
+	const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
+
+	try {
+		await RconService.whitelistRemove(user.minecraft_uuid);
+		await DatabaseService.changeStatus(discordUuid, Constants.inscriptionStatus.rejected);
+	}
+	catch (e) {
+		await interaction.reply({ content: e.message, ephemeral: true });
+		await interaction.message.delete();
+		return;
+	}
+
+	const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
+	embedToUpdate.color = Colors.Green;
+	await interaction.message.edit({ content: Strings.events.ban.messageUpdate, embeds: [embedToUpdate], components: [] });
+
+	await interaction.reply({ content: Strings.events.ban.reply.replace('$discordUuid$', discordUuid), ephemeral: true });
+}
+
 async function deleteUser(interaction: ButtonInteraction) {
 	await interaction.message.delete();
 	const discordUuid = interaction.customId.split('_')[1];
@@ -383,7 +408,7 @@ async function deleteUser(interaction: ButtonInteraction) {
 		await RconService.whitelistRemove(user.minecraft_uuid);
 	}
 	catch {
-		await interaction.reply(Strings.errors.rcon.remove);
+		await interaction.reply({ content: Strings.errors.rcon.remove, ephemeral: true });
 		return;
 	}
 

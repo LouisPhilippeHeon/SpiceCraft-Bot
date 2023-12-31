@@ -49,7 +49,7 @@ module.exports = {
 				break;
 		}
 	}
-};
+}
 
 async function sendAsJson(interaction: ChatInputCommandInteraction, usersFromDb: Models.UserFromDb[], status: number) {
 	await interaction.reply({

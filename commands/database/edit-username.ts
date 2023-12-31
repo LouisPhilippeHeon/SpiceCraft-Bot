@@ -35,7 +35,7 @@ module.exports = {
             await interaction.reply(e.message);
         }
     }
-};
+}
 
 async function getMojangAccountForNewUsername(newUsername: string, discordUuid: string): Promise<Models.UserFromMojangApi> {
     let userFromDb = await DatabaseService.getUserByDiscordUuid(discordUuid);
