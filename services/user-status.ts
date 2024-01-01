@@ -3,7 +3,6 @@ import * as Constants from '../bot-constants';
 import * as Strings from '../strings';
 import * as Utils from '../utils';
 import { ChatInputCommandInteraction, GuildMember } from 'discord.js';
-import * as RconService from '../services/rcon';
 
 export async function editUserStatus(interaction: ChatInputCommandInteraction, status: number) {
 	const idToEdit = interaction.options.getUser('membre').id;
@@ -26,9 +25,9 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
 	try {
 		const user = await DatabaseService.getUserByDiscordUuid(idToEdit);
 		if (status === Constants.inscriptionStatus.approved)
-			await RconService.whitelistAdd(user.minecraft_uuid);
+			await user.addToWhitelist();
 		else
-			await RconService.whitelistRemove(user.minecraft_uuid);
+			await user.removeFromWhitelist();
 	}
 	catch (e) {
 		await interaction.reply(e.message);

@@ -17,13 +17,13 @@ module.exports = {
 		const discordUuid = interaction.options.getString('discord-uuid');
 		try {
 			const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
-			await DatabaseService.deleteEntry(discordUuid);
+			await user.delete();
 
 			const member = await Utils.fetchGuildMember(interaction.guild, discordUuid);
 			const role = await Utils.fetchPlayerRole(interaction.guild);
 			await member.roles.remove(role.id);
 
-			await RconService.whitelistRemove(user.minecraft_uuid);
+			await user.removeFromWhitelist();
 			await interaction.reply({ content: Strings.commands.deleteEntry.reply.replace('$discordUuid$', discordUuid), ephemeral: true });
 		}
 		catch (e) {

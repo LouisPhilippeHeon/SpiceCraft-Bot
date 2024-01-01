@@ -62,16 +62,16 @@ export async function changeMinecraftUuid(discordUuid: string, minecraftUuid: st
 }
 
 export async function getUserByDiscordUuid(discordUuid: string): Promise<Models.UserFromDb> {
-	const tag = await this.tags.findOne({ where: { discord_uuid: discordUuid } });
+    const tag = await this.tags.findOne({ where: { discord_uuid: discordUuid } });
 
-	if (tag) return structuredClone(tag.get({ plain: true }))
-	return null;
+    if (tag) return Object.assign(new Models.UserFromDb(), tag.get({plain: true}));
+    return null;
 }
 
 export async function getUserByMinecraftUuid(minecraftUuid: string): Promise<Models.UserFromDb> {
 	const tag = await this.tags.findOne({ where: { minecraft_uuid: minecraftUuid } });
 
-	if (tag) return structuredClone(tag.get({ plain: true }))
+	if (tag) return Object.assign(new Models.UserFromDb(), tag.get({plain: true}));
 	return null;
 }
 

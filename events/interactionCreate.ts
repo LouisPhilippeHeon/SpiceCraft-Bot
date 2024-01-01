@@ -6,7 +6,6 @@ import * as Constants from '../bot-constants';
 import * as Strings from '../strings';
 import { ButtonComponent, Events, ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, Message, PermissionFlagsBits } from 'discord.js';
 import * as assert from "assert";
-import * as RconService from '../services/rcon';
 
 // Ephemeral messages cannot be fetched, therefore the reference must be kept
 const ephemeralInteractions = new Map<string, ButtonInteraction>();
@@ -115,10 +114,11 @@ async function handleChatInputCommand(interaction: Models.InteractionWithCommand
 async function approveUser(interaction: ButtonInteraction) {
 	const discordUuid = interaction.customId.split('_')[1];
 	const approvalRequest = interaction.message;
-
+	const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
 	let member;
+
 	try {
-		member = await Utils.fetchGuildMember(interaction.guild, discordUuid);
+		member = await user.fetchGuildMember(interaction.guild);
 	}
 	catch (e) {
 		await interaction.reply({ content: e.message, ephemeral: true });
@@ -127,8 +127,7 @@ async function approveUser(interaction: ButtonInteraction) {
 	}
 
 	try {
-		const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
-		await RconService.whitelistAdd(user.minecraft_uuid);
+		await user.addToWhitelist();
 	}
 	catch (e) {
 		const confirmManualAdditionToWhitelist = new ButtonBuilder({
@@ -155,7 +154,7 @@ async function approveUser(interaction: ButtonInteraction) {
 	}
 
 	try {
-		await DatabaseService.changeStatus(discordUuid, Constants.inscriptionStatus.approved);
+		await user.changeStatus(Constants.inscriptionStatus.approved);
 	}
 	catch (e) {
 		await interaction.reply({ content: e.message, ephemeral: true });
@@ -282,14 +281,16 @@ async function confirmUsernameChange(interaction: ButtonInteraction) {
 	}
 
 	try {
-		member = await Utils.fetchGuildMember(interaction.guild, discordUuid);
+		member = await user.fetchGuildMember(interaction.guild);
 	}
 	catch (e) {
 		await interaction.reply(e.message);
+		await interaction.message.delete();
+		return;
 	}
 
 	try {
-		await RconService.whitelistReplaceUsername(minecraftUuid, user.minecraft_uuid);
+		await user.replaceWhitelistUsername(minecraftUuid);
 	}
 	catch (e) {
 		const confirmManualModificationOfWhitelist = new ButtonBuilder({
@@ -316,7 +317,7 @@ async function confirmUsernameChange(interaction: ButtonInteraction) {
 	}
 
 	try {
-		await DatabaseService.changeMinecraftUuid(discordUuid, minecraftUuid);
+		await user.editMinecraftUuid(minecraftUuid);
 	}
 	catch (e) {
 		await interaction.reply(e.message);
@@ -370,8 +371,8 @@ async function ban(interaction: ButtonInteraction) {
 	const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
 
 	try {
-		await RconService.whitelistRemove(user.minecraft_uuid);
-		await DatabaseService.changeStatus(discordUuid, Constants.inscriptionStatus.rejected);
+		await user.removeFromWhitelist();
+		await user.changeStatus(Constants.inscriptionStatus.rejected);
 	}
 	catch (e) {
 		await interaction.reply({ content: e.message, ephemeral: true });
@@ -389,10 +390,10 @@ async function ban(interaction: ButtonInteraction) {
 async function deleteUser(interaction: ButtonInteraction) {
 	await interaction.message.delete();
 	const discordUuid = interaction.customId.split('_')[1];
+	const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
 
 	try {
-		const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
-		await RconService.whitelistRemove(user.minecraft_uuid);
+		await user.removeFromWhitelist();
 	}
 	catch (e) {
 		await interaction.reply({ content: e.message, ephemeral: true });
@@ -401,7 +402,7 @@ async function deleteUser(interaction: ButtonInteraction) {
 
 	try {
 		// Member might have already been deleted, in this case, it will throw an error
-		await DatabaseService.deleteEntry(discordUuid);
+		await user.delete();
 	}
 	catch { }
 
