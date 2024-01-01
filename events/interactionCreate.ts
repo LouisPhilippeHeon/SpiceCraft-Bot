@@ -1,11 +1,13 @@
-import * as RegisteringService from '../services/registering';
+import * as RegisteringEvent from '../buttonEvents/registering';
 import * as Models from '../models';
 import * as DatabaseService from '../services/database';
 import * as Utils from '../utils';
 import * as Constants from '../bot-constants';
 import * as Strings from '../strings';
 import { ButtonComponent, Events, ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, Message, PermissionFlagsBits } from 'discord.js';
-import * as assert from "assert";
+import * as assert from 'assert';
+import { manuallyModifiedWhitelist } from '../buttonEvents/manually-modified-whitelist';
+import { approveUser } from '../buttonEvents/approve';
 
 // Ephemeral messages cannot be fetched, therefore the reference must be kept
 const ephemeralInteractions = new Map<string, ButtonInteraction>();
@@ -111,72 +113,7 @@ async function handleChatInputCommand(interaction: Models.InteractionWithCommand
 	}
 }
 
-async function approveUser(interaction: ButtonInteraction) {
-	const discordUuid = interaction.customId.split('_')[1];
-	const approvalRequest = interaction.message;
-	const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
-	let member;
 
-	try {
-		member = await user.fetchGuildMember(interaction.guild);
-	}
-	catch (e) {
-		await interaction.reply({ content: e.message, ephemeral: true });
-		await interaction.message.delete();
-		return;
-	}
-
-	try {
-		await user.addToWhitelist();
-	}
-	catch (e) {
-		const confirmManualAdditionToWhitelist = new ButtonBuilder({
-			customId: `manually-added-whitelist_${discordUuid}`,
-			label: Strings.components.buttons.manuallyAddedToWhitelist,
-			style: ButtonStyle.Success
-		});
-
-		const reject = new ButtonBuilder({
-			customId: `reject_${discordUuid}`,
-			label: Strings.components.buttons.reject,
-			style: ButtonStyle.Danger
-		});
-
-		const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
-		embedToUpdate.color = Colors.Yellow;
-
-		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmManualAdditionToWhitelist, reject);
-		await interaction.message.edit({ content: `${e.message} ${Strings.events.clickToConfirmChangesToWhitelist.replace('$discordUuid$', discordUuid)}`, embeds: [embedToUpdate], components: [row] });
-
-		await interaction.reply({ content: Strings.events.approbation.changeWhitelistBeforeCliking, ephemeral: true });
-
-		return;
-	}
-
-	try {
-		await user.changeStatus(Constants.inscriptionStatus.approved);
-	}
-	catch (e) {
-		await interaction.reply({ content: e.message, ephemeral: true });
-		await approvalRequest.delete();
-		return;
-	}
-
-	let role = await Utils.fetchPlayerRole(interaction.guild);
-	await member.roles.add(role);
-
-	const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
-	embedToUpdate.color = Colors.Green;
-	await interaction.message.edit({ content: Strings.events.approbation.requestGranted.replace('$discordUuid$', interaction.user.id), embeds: [embedToUpdate], components: [] });
-
-	try {
-		await member.send(Strings.events.approbation.messageSentToPlayerToConfirmInscription);
-		await interaction.reply({ content: Strings.events.approbation.success.replace('$discordUuid$', discordUuid), ephemeral: true });
-	}
-	catch {
-		await interaction.reply({ content: Strings.events.approbation.successNoDm.replace('$discordUuid$', discordUuid), ephemeral: true });
-	}
-}
 
 async function manuallyAddedToWhitelist(interaction: ButtonInteraction) {
 	const discordUuid = interaction.customId.split('_')[1];
@@ -338,33 +275,7 @@ async function confirmUsernameChange(interaction: ButtonInteraction) {
 	}
 }
 
-async function manuallyModifiedWhitelist(interaction: ButtonInteraction) {
-	const discordUuid = interaction.customId.split('_')[1];
-	const minecraftUuid = interaction.customId.split('_')[2];
-	let member;
 
-	try {
-		member = await Utils.fetchGuildMember(interaction.guild, discordUuid);
-		await DatabaseService.changeMinecraftUuid(discordUuid, minecraftUuid);
-	}
-	catch (e) {
-		await interaction.reply({ content: e.message, ephemeral: true });
-		await interaction.message.delete();
-		return;
-	}
-
-	const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
-	embedToUpdate.color = Colors.Green;
-	await interaction.message.edit({ content: Strings.events.usernameChangeConfirmation.messageUpdate.replace('$discordUuid$', interaction.user.id), embeds: [embedToUpdate], components: [] });
-
-	try {
-		await member.send(Strings.events.usernameChangeConfirmation.messageSentToConfirmUsernameChange);
-		await interaction.reply({ content: Strings.events.usernameChangeConfirmation.success.replace('$discordUuid$', discordUuid), ephemeral: true });
-	}
-	catch {
-		await interaction.reply({ content: Strings.events.usernameChangeConfirmation.successNoDm.replace('$discordUuid$', discordUuid), ephemeral: true });
-	}
-}
 
 async function ban(interaction: ButtonInteraction) {
 	const discordUuid = interaction.customId.split('_')[1];
@@ -448,7 +359,7 @@ async function inscription(interaction: ButtonInteraction) {
 		if (userFromDb.inscription_status === Constants.inscriptionStatus.rejected)
 			await interaction.reply({ content: Strings.services.registering.adminsAlreadyDeniedRequest, ephemeral: true });
 		else
-			await RegisteringService.updateExistingUser(userFromDb, interaction);
+			await RegisteringEvent.updateExistingUser(userFromDb, interaction);
 	}
 	else
 		await askIfFistTimeUser(interaction);
@@ -503,5 +414,5 @@ async function register(interaction: ButtonInteraction) {
 	}
 
 	ephemeralInteractions.delete(interaction.user.id);
-	await RegisteringService.registerUser(interaction, (interaction.customId === 'register-first-time'));
+	await RegisteringEvent.registerUser(interaction, (interaction.customId === 'register-first-time'));
 }

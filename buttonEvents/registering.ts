@@ -1,7 +1,7 @@
 import * as Constants from '../bot-constants';
-import * as HttpService from './http';
-import * as DatabaseService from './database';
-import * as AdminApprovalService from './admin-approval';
+import * as HttpService from '../services/http';
+import * as DatabaseService from '../services/database';
+import * as AdminApprovalService from '../services/admin-approval';
 import * as Strings from '../strings';
 import * as Utils from '../utils';
 import * as Models from '../models';
