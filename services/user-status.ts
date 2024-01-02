@@ -11,18 +11,11 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
 	try {
 		member = await Utils.fetchGuildMember(interaction.guild, idToEdit);
 		await DatabaseService.changeStatus(idToEdit, status);
-	}
-	catch (e) {
-		await interaction.reply(e.message);
-		return;
-	}
 
-	let role = await Utils.fetchPlayerRole(interaction.guild);
-	(status === Constants.inscriptionStatus.approved)
-			? await member.roles.add(role.id)
-			: await member.roles.remove(role.id);
+		(status === Constants.inscriptionStatus.approved)
+				? await Utils.addPlayerRole(member)
+				: await Utils.removePlayerRole(member);
 
-	try {
 		const user = await DatabaseService.getUserByDiscordUuid(idToEdit);
 		if (status === Constants.inscriptionStatus.approved)
 			await user.addToWhitelist();

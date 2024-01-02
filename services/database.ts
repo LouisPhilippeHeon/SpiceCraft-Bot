@@ -65,7 +65,7 @@ export async function getUserByDiscordUuid(discordUuid: string): Promise<Models.
     const tag = await this.tags.findOne({ where: { discord_uuid: discordUuid } });
 
     if (tag) return Object.assign(new Models.UserFromDb(), tag.get({plain: true}));
-    return null;
+    throw new Error(Strings.errors.database.userDoesNotExist);
 }
 
 export async function getUserByMinecraftUuid(minecraftUuid: string): Promise<Models.UserFromDb> {

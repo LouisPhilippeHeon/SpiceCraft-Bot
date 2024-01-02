@@ -13,15 +13,11 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction: ChatInputCommandInteraction) {
     const discordUuid = interaction.options.getUser('membre').id;
-    const userFromDb = await DatabaseService.getUserByDiscordUuid(discordUuid);
-
-    if (!userFromDb) {
-        await interaction.reply(Strings.errors.database.userDoesNotExist);
-        return;
-    }
+    let user, usernameMinecraft;
 
     try {
-        const usernameMinecraft = await HttpService.getUsernameFromUuid(userFromDb.minecraft_uuid);
+        user = await DatabaseService.getUserByDiscordUuid(discordUuid);
+        usernameMinecraft = await HttpService.getUsernameFromUuid(user.minecraft_uuid);;
         await interaction.reply(usernameMinecraft);
     }
     catch (e) {

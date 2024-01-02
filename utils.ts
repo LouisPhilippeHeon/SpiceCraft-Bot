@@ -22,6 +22,7 @@ export function deepCloneWithJson(objectToClone: any): any {
 	return JSON.parse(JSON.stringify(objectToClone));
 }
 
+// TODO add parameter createIfNecessary
 export async function fetchBotChannel(guild: Guild): Promise<TextChannel> {
 	let channel = guild.channels.cache.find(channel => channel.name === Constants.whitelistChannelName) as TextChannel;
 	if (channel) return channel;
@@ -43,10 +44,11 @@ export async function fetchBotChannel(guild: Guild): Promise<TextChannel> {
 	});
 }
 
-export async function fetchPlayerRole(guild: Guild): Promise<Role> {
+export async function fetchPlayerRole(guild: Guild, createIfNecessery = true): Promise<Role> {
 	let role = guild.roles.cache.find(role => role.name.toLowerCase() == Constants.playerRoleName.toLowerCase());
 	if (role) return role;
 
+	if (!createIfNecessery) return null;
 	return await guild.roles.create({
 		name: Constants.playerRoleName,
 		color: Colors.Green,
@@ -54,13 +56,20 @@ export async function fetchPlayerRole(guild: Guild): Promise<Role> {
 	});
 }
 
+export async function addPlayerRole(member: GuildMember) {
+	const role = await fetchPlayerRole(member.guild);
+	await member.roles.add(role);
+}
+
+export async function removePlayerRole(member: GuildMember) {
+	const role = await fetchPlayerRole(member.guild);
+	await member.roles.remove(role);
+}
+
 export async function fetchGuildMember(guild: Guild, id: string): Promise<GuildMember> {
-	try {
-		return await guild.members.fetch(id);
-	}
-	catch {
+	return await guild.members.fetch(id).catch(() => {
 		throw Error(Strings.errors.noDiscordUserWithThisUuid);
-	}
+	});
 }
 
 export function formatDate(dateToFormat: Date): string {

@@ -4,13 +4,14 @@ import * as Strings from '../strings';
 import * as Utils from '../utils';
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, GuildMember, Message } from 'discord.js';
 
+let member, user;
+
 export async function approveUser(interaction: ButtonInteraction) {
     const discordUuid = interaction.customId.split('_')[1];
     const approvalRequest = interaction.message;
-    const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
-    let member;
 
     try {
+        user = await DatabaseService.getUserByDiscordUuid(discordUuid);
         member = await user.fetchGuildMember(interaction.guild);
     }
 	catch (e) {
@@ -36,8 +37,7 @@ export async function approveUser(interaction: ButtonInteraction) {
         return;
     }
 
-    let role = await Utils.fetchPlayerRole(interaction.guild);
-    await member.roles.add(role);
+    await Utils.addPlayerRole(member);
     
     await updateMessage(approvalRequest, interaction);
     await notifyMember(member, interaction, discordUuid);

@@ -8,6 +8,7 @@ import { ButtonComponent, Events, ActionRowBuilder, ButtonBuilder, ButtonInterac
 import * as assert from 'assert';
 import { manuallyModifiedWhitelist } from '../buttonEvents/manually-modified-whitelist';
 import { approveUser } from '../buttonEvents/approve';
+import { confirmEndSeason } from "../buttonEvents/confirm-new-season";
 
 // Ephemeral messages cannot be fetched, therefore the reference must be kept
 const ephemeralInteractions = new Map<string, ButtonInteraction>();
@@ -113,8 +114,6 @@ async function handleChatInputCommand(interaction: Models.InteractionWithCommand
 	}
 }
 
-
-
 async function manuallyAddedToWhitelist(interaction: ButtonInteraction) {
 	const discordUuid = interaction.customId.split('_')[1];
 	let member;
@@ -129,8 +128,7 @@ async function manuallyAddedToWhitelist(interaction: ButtonInteraction) {
 		return;
 	}
 
-	let role = await Utils.fetchPlayerRole(interaction.guild);
-	await member.roles.add(role);
+	await Utils.addPlayerRole(member);
 
 	const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
 	embedToUpdate.color = Colors.Green;
@@ -208,16 +206,10 @@ async function confirmRejectUser(interaction: ButtonInteraction) {
 async function confirmUsernameChange(interaction: ButtonInteraction) {
 	const discordUuid = interaction.customId.split('_')[1];
 	const minecraftUuid = interaction.customId.split('_')[2];
-	const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
-	let member;
-
-	if (!user) {
-		await interaction.reply(Strings.errors.database.userDoesNotExist);
-		await interaction.message.delete();
-		return;
-	}
+	let member, user;
 
 	try {
+		user = await DatabaseService.getUserByDiscordUuid(discordUuid);
 		member = await user.fetchGuildMember(interaction.guild);
 	}
 	catch (e) {
@@ -275,13 +267,12 @@ async function confirmUsernameChange(interaction: ButtonInteraction) {
 	}
 }
 
-
-
 async function ban(interaction: ButtonInteraction) {
 	const discordUuid = interaction.customId.split('_')[1];
-	const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
+	let user;
 
 	try {
+		user = await DatabaseService.getUserByDiscordUuid(discordUuid);
 		await user.removeFromWhitelist();
 		await user.changeStatus(Constants.inscriptionStatus.rejected);
 	}
@@ -301,9 +292,10 @@ async function ban(interaction: ButtonInteraction) {
 async function deleteUser(interaction: ButtonInteraction) {
 	await interaction.message.delete();
 	const discordUuid = interaction.customId.split('_')[1];
-	const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
+	let user;
 
 	try {
+		user = await DatabaseService.getUserByDiscordUuid(discordUuid);
 		await user.removeFromWhitelist();
 	}
 	catch (e) {
@@ -311,11 +303,8 @@ async function deleteUser(interaction: ButtonInteraction) {
 		return;
 	}
 
-	try {
-		// Member might have already been deleted, in this case, it will throw an error
-		await user.delete();
-	}
-	catch { }
+	// Member might have already been deleted, in this case, it will throw an error
+	await user.delete().catch();
 
 	const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
 	embedToUpdate.color = Colors.Red;
@@ -325,44 +314,13 @@ async function deleteUser(interaction: ButtonInteraction) {
 	await interaction.reply({ content: Strings.commands.deleteEntry.reply.replace('$discordUuid$', discordUuid), ephemeral: true });
 }
 
-async function confirmEndSeason(interaction: ButtonInteraction) {
-	await interaction.message.edit({ content: Strings.commands.endSeason.seasonEnded, components: [] });
-
-	// Sending the data about to be deleted to the user performing the command
-	const users = await DatabaseService.getUsers();
-	if (users.length > 0) {
-		await interaction.user.send({
-			files: [{
-				attachment: Buffer.from(JSON.stringify(users)),
-				name: Constants.filenameSeasonSave
-			}]
-		}).catch(async () =>
-			// People using this commands are admins, therefore they should have their DMs turned on for the server anyways
-			console.log(JSON.stringify(users))
-		);
-	}
-
-	await interaction.reply({ content: Strings.commands.endSeason.newSeasonBegins, ephemeral: true });
-	DatabaseService.tags.sync({ force: true });
-	await (await Utils.fetchPlayerRole(interaction.guild)).delete();
-
-	// Not calling fetchBotChannel to avoid creating a channel if it is already deleted
-	const botChannel = interaction.guild.channels.cache.find(channel => channel.name === Constants.whitelistChannelName);
-	if (botChannel) await botChannel.delete();
-}
-
 async function inscription(interaction: ButtonInteraction) {
-	let discordUuid = interaction.user.id;
-	const userFromDb = await DatabaseService.getUserByDiscordUuid(discordUuid);
-
-	if (userFromDb) {
-		if (userFromDb.inscription_status === Constants.inscriptionStatus.rejected)
+	await DatabaseService.getUserByDiscordUuid(interaction.user.id).then(async (user) => {
+		if (user.inscription_status === Constants.inscriptionStatus.rejected)
 			await interaction.reply({ content: Strings.services.registering.adminsAlreadyDeniedRequest, ephemeral: true });
 		else
-			await RegisteringEvent.updateExistingUser(userFromDb, interaction);
-	}
-	else
-		await askIfFistTimeUser(interaction);
+			await RegisteringEvent.updateExistingUser(user, interaction);
+	}).catch(async () => await askIfFistTimeUser(interaction));
 }
 
 async function askIfFistTimeUser(interaction: ButtonInteraction) {

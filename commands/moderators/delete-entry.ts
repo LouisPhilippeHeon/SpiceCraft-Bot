@@ -18,16 +18,14 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 		const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
 		await user.delete();
 
-		const member = await Utils.fetchGuildMember(interaction.guild, discordUuid);
-		const role = await Utils.fetchPlayerRole(interaction.guild);
-		await member.roles.remove(role.id);
+		await Utils.fetchGuildMember(interaction.guild, discordUuid).then(
+			async (member) => await Utils.removePlayerRole(member)
+		).catch();
 
 		await user.removeFromWhitelist();
 		await interaction.reply({ content: Strings.commands.deleteEntry.reply.replace('$discordUuid$', discordUuid), ephemeral: true });
 	}
 	catch (e) {
-		// If user is no longer a member, ignore error thrown while trying to remove role
-		if (e.message !== 'Unknown Member')
-			await interaction.reply(e.message);
+		await interaction.reply(e.message);
 	}
 }
