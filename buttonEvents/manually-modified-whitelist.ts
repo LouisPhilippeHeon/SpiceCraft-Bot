@@ -1,12 +1,13 @@
-import { ButtonInteraction, Colors, GuildMember } from "discord.js";
+import { ButtonInteraction, Colors, GuildMember } from 'discord.js';
 import * as Utils from '../utils';
 import * as DatabaseService from '../services/database';
 import * as Strings from '../strings';
 
+let member;
+
 export async function manuallyModifiedWhitelist(interaction: ButtonInteraction) {
    const discordUuid = interaction.customId.split('_')[1];
    const minecraftUuid = interaction.customId.split('_')[2];
-   let member;
 
    try {
       member = await Utils.fetchGuildMember(interaction.guild, discordUuid);

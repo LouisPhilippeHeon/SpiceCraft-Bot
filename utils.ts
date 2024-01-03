@@ -72,6 +72,8 @@ export async function fetchGuildMember(guild: Guild, id: string): Promise<GuildM
 	});
 }
 
+// TODO replyOrFollowUp()
+
 export function formatDate(dateToFormat: Date): string {
 	let parts = dateToFormat.toString().split(" ");
 	let datePart = parts[0];
