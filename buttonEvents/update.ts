@@ -1,7 +1,7 @@
 import * as DatabaseService from '../services/database';
 import * as Strings from '../strings';
 import * as Utils from '../utils';
-import {ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, GuildMember} from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, GuildMember } from 'discord.js';
 
 let member, user;
 
@@ -12,22 +12,16 @@ export async function confirmUsernameChange(interaction: ButtonInteraction) {
     try {
         user = await DatabaseService.getUserByDiscordUuid(discordUuid);
         member = await user.fetchGuildMember(interaction.guild);
-    }
-	catch (e) {
-        await interaction.reply(e.message);
-        await interaction.message.delete();
-        return;
-    }
 
-    try {
-        await user.replaceWhitelistUsername(minecraftUuid);
-    }
-	catch (e) {
-        await rconFailed(discordUuid, minecraftUuid, interaction, e);
-        return;
-    }
+        // TODO Transformer en une méthode qui va rethrow l'erreur en plus de rconFailed()
+        try {
+            await user.replaceWhitelistUsername(minecraftUuid);
+        }
+        catch (e) {
+            await rconFailed(discordUuid, minecraftUuid, interaction, e);
+            return;
+        }
 
-    try {
         await user.editMinecraftUuid(minecraftUuid);
     }
 	catch (e) {

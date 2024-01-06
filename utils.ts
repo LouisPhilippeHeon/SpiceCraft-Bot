@@ -1,4 +1,4 @@
-import { ChannelType, Client, Colors, GatewayIntentBits, Guild, GuildMember, PermissionsBitField, Role, TextChannel } from "discord.js";
+import { ChannelType, Client, Colors, GatewayIntentBits, Guild, GuildMember, Interaction, InteractionReplyOptions, MessagePayload, PermissionsBitField, Role, TextChannel } from "discord.js";
 import * as Models from './models';
 import * as Constants from './bot-constants';
 import * as Config from './config';
@@ -72,7 +72,14 @@ export async function fetchGuildMember(guild: Guild, id: string): Promise<GuildM
 	});
 }
 
-// TODO replyOrFollowUp()
+export async function replyOrFollowUp(message: string | MessagePayload | InteractionReplyOptions, interaction: Interaction) {
+	if (!interaction.isRepliable()) return;
+
+	if (interaction.replied || interaction.deferred)
+		await interaction.followUp(message);
+	else
+		await interaction.reply(message);
+}
 
 export function formatDate(dateToFormat: Date): string {
 	let parts = dateToFormat.toString().split(" ");

@@ -13,6 +13,7 @@ import { confirmUsernameChange } from '../buttonEvents/update';
 import { deleteUser } from '../buttonEvents/delete';
 import { inscription } from '../buttonEvents/inscription';
 import { register } from '../buttonEvents/register';
+import { replyOrFollowUp } from '../utils';
 
 // Ephemeral messages cannot be fetched, therefore the reference must be kept
 export const ephemeralInteractions = new Map<string, ButtonInteraction>();
@@ -85,13 +86,11 @@ async function handleButtonInteraction(interaction: ButtonInteraction) {
 		}
 	}
 	catch (e) {
-		if (e.code === 'ERR_ASSERTION') {
-			if (!interaction.replied) await interaction.reply({ content: Strings.errors.unauthorized, ephemeral: true });
-			return;
+		if (e.code === 'ERR_ASSERTION')	await replyOrFollowUp({ content: Strings.errors.unauthorized, ephemeral: true }, interaction);
+		else {
+			console.error(e);
+			await replyOrFollowUp({ content: Strings.errors.generic, ephemeral: true }, interaction);
 		}
-
-		console.error(e);
-		if (!interaction.replied) await interaction.reply({ content: Strings.errors.generic, ephemeral: true });
 	}
 }
 
@@ -110,10 +109,6 @@ async function handleChatInputCommand(interaction: Models.InteractionWithCommand
 	}
 	catch (error) {
 		console.error(error);
-
-		if (interaction.replied || interaction.deferred)
-			await interaction.followUp({ content: Strings.errors.commandExecution, ephemeral: true });
-		else
-			await interaction.reply({ content: Strings.errors.commandExecution, ephemeral: true });
+		await replyOrFollowUp({ content: Strings.errors.commandExecution, ephemeral: true }, interaction);
 	}
 }
