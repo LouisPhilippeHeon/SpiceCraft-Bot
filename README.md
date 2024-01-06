@@ -2,14 +2,14 @@
 ## En bref...
 ### Inscription
 Le but du bot est de permettre aux membres d'un serveur Discord de faire une demande pour être ajouté sur la whitelist d'un serveur Minecraft.<br>
-Les membres cliquent sur un bouton, puis le bot lui envoie un message pour compléter l'inscription.
+Les membres cliquent sur un bouton, puis le bot lui envoie un message pour compléter l'inscription.<br>
 <img width="865" alt="Capture d’écran, le 2023-11-15 à 08 53 18" src="https://github.com/LouisPhilippeHeon/SpiceCraft-Bot/assets/83369199/5152a8ed-f3bc-4a99-a7e5-5171c9e5f011">
 
 Plus spécifiquement, le membre fourni son nom d'utilisateur Minecraft et confirme qu'il accepte les règles.
 <img width="809" alt="Capture d’écran, le 2023-11-15 à 09 15 53" src="https://github.com/LouisPhilippeHeon/SpiceCraft-Bot/assets/83369199/00c7893c-edec-43a3-a5aa-25fb5430a016"><br>
 Le nom d'utilisateur est validé avec l'API de Mojang.<br>
 ### L'administrateur est en contrôle
-Permet à l'administrateur d'accepter la demande (et indiquer que le membre est ajouté à la whitelist).
+Permet à l'administrateur d'accepter la demande (et indiquer que le membre est ajouté à la whitelist).<br>
 <img width="429" alt="Capture d’écran, le 2023-11-15 à 09 14 08" src="https://github.com/LouisPhilippeHeon/SpiceCraft-Bot/assets/83369199/72938e82-d5fe-4657-a7b0-39bba7ffab04">
 
 # Commandes
