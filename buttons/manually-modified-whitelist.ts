@@ -1,7 +1,10 @@
-import { ButtonInteraction, Colors, GuildMember } from 'discord.js';
+import { ButtonInteraction, Colors, GuildMember, PermissionFlagsBits } from 'discord.js';
 import * as Utils from '../utils';
 import * as DatabaseService from '../services/database';
 import * as Strings from '../strings';
+import { ButtonData } from '../models';
+
+export const data = new ButtonData('manually-modified-whitelist', PermissionFlagsBits.BanMembers);
 
 let member;
 

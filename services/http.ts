@@ -17,9 +17,8 @@ export function getMojangUser(username: string): Promise<UserFromMojangApi> {
 				catch (e) {
 					reject(e);
 				}
-				if ((body as MojangApiError).errorMessage != null) {
+				if ((body as MojangApiError).errorMessage)
 					reject(new Error(Strings.errors.api.noMojangAccountWithThatUsername));
-				}
 				resolve(body as UserFromMojangApi);
 			});
 		});
@@ -44,9 +43,8 @@ export function getUsernameFromUuid(uuid: string): Promise<string> {
 				catch (e) {
 					reject(e);
 				}
-				if (body.name === null) {
+				if (!body.name)
 					reject(new Error(Strings.errors.api.noMojangAccountWithThatUuid));
-				}
 				resolve(body.name);
 			});
 		});

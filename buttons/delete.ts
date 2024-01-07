@@ -1,12 +1,16 @@
+import { ButtonData } from '../models';
 import * as DatabaseService from '../services/database';
 import * as Strings from '../strings';
 import * as Utils from '../utils';
-import { ButtonInteraction, Colors } from 'discord.js';
+import { ButtonInteraction, Colors, PermissionFlagsBits } from 'discord.js';
+
+export const data = new ButtonData('delete', PermissionFlagsBits.Administrator);
+
+let user;
 
 export async function deleteUser(interaction: ButtonInteraction) {
     await interaction.message.delete();
     const discordUuid = interaction.customId.split('_')[1];
-    let user;
 
     try {
         user = await DatabaseService.getUserByDiscordUuid(discordUuid);

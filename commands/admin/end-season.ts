@@ -8,7 +8,7 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction: ChatInputCommandInteraction) {
 	const confirm = new ButtonBuilder({
-		customId: 'confirm-new-season',
+		customId: 'confirm-end-season',
 		label: Strings.components.buttons.endSeason,
 		style: ButtonStyle.Danger
 	});

@@ -1,8 +1,11 @@
-import { ButtonInteraction, Colors, GuildMember, Message } from 'discord.js';
+import { ButtonInteraction, Colors, GuildMember, Message, PermissionFlagsBits } from 'discord.js';
 import * as Utils from '../utils';
 import * as DatabaseService from '../services/database';
 import * as Strings from '../strings';
 import * as Constants from '../bot-constants';
+import { ButtonData } from '../models';
+
+export const data = new ButtonData('confirm-reject', PermissionFlagsBits.BanMembers);
 
 let member;
 let statusChanged = false;
@@ -26,7 +29,7 @@ export async function confirmRejectUser(interaction: ButtonInteraction) {
             await interaction.reply(e.message + '\n' + Strings.events.rejection.userStillInBdExplanation.replace('$discordUuid$', discordUuid));
         else
             await interaction.reply({ content: e.message, ephemeral: true });
-        if (approvalRequest !== undefined) await approvalRequest.delete();
+        if (approvalRequest) await approvalRequest.delete();
         return;
     }
 
@@ -35,7 +38,7 @@ export async function confirmRejectUser(interaction: ButtonInteraction) {
 }
 
 async function updateApprovalRequest(approvalRequest: Message, interaction: ButtonInteraction) {
-    if (approvalRequest !== undefined) {
+    if (approvalRequest) {
         const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
         embedToUpdate.color = Colors.Red;
         await approvalRequest.edit({ content: Strings.events.rejection.requestDenied.replace('$discordUuid$', interaction.user.id), embeds: [embedToUpdate], components: [] });

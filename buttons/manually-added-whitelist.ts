@@ -1,12 +1,17 @@
-import { ButtonInteraction, Colors } from 'discord.js';
+import { ButtonInteraction, Colors, PermissionFlagsBits } from 'discord.js';
 import * as Utils from '../utils';
 import * as DatabaseService from '../services/database';
 import * as Strings from '../strings';
 import * as Constants from '../bot-constants';
+import { ButtonData } from '../models';
+
+export const data = new ButtonData('manually-added-whitelist', PermissionFlagsBits.BanMembers);
 
 let member;
+let interaction: ButtonInteraction;
 
-export async function manuallyAddedToWhitelist(interaction: ButtonInteraction) {
+export async function manuallyAddedToWhitelist(buttonInteraction: ButtonInteraction) {
+    interaction = buttonInteraction;
     const discordUuid = interaction.customId.split('_')[1];
 
     try {
@@ -20,7 +25,7 @@ export async function manuallyAddedToWhitelist(interaction: ButtonInteraction) {
     }
 
     await Utils.addPlayerRole(member);
-    await updateEmbed(interaction);
+    await updateEmbed();
 
     try {
         await member.send(Strings.events.approbation.messageSentToPlayerToConfirmInscription);
@@ -31,7 +36,7 @@ export async function manuallyAddedToWhitelist(interaction: ButtonInteraction) {
     }
 }
 
-async function updateEmbed(interaction: ButtonInteraction) {
+async function updateEmbed() {
     const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
     embedToUpdate.color = Colors.Green;
     await interaction.message.edit({ content: Strings.events.approbation.requestGranted.replace('$discordUuid$', interaction.user.id), embeds: [embedToUpdate], components: [] });

@@ -1,31 +1,19 @@
-import { ChannelType, Client, Colors, GatewayIntentBits, Guild, GuildMember, Interaction, InteractionReplyOptions, MessagePayload, PermissionsBitField, Role, TextChannel } from "discord.js";
-import * as Models from './models';
+import { ChannelType, Colors, Guild, GuildMember, Interaction, InteractionReplyOptions, MessagePayload, PermissionsBitField, Role, TextChannel } from 'discord.js';
 import * as Constants from './bot-constants';
 import * as Config from './config';
 import * as Strings from './strings';
-
-export const client = new Client({
-	intents: [
-		GatewayIntentBits.Guilds,
-		GatewayIntentBits.GuildMessages,
-		GatewayIntentBits.MessageContent,
-		GatewayIntentBits.DirectMessages,
-		GatewayIntentBits.DirectMessageReactions,
-		GatewayIntentBits.GuildMessageReactions,
-		GatewayIntentBits.GuildMembers,
-		GatewayIntentBits.GuildPresences
-	]
-}) as Models.ClientWithCommands;
+import { client } from './bot-constants';
 
 // structuredClone dosen't work in some circumstances
 export function deepCloneWithJson(objectToClone: any): any {
 	return JSON.parse(JSON.stringify(objectToClone));
 }
 
-// TODO add parameter createIfNecessary
-export async function fetchBotChannel(guild: Guild): Promise<TextChannel> {
-	let channel = guild.channels.cache.find(channel => channel.name === Constants.whitelistChannelName) as TextChannel;
+export async function fetchBotChannel(guild: Guild, createIfNecessary = true): Promise<TextChannel> | null {
+	const channel = guild.channels.cache.find(channel => channel.name === Constants.whitelistChannelName) as TextChannel;
 	if (channel) return channel;
+
+	if (!createIfNecessary) return null;
 
 	return await guild.channels.create({
 		name: Constants.whitelistChannelName,
@@ -44,15 +32,15 @@ export async function fetchBotChannel(guild: Guild): Promise<TextChannel> {
 	});
 }
 
-export async function fetchPlayerRole(guild: Guild, createIfNecessery = true): Promise<Role> {
-	let role = guild.roles.cache.find(role => role.name.toLowerCase() == Constants.playerRoleName.toLowerCase());
+export async function fetchPlayerRole(guild: Guild, createIfNecessery = true): Promise<Role> | null {
+	const role = guild.roles.cache.find(role => role.name.toLowerCase() === Constants.playerRoleName.toLowerCase());
 	if (role) return role;
 
 	if (!createIfNecessery) return null;
 	return await guild.roles.create({
 		name: Constants.playerRoleName,
 		color: Colors.Green,
-		reason: 'Le rôle pour les joueurs n\'existait pas, il a été créé.',
+		reason: Strings.utils.createdPlayerRole,
 	});
 }
 
@@ -82,22 +70,22 @@ export async function replyOrFollowUp(message: string | MessagePayload | Interac
 }
 
 export function formatDate(dateToFormat: Date): string {
-	let parts = dateToFormat.toString().split(" ");
-	let datePart = parts[0];
-	let timePart = parts[1];
+	const parts = dateToFormat.toString().split(' ');
+	const datePart = parts[0];
+	const timePart = parts[1];
 
-	let dateParts = datePart.split("-");
-	let year = Number(dateParts[0]);
-	let month = Number(dateParts[1]);
-	let day = Number(dateParts[2]);
+	const dateParts = datePart.split('-');
+	const year = Number(dateParts[0]);
+	const month = Number(dateParts[1]);
+	const day = Number(dateParts[2]);
 
-	let timeParts = timePart.split(":");
-	let hours = Number(timeParts[0]);
-	let minutes = Number(timeParts[1]);
+	const timeParts = timePart.split(':');
+	const hours = Number(timeParts[0]);
+	const minutes = Number(timeParts[1]);
 
-	let date = new Date(year, month - 1, day, hours, minutes);
+	const date = new Date(year, month - 1, day, hours, minutes);
 
-	let options = {
+	const options = {
 		weekday: 'long',
 		day: 'numeric',
 		month: 'long',

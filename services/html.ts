@@ -1,11 +1,13 @@
 import * as Models from '../models';
 import * as Utils from '../utils';
 import * as Strings from '../strings';
+import { client } from "../bot-constants";
+
+let rows = '';
 
 export function buildHtml(users: Models.UserFromDb[]) {
-    let rows = "";
     users.forEach(userFromDb => {
-        let user = Utils.client.users.cache.find(user => user.id == userFromDb.discord_uuid);
+        const user = client.users.cache.find(user => user.id == userFromDb.discord_uuid);
 
         rows += Strings.services.html.rowTemplate
             .replaceAll('$username$', user.username)

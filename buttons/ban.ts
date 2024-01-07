@@ -1,8 +1,11 @@
 import * as Constants from '../bot-constants';
+import { ButtonData } from '../models';
 import * as DatabaseService from '../services/database';
 import * as Strings from '../strings';
 import * as Utils from '../utils';
-import { ButtonInteraction, Colors } from 'discord.js';
+import { ButtonInteraction, Colors, PermissionFlagsBits } from 'discord.js';
+
+export const data = new ButtonData('ban', PermissionFlagsBits.BanMembers);
 
 let user;
 

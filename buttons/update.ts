@@ -1,32 +1,30 @@
+import { ButtonData, UserFromDb } from '../models';
 import * as DatabaseService from '../services/database';
 import * as Strings from '../strings';
 import * as Utils from '../utils';
-import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, GuildMember } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, GuildMember, PermissionFlagsBits } from 'discord.js';
+
+export const data = new ButtonData('update', PermissionFlagsBits.BanMembers);
 
 let member, user;
+let interaction: ButtonInteraction;
 
-export async function confirmUsernameChange(interaction: ButtonInteraction) {
+export async function confirmUsernameChange(buttonInteraction: ButtonInteraction) {
+    interaction = buttonInteraction;
     const discordUuid = interaction.customId.split('_')[1];
     const minecraftUuid = interaction.customId.split('_')[2];
 
     try {
         user = await DatabaseService.getUserByDiscordUuid(discordUuid);
         member = await user.fetchGuildMember(interaction.guild);
-
-        // TODO Transformer en une méthode qui va rethrow l'erreur en plus de rconFailed()
-        try {
-            await user.replaceWhitelistUsername(minecraftUuid);
-        }
-        catch (e) {
-            await rconFailed(discordUuid, minecraftUuid, interaction, e);
-            return;
-        }
-
+        await modifyWhitelist(user, minecraftUuid, discordUuid);
         await user.editMinecraftUuid(minecraftUuid);
     }
 	catch (e) {
-        await interaction.reply(e.message);
-        await interaction.message.delete();
+        if (e.message !== 'rconFailed') {
+            await interaction.reply(e.message);
+            await interaction.message.delete();
+        }
         return;
     }
    
@@ -34,7 +32,17 @@ export async function confirmUsernameChange(interaction: ButtonInteraction) {
     await notifyMember(member, interaction, discordUuid);
 }
 
-async function rconFailed(discordUuid: string, minecraftUuid: string, interaction: ButtonInteraction, e: Error) {
+async function modifyWhitelist(user: UserFromDb, minecraftUuid: string, discordUuid: string) {
+    try {
+        await user.replaceWhitelistUsername(minecraftUuid);
+    }
+    catch (e) {
+        await rconFailed(discordUuid, minecraftUuid, e);
+        throw new Error('rconFailed');
+    }
+}
+
+async function rconFailed(discordUuid: string, minecraftUuid: string, e: Error) {
     const confirmManualModificationOfWhitelist = new ButtonBuilder({
         customId: `manually-modified-whitelist_${discordUuid}_${minecraftUuid}`,
         label: Strings.components.buttons.manuallyEditedWhitelist,

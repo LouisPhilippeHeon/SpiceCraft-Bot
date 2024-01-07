@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
+import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import * as DatabaseService from '../../services/database';
 import * as HttpService from '../../services/http';
 import * as Strings from '../../strings';

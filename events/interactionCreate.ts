@@ -2,21 +2,18 @@ import * as Models from '../models';
 import * as Strings from '../strings';
 import * as assert from 'assert';
 import { Events, ButtonInteraction, PermissionFlagsBits } from 'discord.js';
-import { manuallyModifiedWhitelist } from '../buttonEvents/manually-modified-whitelist';
-import { approveUser } from '../buttonEvents/approve';
-import { confirmEndSeason } from '../buttonEvents/confirm-new-season';
-import { confirmRejectUser } from '../buttonEvents/confirm-reject';
-import { rejectUser } from '../buttonEvents/reject';
-import { manuallyAddedToWhitelist } from '../buttonEvents/manually-added-whitelist';
-import { ban } from '../buttonEvents/ban';
-import { confirmUsernameChange } from '../buttonEvents/update';
-import { deleteUser } from '../buttonEvents/delete';
-import { inscription } from '../buttonEvents/inscription';
-import { register } from '../buttonEvents/register';
+import { manuallyModifiedWhitelist } from '../buttons/manually-modified-whitelist';
+import { approveUser } from '../buttons/approve';
+import { confirmEndSeason } from '../buttons/confirm-end-season';
+import { confirmRejectUser } from '../buttons/confirm-reject';
+import { rejectUser } from '../buttons/reject';
+import { manuallyAddedToWhitelist } from '../buttons/manually-added-whitelist';
+import { ban } from '../buttons/ban';
+import { confirmUsernameChange } from '../buttons/update';
+import { deleteUser } from '../buttons/delete';
+import { inscription } from '../buttons/inscription';
+import { register } from '../buttons/register';
 import { replyOrFollowUp } from '../utils';
-
-// Ephemeral messages cannot be fetched, therefore the reference must be kept
-export const ephemeralInteractions = new Map<string, ButtonInteraction>();
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -43,12 +40,11 @@ async function handleButtonInteraction(interaction: ButtonInteraction) {
 				assert(member.permissions.has(PermissionFlagsBits.BanMembers));
 				await interaction.message.delete();
 				break;
-			case 'confirm-new-season':
+			case 'confirm-end-season':
 				assert(member.permissions.has(PermissionFlagsBits.Administrator));
 				await confirmEndSeason(interaction);
 				break;
-			case 'register-first-time':
-			case 'register-not-first-time':
+			case 'register':
 				await register(interaction);
 				break;
 			case 'confirm-reject':

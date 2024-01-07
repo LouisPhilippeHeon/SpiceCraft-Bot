@@ -1,10 +1,11 @@
-import {Client, Collection, Guild, GuildMember, Interaction} from "discord.js";
+import { Client, Collection, Guild, GuildMember, Interaction } from 'discord.js';
 import * as DatabaseService from './services/database';
 import * as RconService from './services/rcon';
 import * as Utils from './utils';
 
 export interface ClientWithCommands extends Client {
     commands: Collection<string, any>;
+    buttons: Collection<string, any>;
 }
 
 export type InteractionWithCommands = Interaction & {
@@ -20,6 +21,16 @@ export interface MojangApiError {
     path: string;
     error: string;
     errorMessage: string;
+}
+
+export class ButtonData {
+    name: string;
+    permissions: BigInt;
+
+    constructor(name: string, permisions?: BigInt) {
+        this.name = name;
+        this.permissions = permisions;
+    }
 }
 
 export class UserFromDb {
@@ -54,7 +65,6 @@ export class UserFromDb {
         await DatabaseService.changeMinecraftUuid(this.discord_uuid, newUuid);
     }
 
-    // Remplacer par isServerMember()
     async fetchGuildMember(guild: Guild): Promise<GuildMember> {
         return await Utils.fetchGuildMember(guild, this.discord_uuid);
     }

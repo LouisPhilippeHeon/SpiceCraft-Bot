@@ -1,5 +1,8 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, PermissionFlagsBits } from 'discord.js';
 import * as Strings from '../strings';
+import { ButtonData } from '../models';
+
+export const data = new ButtonData('reject', PermissionFlagsBits.BanMembers);
 
 export async function rejectUser(interaction: ButtonInteraction) {
     const discordUuid = interaction.customId.split('_')[1];

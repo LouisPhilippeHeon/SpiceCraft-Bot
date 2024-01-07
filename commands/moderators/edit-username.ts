@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import * as DatabaseService from '../../services/database';
 import * as HttpService from '../../services/http';
 import * as Strings from '../../strings';
@@ -44,7 +44,7 @@ async function getMojangAccountForNewUsername(newUsername: string, discordUuid: 
 
     let userFromMojangApi = await HttpService.getMojangUser(newUsername);
 
-    if (userFromDb.minecraft_uuid == userFromMojangApi.id)
+    if (userFromDb.minecraft_uuid === userFromMojangApi.id)
         throw new Error(Strings.commands.editUsername.usernameIdenticalToPreviousOne);
 
     return userFromMojangApi;

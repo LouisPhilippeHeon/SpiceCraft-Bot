@@ -2,38 +2,30 @@ import * as Constants from '../bot-constants';
 import * as DatabaseService from '../services/database';
 import * as Strings from '../strings';
 import * as Utils from '../utils';
-import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, GuildMember, Message } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, GuildMember, Message, PermissionFlagsBits } from 'discord.js';
+import { ButtonData, UserFromDb } from '../models';
+
+export const data = new ButtonData('terminer-saison', PermissionFlagsBits.BanMembers);
 
 let member, user;
+let interaction: ButtonInteraction;
 
-export async function approveUser(interaction: ButtonInteraction) {
+export async function approveUser(buttonInteraction: ButtonInteraction) {
+    interaction = buttonInteraction;
     const discordUuid = interaction.customId.split('_')[1];
     const approvalRequest = interaction.message;
 
     try {
         user = await DatabaseService.getUserByDiscordUuid(discordUuid);
         member = await user.fetchGuildMember(interaction.guild);
-    }
-	catch (e) {
-        await interaction.reply({ content: e.message, ephemeral: true });
-        await interaction.message.delete();
-        return;
-    }
-
-    try {
-        await user.addToWhitelist();
-    }
-	catch (e) {
-        await rconFailed(interaction, discordUuid, e);
-        return;
-    }
-
-    try {
+        await addToWhitelist(user, discordUuid);
         await user.changeStatus(Constants.inscriptionStatus.approved);
     }
 	catch (e) {
-        await interaction.reply({ content: e.message, ephemeral: true });
-        await approvalRequest.delete();
+        if (e.message !== 'rconFailed') {
+            await interaction.reply(e.message);
+            await interaction.message.delete();
+        }
         return;
     }
 
@@ -43,7 +35,17 @@ export async function approveUser(interaction: ButtonInteraction) {
     await notifyMember(member, interaction, discordUuid);
 }
 
-async function rconFailed(interaction: ButtonInteraction, discordUuid: string, e: Error) {
+async function addToWhitelist(user: UserFromDb, discordUuid: string) {
+    try {
+        await user.addToWhitelist();
+    }
+    catch (e) {
+        await rconFailed(discordUuid, e);
+        throw new Error('rconFailed');
+    }
+}
+
+async function rconFailed(discordUuid: string, e: Error) {
     const confirmManualAdditionToWhitelist = new ButtonBuilder({
         customId: `manually-added-whitelist_${discordUuid}`,
         label: Strings.components.buttons.manuallyAddedToWhitelist,

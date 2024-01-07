@@ -1,13 +1,19 @@
 import * as Constants from '../bot-constants';
+import { ButtonData } from '../models';
 import * as DatabaseService from '../services/database';
 import * as Strings from '../strings';
 import * as Utils from '../utils';
-import { ButtonInteraction } from 'discord.js';
+import { ButtonInteraction, PermissionFlagsBits } from 'discord.js';
 
-export async function confirmEndSeason(interaction: ButtonInteraction) {
+export const data = new ButtonData('confirm-end-season', PermissionFlagsBits.Administrator);
+
+let interaction: ButtonInteraction;
+
+export async function confirmEndSeason(buttonInteraction: ButtonInteraction) {
+    interaction = buttonInteraction;
     await interaction.message.edit({ content: Strings.commands.endSeason.seasonEnded, components: [] });await
     
-    sendBackupToInteractionAuthor(interaction);
+    sendBackupToInteractionAuthor();
 
     await interaction.reply({ content: Strings.commands.endSeason.newSeasonBegins, ephemeral: true });
     DatabaseService.tags.sync({ force: true });
@@ -15,12 +21,11 @@ export async function confirmEndSeason(interaction: ButtonInteraction) {
     const playerRole = await Utils.fetchPlayerRole(interaction.guild, false);
     if (playerRole) await playerRole.delete();
     
-    // Not calling fetchBotChannel to avoid creating a channel if it is already deleted
-    const botChannel = interaction.guild.channels.cache.find(channel => channel.name === Constants.whitelistChannelName);
+    const botChannel = await Utils.fetchBotChannel(interaction.guild, false);
     if (botChannel) await botChannel.delete();
 }
 
-async function sendBackupToInteractionAuthor(interaction: ButtonInteraction) {
+async function sendBackupToInteractionAuthor() {
     const users = await DatabaseService.getUsers();
     if (users.length > 0) {
         await interaction.user.send({
