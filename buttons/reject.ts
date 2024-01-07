@@ -4,7 +4,7 @@ import { ButtonData } from '../models';
 
 export const data = new ButtonData('reject', PermissionFlagsBits.BanMembers);
 
-export async function rejectUser(interaction: ButtonInteraction) {
+export async function execute(interaction: ButtonInteraction) {
     const discordUuid = interaction.customId.split('_')[1];
 
     const confirmRejection = new ButtonBuilder({

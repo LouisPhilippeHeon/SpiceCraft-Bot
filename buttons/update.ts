@@ -9,7 +9,7 @@ export const data = new ButtonData('update', PermissionFlagsBits.BanMembers);
 let member, user;
 let interaction: ButtonInteraction;
 
-export async function confirmUsernameChange(buttonInteraction: ButtonInteraction) {
+export async function execute(buttonInteraction: ButtonInteraction) {
     interaction = buttonInteraction;
     const discordUuid = interaction.customId.split('_')[1];
     const minecraftUuid = interaction.customId.split('_')[2];

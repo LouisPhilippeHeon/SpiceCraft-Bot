@@ -9,7 +9,7 @@ export const data = new ButtonData('ban', PermissionFlagsBits.BanMembers);
 
 let user;
 
-export async function ban(interaction: ButtonInteraction) {
+export async function execute(interaction: ButtonInteraction) {
     const discordUuid = interaction.customId.split('_')[1];
 
     try {

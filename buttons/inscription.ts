@@ -14,7 +14,7 @@ let dmChannel: DMChannel;
 let userFromMojangApi: UserFromMojangApi;
 let interaction: ButtonInteraction;
 
-export async function inscription(buttonInteraction: ButtonInteraction) {
+export async function execute(buttonInteraction: ButtonInteraction) {
     interaction = buttonInteraction;
     await DatabaseService.getUserByDiscordUuid(interaction.user.id).then(async (user) => {
         if (user.inscription_status === Constants.inscriptionStatus.rejected)

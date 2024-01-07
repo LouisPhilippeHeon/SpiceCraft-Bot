@@ -10,7 +10,7 @@ export const data = new ButtonData('terminer-saison', PermissionFlagsBits.BanMem
 let member, user;
 let interaction: ButtonInteraction;
 
-export async function approveUser(buttonInteraction: ButtonInteraction) {
+export async function execute(buttonInteraction: ButtonInteraction) {
     interaction = buttonInteraction;
     const discordUuid = interaction.customId.split('_')[1];
     const approvalRequest = interaction.message;

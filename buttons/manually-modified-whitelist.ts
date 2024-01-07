@@ -8,7 +8,7 @@ export const data = new ButtonData('manually-modified-whitelist', PermissionFlag
 
 let member;
 
-export async function manuallyModifiedWhitelist(interaction: ButtonInteraction) {
+export async function execute(interaction: ButtonInteraction) {
    const discordUuid = interaction.customId.split('_')[1];
    const minecraftUuid = interaction.customId.split('_')[2];
 

@@ -8,7 +8,7 @@ export const data = new ButtonData('delete', PermissionFlagsBits.Administrator);
 
 let user;
 
-export async function deleteUser(interaction: ButtonInteraction) {
+export async function execute(interaction: ButtonInteraction) {
     await interaction.message.delete();
     const discordUuid = interaction.customId.split('_')[1];
 

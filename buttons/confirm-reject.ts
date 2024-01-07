@@ -10,7 +10,7 @@ export const data = new ButtonData('confirm-reject', PermissionFlagsBits.BanMemb
 let member;
 let statusChanged = false;
 
-export async function confirmRejectUser(interaction: ButtonInteraction) {
+export async function execute(interaction: ButtonInteraction) {
     const discordUuid = interaction.customId.split('_')[1];
     const messageUuid = interaction.customId.split('_')[2];
 

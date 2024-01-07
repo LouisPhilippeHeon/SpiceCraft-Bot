@@ -21,7 +21,7 @@ let interaction: ButtonInteraction;
 let dmChannel: DMChannel;
 let userThatInvited: string = null;
 
-export async function register(interaction: ButtonInteraction) {
+export async function execute(interaction: ButtonInteraction) {
     const argument = interaction.customId.split('_')[1];
     const interactionWithEphemeral = ephemeralInteractions.get(interaction.user.id);
 

@@ -5,6 +5,7 @@ import { token } from './config';
 import { client } from './bot-constants';
 
 client.commands = new Collection();
+client.buttons = new Collection();
 
 const commandPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(commandPath).filter(folder => !folder.endsWith('.DS_Store'));

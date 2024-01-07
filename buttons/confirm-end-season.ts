@@ -9,7 +9,7 @@ export const data = new ButtonData('confirm-end-season', PermissionFlagsBits.Adm
 
 let interaction: ButtonInteraction;
 
-export async function confirmEndSeason(buttonInteraction: ButtonInteraction) {
+export async function execute(buttonInteraction: ButtonInteraction) {
     interaction = buttonInteraction;
     await interaction.message.edit({ content: Strings.commands.endSeason.seasonEnded, components: [] });await
     

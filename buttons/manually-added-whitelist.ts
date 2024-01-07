@@ -10,7 +10,7 @@ export const data = new ButtonData('manually-added-whitelist', PermissionFlagsBi
 let member;
 let interaction: ButtonInteraction;
 
-export async function manuallyAddedToWhitelist(buttonInteraction: ButtonInteraction) {
+export async function execute(buttonInteraction: ButtonInteraction) {
     interaction = buttonInteraction;
     const discordUuid = interaction.customId.split('_')[1];
 
