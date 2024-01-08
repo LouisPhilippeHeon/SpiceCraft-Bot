@@ -21,11 +21,21 @@ let interaction: ButtonInteraction;
 let dmChannel: DMChannel;
 let userThatInvited: string = null;
 
-export async function execute(interaction: ButtonInteraction) {
+export async function execute(buttonInteraction: ButtonInteraction) {
+    interaction = buttonInteraction;
+
     const argument = interaction.customId.split('_')[1];
-    const interactionWithEphemeral = ephemeralInteractions.get(interaction.user.id);
 
     // Disable buttons and style the one that was clicked
+    await disableButtons();
+
+    ephemeralInteractions.delete(interaction.user.id);
+    await registerUser(argument === 'false');
+}
+
+async function disableButtons() {
+    const interactionWithEphemeral = ephemeralInteractions.get(interaction.user.id);
+
     if (interactionWithEphemeral) {
         let components = (await interactionWithEphemeral.fetchReply()).components[0].components;
         const row = new ActionRowBuilder<ButtonBuilder>();
@@ -44,14 +54,9 @@ export async function execute(interaction: ButtonInteraction) {
         });
         await interactionWithEphemeral.editReply({ components: [row] });
     }
-
-    ephemeralInteractions.delete(interaction.user.id);
-    await registerUser(interaction, (argument === 'false'));
 }
 
-export async function registerUser(buttonInteraction: ButtonInteraction, isFirstTimeMember: boolean) {
-    interaction = buttonInteraction;
-
+async function registerUser(isFirstTimeMember: boolean) {
     try {
         const usernameMessage = await interaction.user.send(Strings.services.registering.askWhatIsMinecraftUsername);
         dmChannel = usernameMessage.channel as DMChannel;

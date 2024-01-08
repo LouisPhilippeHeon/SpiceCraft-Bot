@@ -7,7 +7,7 @@ import { ButtonData } from '../models';
 
 export const data = new ButtonData('manually-added-whitelist', PermissionFlagsBits.BanMembers);
 
-let member;
+let member: GuildMember;
 let interaction: ButtonInteraction;
 
 export async function execute(buttonInteraction: ButtonInteraction) {
@@ -26,7 +26,16 @@ export async function execute(buttonInteraction: ButtonInteraction) {
 
     await Utils.addPlayerRole(member);
     await updateEmbed();
+    await notifyMember();
+}
 
+async function updateEmbed() {
+    const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
+    embedToUpdate.color = Colors.Green;
+    await interaction.message.edit({ content: Strings.events.approbation.requestGranted.replace('$discordUuid$', interaction.user.id), embeds: [embedToUpdate], components: [] });
+}
+
+async function notifyMember() {
     try {
         await member.send(Strings.events.approbation.messageSentToPlayerToConfirmInscription);
         await interaction.reply({ content: Strings.events.approbation.success.replace('$discordUuid$', discordUuid), ephemeral: true });
@@ -34,10 +43,4 @@ export async function execute(buttonInteraction: ButtonInteraction) {
 	catch {
         await interaction.reply({ content: Strings.events.approbation.successNoDm.replace('$discordUuid$', discordUuid), ephemeral: true });
     }
-}
-
-async function updateEmbed() {
-    const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
-    embedToUpdate.color = Colors.Green;
-    await interaction.message.edit({ content: Strings.events.approbation.requestGranted.replace('$discordUuid$', interaction.user.id), embeds: [embedToUpdate], components: [] });
 }

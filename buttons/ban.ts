@@ -8,8 +8,10 @@ import { ButtonInteraction, Colors, PermissionFlagsBits } from 'discord.js';
 export const data = new ButtonData('ban', PermissionFlagsBits.BanMembers);
 
 let user;
+let interaction: ButtonInteraction;
 
-export async function execute(interaction: ButtonInteraction) {
+export async function execute(buttonInteraction: ButtonInteraction) {
+    interaction = buttonInteraction;
     const discordUuid = interaction.customId.split('_')[1];
 
     try {
@@ -23,9 +25,13 @@ export async function execute(interaction: ButtonInteraction) {
         return;
     }
 
+    await updateEmbed();
+
+    await interaction.reply({ content: Strings.events.ban.reply.replace('$discordUuid$', discordUuid), ephemeral: true });
+}
+
+async function updateEmbed() {
     const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
     embedToUpdate.color = Colors.Green;
     await interaction.message.edit({ content: Strings.events.ban.messageUpdate.replace('$discordUuid$', interaction.user.id), embeds: [embedToUpdate], components: [] });
-
-    await interaction.reply({ content: Strings.events.ban.reply.replace('$discordUuid$', discordUuid), ephemeral: true });
 }
