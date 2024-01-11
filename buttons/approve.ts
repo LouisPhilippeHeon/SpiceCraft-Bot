@@ -5,7 +5,7 @@ import * as Utils from '../utils';
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, GuildMember, Message, PermissionFlagsBits } from 'discord.js';
 import { ButtonData, UserFromDb } from '../models';
 
-export const data = new ButtonData('terminer-saison', PermissionFlagsBits.BanMembers);
+export const data = new ButtonData('approve', PermissionFlagsBits.BanMembers);
 
 let member, user;
 let interaction: ButtonInteraction;

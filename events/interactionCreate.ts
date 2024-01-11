@@ -23,7 +23,6 @@ async function handleButtonInteraction(interaction: Models.InteractionWithComman
 	const member = interaction.guild.members.resolve(interaction.user);
 	const button = interaction.client.buttons.get(buttonName);
 
-
 	if (!button) {
 		console.error(Strings.errors.buttonNotFound.replace('$button$', interaction.customId));
 		return;
