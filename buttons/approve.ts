@@ -22,7 +22,7 @@ export async function execute(buttonInteraction: ButtonInteraction) {
         await user.changeStatus(Constants.inscriptionStatus.approved);
     }
 	catch (e) {
-        if (e.message !== 'rconFailed') {
+        if (e.message !== 'rcon-failed') {
             await interaction.reply(e.message);
             await interaction.message.delete();
         }
@@ -41,7 +41,7 @@ async function addToWhitelist(user: UserFromDb, discordUuid: string) {
     }
     catch (e) {
         await rconFailed(discordUuid, e);
-        throw new Error('rconFailed');
+        throw new Error('rcon-failed');
     }
 }
 

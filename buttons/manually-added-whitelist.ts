@@ -1,4 +1,4 @@
-import { ButtonInteraction, Colors, PermissionFlagsBits } from 'discord.js';
+import { ButtonInteraction, Colors, GuildMember, PermissionFlagsBits } from 'discord.js';
 import * as Utils from '../utils';
 import * as DatabaseService from '../services/database';
 import * as Strings from '../strings';
@@ -9,10 +9,11 @@ export const data = new ButtonData('manually-added-whitelist', PermissionFlagsBi
 
 let member: GuildMember;
 let interaction: ButtonInteraction;
+let discordUuid: string;
 
 export async function execute(buttonInteraction: ButtonInteraction) {
     interaction = buttonInteraction;
-    const discordUuid = interaction.customId.split('_')[1];
+    discordUuid = interaction.customId.split('_')[1];
 
     try {
         member = await Utils.fetchGuildMember(interaction.guild, discordUuid);

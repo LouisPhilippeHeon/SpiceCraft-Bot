@@ -21,7 +21,7 @@ export async function execute(buttonInteraction: ButtonInteraction) {
         await user.editMinecraftUuid(minecraftUuid);
     }
 	catch (e) {
-        if (e.message !== 'rconFailed') {
+        if (e.message !== 'rcon-failed') {
             await interaction.reply(e.message);
             await interaction.message.delete();
         }
@@ -38,7 +38,7 @@ async function modifyWhitelist(user: UserFromDb, minecraftUuid: string, discordU
     }
     catch (e) {
         await rconFailed(discordUuid, minecraftUuid, e);
-        throw new Error('rconFailed');
+        throw new Error('rcon-failed');
     }
 }
 
