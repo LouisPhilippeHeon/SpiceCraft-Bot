@@ -4,7 +4,7 @@ import * as AdminApprovalService from '../services/admin-approval';
 import * as Utils from '../utils';
 import * as Strings from '../strings';
 import * as Constants from '../bot-constants';
-import { UserFromDb } from "../models";
+import { UserFromDb } from '../models';
 
 module.exports = {
 	name: Events.GuildMemberRemove,

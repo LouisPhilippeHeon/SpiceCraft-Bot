@@ -5,6 +5,7 @@ export const data = new SlashCommandBuilder()
 	.setName('afficher-bouton-inscription')
 	.setDescription(Strings.commands.showInscriptionButton.description)
 	.setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
+
 export async function execute(interaction: ChatInputCommandInteraction) {
 	const register = new ButtonBuilder({
 		customId: 'inscription',

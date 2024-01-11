@@ -162,6 +162,7 @@ export namespace errors {
 	export const generic = 'Une erreur inconnue est survenue !';
 	export const commandExecution = 'Une erreur s\'est produite lors de l\'exécution de cette commande!';
 	export const commandNotFound = `Aucune commande ne corresponsant à $command$ n'a été trouvée.`;
+	export const buttonNotFound = `Aucun bouton ne corresponsant à $button$ n'a été trouvée.`;
 	export const unauthorized = 'Tu n\'as pas les permissions requises pour effectuer ceci.';
 
 	enum apiErrors {
@@ -214,9 +215,9 @@ export namespace components {
 	}
 
 	enum embedDescription {
-		approvalRequest = 'Compte Discord : <@$discordUuid$>.\nUsername Minecraft : $username$.',
-		approvalRequestNewUser = 'Compte Discord : <@$discordUuid$>.\nUsername Minecraft : $username$.\nPersonne qui a invité : $inviter$.',
-		usernameChangeRequest = 'Compte Discord : <@$discordUuid$>.\nNouveau username Minecraft : $username$.',
+		approvalRequest = 'Compte Discord : <@$discordUuid$>.\nUsername Minecraft : `$username$`.',
+		approvalRequestNewUser = 'Compte Discord : <@$discordUuid$>.\nUsername Minecraft : `$username$`.\nPersonne qui a invité : $inviter$.',
+		usernameChangeRequest = 'Compte Discord : <@$discordUuid$>.\nNouveau username Minecraft : `$username$`.',
 		userLeft = 'Compte Discord : <@$discordUuid$>.',
 		userBanned = 'Compte Discord : <@$discordUuid$>.',
 		rules = '1. Jouer sur le serveur signifie que vous avez pris connaissance des règles.\n2. Il est possible de construire une base dans l\'overworld à l\'extérieur d\'un carré de 600 blocs de largeur autour de 0,0 (donc, si une des coordonnées excède +300 ou -300, vous pouvez construire votre base). Ce carré est donc réservé pour les boutiques!\n3. Assurez vous que vos constructions sur le toit du nether soient spawn-proof.\n4. Aucun grief ou vol n\'est toléré. Cela inclut boutiques, maisons et farms.\n5. Aucun hack, cheat, xray, minimap ou tout autre avantage injuste n\'est toléré, ceci inclut les ressource packs, clients, mods et autres. Les seules modifications du client autorisées sont Optifine, Iris, Sodium, Phosphore et Litematica.\n6. Le PVP est toléré uniquement si tous les participants y consentent.\n7. Les pranks sont acceptés, à condition d\'être inoffensifs et de bon goût.\n8. Respectez le territoire des autres joueurs. Ne construisez pas proche du territoire d\'un autre sans son accord.\n9. Il est interdit d\'être toxique, méchant ou rude avec un autre joueur, sur Discord ou dans le serveur Minecraft directement.\n10. La seed est privée, par conséquent il est interdit d\'essayer de la découvrir. Si un joueur est en possession de la seed du serveur, il lui est interdit de l\'utiliser pour obtenir un avantage, cela inclut trouver les slime chunks, certains biomes, des portails de l\'end, etc...\n11. Si vous voyez un ou des joueurs enfreindre ces règlements, veuillez aviser un admin le plus rapiement possible sur Discord.\n12. Si un joueur enfreint un de ces règlements, les conséquences sont à la discrétion des administrateurs.\n13. Les conséquences peuvent aller jusqu\'à un bannissement permanent, tout comme elles peuvent être plus légères.'
@@ -225,6 +226,10 @@ export namespace components {
 	export import buttons = buttonComponents;
 	export import titles = embedTitles;
 	export import descriptions = embedDescription;
+}
+
+export namespace utils {
+	export const createdPlayerRole = 'Le rôle pour les joueurs n\'existait pas, il a été créé.';
 }
 
 export function getStatusName(status: number): string {

@@ -5,49 +5,48 @@ import * as Strings from '../../strings';
 import * as Models from '../../models';
 import * as HtmlService from '../../services/html';
 
-module.exports = {
-	data: new SlashCommandBuilder()
-		.setName('afficher')
-		.setDescription(Strings.commands.displayUsers.description)
-		.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
-		.addStringOption(option =>
-			option.setName('statut')
-				.setDescription(Strings.commands.displayUsers.statusOptionDescription)
-				.addChoices(
-					{ name: 'Approuvé', value: Constants.inscriptionStatus.approved.toString() },
-					{ name: 'Rejeté', value: Constants.inscriptionStatus.rejected.toString() },
-					{ name: 'En attente', value: Constants.inscriptionStatus.awaitingApproval.toString() }
-				))
-		.addStringOption(option =>
-			option.setName('format')
-				.setDescription(Strings.commands.displayUsers.formatOptionDescription)
-				.addChoices(
-					{ name: 'HTML', value: 'html' },
-					{ name: 'JSON', value: 'json' },
-					{ name: 'Messages', value: 'messages' }
-				)),
-	async execute(interaction: ChatInputCommandInteraction) {
-		const status: number = interaction.options.getString('statut') ? Number(interaction.options.getString('statut')) : null;
-		const format = interaction.options.getString('format');
+export const data = new SlashCommandBuilder()
+	.setName('afficher')
+	.setDescription(Strings.commands.displayUsers.description)
+	.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
+	.addStringOption(option =>
+		option.setName('statut')
+			.setDescription(Strings.commands.displayUsers.statusOptionDescription)
+			.addChoices(
+				{ name: 'Approuvé', value: Constants.inscriptionStatus.approved.toString() },
+				{ name: 'Rejeté', value: Constants.inscriptionStatus.rejected.toString() },
+				{ name: 'En attente', value: Constants.inscriptionStatus.awaitingApproval.toString() }
+			))
+	.addStringOption(option =>
+		option.setName('format')
+			.setDescription(Strings.commands.displayUsers.formatOptionDescription)
+			.addChoices(
+				{ name: 'HTML', value: 'html' },
+				{ name: 'JSON', value: 'json' },
+				{ name: 'Messages', value: 'messages' }
+			));
 
-		const usersFromDb = await DatabaseService.getUsers(status);
+export async function execute(interaction: ChatInputCommandInteraction) {
+	const status: number = interaction.options.getString('statut') ? Number(interaction.options.getString('statut')) : null;
+	const format = interaction.options.getString('format');
 
-		if (usersFromDb.length === 0) {
-			await interaction.reply(Strings.commands.displayUsers.noUserFound);
-			return;
-		}
+	const usersFromDb = await DatabaseService.getUsers(status);
 
-		switch (format) {
-			case 'json':
-				await sendAsJson(interaction, usersFromDb, status);
-				break;
-			case 'html':
-				await sendAsHtml(interaction, usersFromDb);
-				break;
-			default:
-				await sendMessages(interaction, createMessages(usersFromDb), status);
-				break;
-		}
+	if (usersFromDb.length === 0) {
+		await interaction.reply(Strings.commands.displayUsers.noUserFound);
+		return;
+	}
+
+	switch (format) {
+		case 'json':
+			await sendAsJson(interaction, usersFromDb, status);
+			break;
+		case 'html':
+			await sendAsHtml(interaction, usersFromDb);
+			break;
+		default:
+			await sendMessages(interaction, createMessages(usersFromDb), status);
+			break;
 	}
 }
 

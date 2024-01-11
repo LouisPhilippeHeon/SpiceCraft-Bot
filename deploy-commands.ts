@@ -16,12 +16,11 @@ for (const folder of commandFolders) {
 	for (const file of commandFiles) {
 		const filePath = join(commandsPath, file);
 		const command = require(filePath);
-		if ('data' in command && 'execute' in command) {
+		
+		if ('data' in command && 'execute' in command)
 			commands.push(command.data.toJSON());
-		}
-		else {
+		else
 			console.log(`La commande ${filePath} n'a pas les propriétés "data" ou "execute".`);
-		}
 	}
 }
 
