@@ -159,10 +159,10 @@ export namespace commands {
 export namespace errors {
 	export const usernameUsedWithAnotherAccount = '⚠️ Un autre joueur est déjà inscrit avec ce nom d\'utilisateur Minecraft. S\'il s\'agit bien de ton nom d\'utilisateur, contacte un administrateur. ⚠️';
 	export const noDiscordUserWithThisUuid = 'Cet utilisateur Discord n\'est pas membre du serveur.';
-	export const generic = 'Une erreur inconnue est survenue !';
-	export const commandExecution = 'Une erreur s\'est produite lors de l\'exécution de cette commande!';
-	export const commandNotFound = `Aucune commande ne corresponsant à $command$ n'a été trouvée.`;
-	export const buttonNotFound = `Aucun bouton ne corresponsant à $button$ n'a été trouvée.`;
+	export const commandExecution = 'Une erreur s\'est produite lors de l\'exécution de cette commande !';
+	export const commandNotFound = 'Aucune commande ne corresponsant à $command$ n\'a été trouvée.';
+	export const buttonExecution = 'Une erreur inconnue s\'est produite !';
+	export const buttonNotFound = 'Aucun bouton ne corresponsant à $button$ n\'a été trouvée.';
 	export const unauthorized = 'Tu n\'as pas les permissions requises pour effectuer ceci.';
 
 	enum apiErrors {

@@ -1,13 +1,13 @@
-import * as Models from '../models';
 import * as Strings from '../strings';
 import * as assert from 'assert';
 import { Events } from 'discord.js';
 import { replyOrFollowUp } from '../utils';
+import { InteractionWithCommands } from '../models';
 
 module.exports = {
 	name: Events.InteractionCreate,
 	once: false,
-	async execute(interaction: Models.InteractionWithCommands) {
+	async execute(interaction: InteractionWithCommands) {
 		if (interaction.isButton())
 			await handleButtonInteraction(interaction);
 
@@ -16,7 +16,7 @@ module.exports = {
 	}
 }
 
-async function handleButtonInteraction(interaction: Models.InteractionWithCommands) {
+async function handleButtonInteraction(interaction: InteractionWithCommands) {
 	if (!interaction.isButton()) return;
 
 	const buttonName = interaction.customId.split('_')[0];
@@ -39,12 +39,12 @@ async function handleButtonInteraction(interaction: Models.InteractionWithComman
 		if (e.code === 'ERR_ASSERTION')	await replyOrFollowUp({ content: Strings.errors.unauthorized, ephemeral: true }, interaction);
 		else {
 			console.error(e);
-			await replyOrFollowUp({ content: Strings.errors.generic, ephemeral: true }, interaction);
+			await replyOrFollowUp({ content: Strings.errors.buttonExecution, ephemeral: true }, interaction);
 		}
 	}
 }
 
-async function handleChatInputCommand(interaction: Models.InteractionWithCommands) {
+async function handleChatInputCommand(interaction: InteractionWithCommands) {
 	if (!interaction.isChatInputCommand()) return;
 
 	const command = interaction.client.commands.get(interaction.commandName);

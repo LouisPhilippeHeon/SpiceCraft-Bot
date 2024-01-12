@@ -7,7 +7,7 @@ let rows = '';
 
 export function buildHtml(users: Models.UserFromDb[]) {
     users.forEach(userFromDb => {
-        const user = client.users.cache.find(user => user.id == userFromDb.discord_uuid);
+        const user = client.users.cache.find(user => user.id === userFromDb.discord_uuid);
 
         rows += Strings.services.html.rowTemplate
             .replaceAll('$username$', user.username)

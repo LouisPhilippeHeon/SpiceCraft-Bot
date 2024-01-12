@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
+import { UserFromDb } from '../models';
 import * as Strings from '../strings';
-import * as Models from '../models';
 
 const sequelize = new Sequelize('database', 'user', 'password', {
 	host: 'localhost',
@@ -61,27 +61,27 @@ export async function changeMinecraftUuid(discordUuid: string, minecraftUuid: st
 	if (isUnchanged) throw new Error(Strings.errors.database.userDoesNotExist);
 }
 
-export async function getUserByDiscordUuid(discordUuid: string): Promise<Models.UserFromDb> {
+export async function getUserByDiscordUuid(discordUuid: string): Promise<UserFromDb> {
     const tag = await this.tags.findOne({ where: { discord_uuid: discordUuid } });
 
-    if (tag) return Object.assign(new Models.UserFromDb(), tag.get({plain: true}));
+    if (tag) return Object.assign(new UserFromDb(), tag.get({plain: true}));
     throw new Error(Strings.errors.database.userDoesNotExist);
 }
 
-export async function getUserByMinecraftUuid(minecraftUuid: string): Promise<Models.UserFromDb | null> {
+export async function getUserByMinecraftUuid(minecraftUuid: string): Promise<UserFromDb | null> {
 	const tag = await this.tags.findOne({ where: { minecraft_uuid: minecraftUuid } });
 
-	if (tag) return Object.assign(new Models.UserFromDb(), tag.get({plain: true}));
+	if (tag) return Object.assign(new UserFromDb(), tag.get({plain: true}));
 	return null;
 }
 
-export async function getUsers(status?: number): Promise<Models.UserFromDb[]> {
-	if (status == null) return await this.tags.findAll({ raw: true });
+export async function getUsers(status?: number): Promise<UserFromDb[]> {
+	if (!status) return await this.tags.findAll({ raw: true });
 	return await this.tags.findAll({ where: { inscription_status: status }, raw: true });
 }
 
 export async function deleteEntry(discordUuid: string) {
 	const tagToDelete = await this.tags.findOne({ where: { discord_uuid: discordUuid } })
-	if (tagToDelete === null) throw new Error(Strings.errors.database.userDoesNotExist);
+	if (!tagToDelete) throw new Error(Strings.errors.database.userDoesNotExist);
 	tagToDelete.destroy();
 }

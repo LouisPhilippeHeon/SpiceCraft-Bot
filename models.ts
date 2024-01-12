@@ -1,4 +1,4 @@
-import { ButtonInteraction, Client, Collection, Guild, GuildMember, Interaction } from 'discord.js';
+import { Client, Collection, Guild, GuildMember, Interaction } from 'discord.js';
 import * as DatabaseService from './services/database';
 import * as RconService from './services/rcon';
 import * as Utils from './utils';

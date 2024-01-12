@@ -2,7 +2,7 @@ import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder }
 import * as DatabaseService from '../../services/database';
 import * as HttpService from '../../services/http';
 import * as Strings from '../../strings';
-import * as Models from '../../models';
+import { UserFromMojangApi } from '../../models';
 
 export const data = new SlashCommandBuilder()
     .setName('modifier-username')
@@ -36,7 +36,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     }
 }
 
-async function getMojangAccountForNewUsername(newUsername: string, discordUuid: string): Promise<Models.UserFromMojangApi> {
+async function getMojangAccountForNewUsername(newUsername: string, discordUuid: string): Promise<UserFromMojangApi> {
     let userFromDb = await DatabaseService.getUserByDiscordUuid(discordUuid);
 
     if (!userFromDb)

@@ -6,12 +6,14 @@ import * as Strings from '../strings';
 import * as Constants from '../bot-constants';
 import { UserFromDb } from '../models';
 
+let userFromDb;
+
 module.exports = {
 	name: Events.GuildMemberRemove,
 	once: false,
 	async execute(member: GuildMember) {
 		try {
-			const userFromDb = await DatabaseService.getUserByDiscordUuid(member.user.id);
+			userFromDb = await DatabaseService.getUserByDiscordUuid(member.user.id).catch(() => userFromDb = null);
 			if (!userFromDb) return;
 
 			// If user leaves server or was banned before his request was approved

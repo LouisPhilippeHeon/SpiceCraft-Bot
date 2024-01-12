@@ -2,8 +2,8 @@ import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder }
 import * as DatabaseService from '../../services/database';
 import * as Constants from '../../bot-constants';
 import * as Strings from '../../strings';
-import * as Models from '../../models';
 import * as HtmlService from '../../services/html';
+import { UserFromDb } from '../../models';
 
 export const data = new SlashCommandBuilder()
 	.setName('afficher')
@@ -50,7 +50,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 	}
 }
 
-async function sendAsJson(interaction: ChatInputCommandInteraction, usersFromDb: Models.UserFromDb[], status: number) {
+async function sendAsJson(interaction: ChatInputCommandInteraction, usersFromDb: UserFromDb[], status: number) {
 	await interaction.reply({
 		files: [{
 			attachment: Buffer.from(JSON.stringify(usersFromDb)),
@@ -59,7 +59,7 @@ async function sendAsJson(interaction: ChatInputCommandInteraction, usersFromDb:
 	});
 }
 
-async function sendAsHtml(interaction: ChatInputCommandInteraction, usersFromDb: Models.UserFromDb[]) {
+async function sendAsHtml(interaction: ChatInputCommandInteraction, usersFromDb: UserFromDb[]) {
 	await interaction.reply({
 		files: [{
 			attachment: Buffer.from(HtmlService.buildHtml(usersFromDb)),
@@ -68,7 +68,7 @@ async function sendAsHtml(interaction: ChatInputCommandInteraction, usersFromDb:
 	});
 }
 
-function createMessages(usersFromDb: Models.UserFromDb[]): string[] {
+function createMessages(usersFromDb: UserFromDb[]): string[] {
 	const messages = [];
 	let currentMessage = '';
 
