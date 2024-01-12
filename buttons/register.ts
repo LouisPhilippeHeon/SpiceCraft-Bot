@@ -1,12 +1,11 @@
-import * as Constants from '../bot-constants';
-import * as HttpService from '../services/http';
-import * as DatabaseService from '../services/database';
-import * as AdminApprovalService from '../services/admin-approval';
 import * as Strings from '../strings';
-import * as Models from '../models';
 import { ActionRowBuilder, ButtonBuilder, ButtonComponent, ButtonInteraction, ButtonStyle, DMChannel, EmbedBuilder, Message, MessageReaction, User } from 'discord.js';
-import { ButtonData } from '../models';
+import { ButtonData, UserFromMojangApi } from '../models';
 import { ephemeralInteractions } from '../ephemeral-interactions';
+import { createUser } from '../services/database';
+import { createApprovalRequest } from '../services/admin-approval';
+import { getMojangUser } from '../services/http';
+import { timeToWaitForUserInputBeforeTimeout } from '../bot-constants';
 
 export const data = new ButtonData('register');
 
@@ -16,7 +15,7 @@ const rulesEmbed = new EmbedBuilder({
     description: Strings.components.descriptions.rules
 });
 
-let userFromMojangApi: Models.UserFromMojangApi;
+let userFromMojangApi: UserFromMojangApi;
 let interaction: ButtonInteraction;
 let dmChannel: DMChannel;
 let userThatInvited: string = null;
@@ -74,7 +73,7 @@ async function registerUser(isFirstTimeMember: boolean) {
 
     // Collect message sent by user
     const collectorFilter = (message: Message) => message.author.id === interaction.user.id;
-    const usernameCollected = await dmChannel.awaitMessages({ filter: collectorFilter, max: 1, time: Constants.timeToWaitForUserInputBeforeTimeout });
+    const usernameCollected = await dmChannel.awaitMessages({ filter: collectorFilter, max: 1, time: timeToWaitForUserInputBeforeTimeout });
 
     if (usernameCollected.size === 0) {
         await dmChannel.send(Strings.services.registering.timeoutAnswer);
@@ -84,7 +83,7 @@ async function registerUser(isFirstTimeMember: boolean) {
     let usernameSentByUser: string = usernameCollected.first().content;
 
     try {
-        userFromMojangApi = await HttpService.getMojangUser(usernameSentByUser);
+        userFromMojangApi = await getMojangUser(usernameSentByUser);
 
         if (isFirstTimeMember) {
             await askWhoInvited();
@@ -106,7 +105,7 @@ async function askWhoInvited() {
 
     // Collect answer
     const collectorFilter = (message: Message) => message.author.id === interaction.user.id;
-    const collected = await dmChannel.awaitMessages({ filter: collectorFilter, max: 1, time: Constants.timeToWaitForUserInputBeforeTimeout });
+    const collected = await dmChannel.awaitMessages({ filter: collectorFilter, max: 1, time: timeToWaitForUserInputBeforeTimeout });
     if (collected.size === 0) throw new Error (Strings.services.registering.timeoutAnswer);
 
     userThatInvited = collected.first().content;
@@ -118,14 +117,14 @@ async function getRulesAcknowledgment() {
 
     // Collect emoji reactions
     const collectorFilter = (reaction: MessageReaction, user: User) =>  (reaction.emoji.name === '✅') && (user.id === interaction.user.id);
-    const emojisCollected = await rulesMessage.awaitReactions({ filter: collectorFilter, max: 1, time: Constants.timeToWaitForUserInputBeforeTimeout });
+    const emojisCollected = await rulesMessage.awaitReactions({ filter: collectorFilter, max: 1, time: timeToWaitForUserInputBeforeTimeout });
     if (emojisCollected.size === 0) throw new Error(Strings.services.registering.timeoutAnswer);
 }
 
 async function saveNewUserToDb() {
     try {
-        await DatabaseService.createUser(userFromMojangApi.id, interaction.user.id);
-        await AdminApprovalService.createApprovalRequest(interaction.user, interaction.guild, userFromMojangApi.name, userThatInvited);
+        await createUser(userFromMojangApi.id, interaction.user.id);
+        await createApprovalRequest(interaction.user, interaction.guild, userFromMojangApi.name, userThatInvited);
         await dmChannel.send(Strings.services.registering.waitForAdminApprobation);
     }
 	catch (e) {

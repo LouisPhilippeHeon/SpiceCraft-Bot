@@ -1,20 +1,20 @@
 import * as DatabaseService from '../services/database';
 import * as Constants from '../bot-constants';
 import * as Strings from '../strings';
-import * as Utils from '../utils';
 import { ChatInputCommandInteraction, GuildMember } from 'discord.js';
+import { addPlayerRole, fetchGuildMember, removePlayerRole } from '../utils';
 
 export async function editUserStatus(interaction: ChatInputCommandInteraction, status: number) {
 	const idToEdit = interaction.options.getUser('membre').id;
 	let member: GuildMember;
 
 	try {
-		member = await Utils.fetchGuildMember(interaction.guild, idToEdit);
+		member = await fetchGuildMember(interaction.guild, idToEdit);
 		await DatabaseService.changeStatus(idToEdit, status);
 
 		(status === Constants.inscriptionStatus.approved)
-				? await Utils.addPlayerRole(member)
-				: await Utils.removePlayerRole(member);
+				? await addPlayerRole(member)
+				: await removePlayerRole(member);
 
 		const user = await DatabaseService.getUserByDiscordUuid(idToEdit);
 		if (status === Constants.inscriptionStatus.approved)
@@ -48,6 +48,6 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
 }
 
 function getMessageToSendToUser(status: number): string {
-	if (status == Constants.inscriptionStatus.approved) return Strings.services.userStatus.dmAddedToWhitelist;
-	if (status == Constants.inscriptionStatus.rejected) return Strings.services.userStatus.dmRemovedFromWhitelist;
+	if (status === Constants.inscriptionStatus.approved) return Strings.services.userStatus.dmAddedToWhitelist;
+	if (status === Constants.inscriptionStatus.rejected) return Strings.services.userStatus.dmRemovedFromWhitelist;
 }

@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
-import * as DatabaseService from '../../services/database';
 import * as Strings from '../../strings';
-import * as Utils from '../../utils';
+import { fetchGuildMember, removePlayerRole } from '../../utils';
+import { getUserByDiscordUuid } from '../../services/database';
 
 export const data = new SlashCommandBuilder()
 	.setName('supprimer-entree')
@@ -15,11 +15,11 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction: ChatInputCommandInteraction) {
 	const discordUuid = interaction.options.getString('discord-uuid');
 	try {
-		const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
+		const user = await getUserByDiscordUuid(discordUuid);
 		await user.delete();
 
-		await Utils.fetchGuildMember(interaction.guild, discordUuid).then(
-			async (member) => await Utils.removePlayerRole(member)
+		await fetchGuildMember(interaction.guild, discordUuid).then(
+			async (member) => await removePlayerRole(member)
 		).catch();
 
 		await user.removeFromWhitelist();

@@ -1,7 +1,7 @@
 import { Client, Collection, Guild, GuildMember, Interaction } from 'discord.js';
-import * as DatabaseService from './services/database';
-import * as RconService from './services/rcon';
-import * as Utils from './utils';
+import { fetchGuildMember } from './utils';
+import { whitelistAdd, whitelistRemove, whitelistReplaceUsername } from './services/rcon';
+import { changeMinecraftUuid, changeStatus, deleteEntry } from './services/database';
 
 export interface ClientWithCommands extends Client {
     commands: Collection<string, any>;
@@ -42,30 +42,30 @@ export class UserFromDb {
     readonly updatedAt: Date;
 
     async delete() {
-        await DatabaseService.deleteEntry(this.discord_uuid);
+        await deleteEntry(this.discord_uuid);
     }
 
     async addToWhitelist() {
-        await RconService.whitelistAdd(this.minecraft_uuid);
+        await whitelistAdd(this.minecraft_uuid);
     }
 
     async removeFromWhitelist() {
-        await RconService.whitelistRemove(this.minecraft_uuid);
+        await whitelistRemove(this.minecraft_uuid);
     }
 
     async replaceWhitelistUsername(newUuid: string) {
-        await RconService.whitelistReplaceUsername(newUuid, this.minecraft_uuid);
+        await whitelistReplaceUsername(newUuid, this.minecraft_uuid);
     }
 
     async changeStatus(newStatus: number) {
-        await DatabaseService.changeStatus(this.discord_uuid, newStatus);
+        await changeStatus(this.discord_uuid, newStatus);
     }
 
     async editMinecraftUuid(newUuid: string) {
-        await DatabaseService.changeMinecraftUuid(this.discord_uuid, newUuid);
+        await changeMinecraftUuid(this.discord_uuid, newUuid);
     }
 
     async fetchGuildMember(guild: Guild): Promise<GuildMember> {
-        return await Utils.fetchGuildMember(guild, this.discord_uuid);
+        return await fetchGuildMember(guild, this.discord_uuid);
     }
 }

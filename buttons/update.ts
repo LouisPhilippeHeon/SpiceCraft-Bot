@@ -1,8 +1,8 @@
 import { ButtonData, UserFromDb } from '../models';
-import * as DatabaseService from '../services/database';
+import { getUserByDiscordUuid } from '../services/database';
 import * as Strings from '../strings';
-import * as Utils from '../utils';
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, GuildMember, PermissionFlagsBits } from 'discord.js';
+import { deepCloneWithJson } from '../utils';
 
 export const data = new ButtonData('update', PermissionFlagsBits.BanMembers);
 
@@ -15,7 +15,7 @@ export async function execute(buttonInteraction: ButtonInteraction) {
     const minecraftUuid = interaction.customId.split('_')[2];
 
     try {
-        user = await DatabaseService.getUserByDiscordUuid(discordUuid);
+        user = await getUserByDiscordUuid(discordUuid);
         member = await user.fetchGuildMember(interaction.guild);
         await modifyWhitelist(user, minecraftUuid, discordUuid);
         await user.editMinecraftUuid(minecraftUuid);
@@ -55,7 +55,7 @@ async function rconFailed(discordUuid: string, minecraftUuid: string, e: Error) 
         style: ButtonStyle.Secondary
     });
 
-    const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
+    const embedToUpdate = deepCloneWithJson(interaction.message.embeds[0]);
     embedToUpdate.color = Colors.Yellow;
 
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmManualModificationOfWhitelist, cancel);
@@ -65,7 +65,7 @@ async function rconFailed(discordUuid: string, minecraftUuid: string, e: Error) 
 }
 
 async function updateEmbed(interaction: ButtonInteraction) {
-    const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
+    const embedToUpdate = deepCloneWithJson(interaction.message.embeds[0]);
     embedToUpdate.color = Colors.Green;
     await interaction.message.edit({ content: Strings.events.usernameChangeConfirmation.messageUpdate.replace('$discordUuid$', interaction.user.id), embeds: [embedToUpdate], components: [] });
 }

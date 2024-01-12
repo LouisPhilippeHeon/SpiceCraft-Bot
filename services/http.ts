@@ -1,11 +1,11 @@
 import http = require('https');
-import * as Constants from '../bot-constants';
 import * as Strings from '../strings';
 import { MojangApiError, UserFromMojangApi } from '../models';
+import { mojangApiUrl } from '../bot-constants';
 
 export function getMojangUser(username: string): Promise<UserFromMojangApi> {
 	return new Promise((resolve, reject) => {
-		const req = http.get(`${Constants.mojangApiUrl}/users/profiles/minecraft/${username}`, (res) => {
+		const req = http.get(`${mojangApiUrl}/users/profiles/minecraft/${username}`, (res) => {
 			let body: any = [];
 			res.on('data', function (chunk) {
 				body.push(chunk);
@@ -31,7 +31,7 @@ export function getMojangUser(username: string): Promise<UserFromMojangApi> {
 
 export function getUsernameFromUuid(uuid: string): Promise<string> {
 	return new Promise((resolve, reject) => {
-		const req = http.get(`${Constants.mojangApiUrl}/user/profile/${uuid}`, (res) => {
+		const req = http.get(`${mojangApiUrl}/user/profile/${uuid}`, (res) => {
 			let body: any = [];
 			res.on('data', function (chunk) {
 				body.push(chunk);

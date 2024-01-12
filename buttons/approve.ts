@@ -1,9 +1,9 @@
-import * as Constants from '../bot-constants';
-import * as DatabaseService from '../services/database';
 import * as Strings from '../strings';
-import * as Utils from '../utils';
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, GuildMember, Message, PermissionFlagsBits } from 'discord.js';
 import { ButtonData, UserFromDb } from '../models';
+import { inscriptionStatus } from '../bot-constants';
+import { addPlayerRole, deepCloneWithJson } from '../utils';
+import { getUserByDiscordUuid } from '../services/database';
 
 export const data = new ButtonData('approve', PermissionFlagsBits.BanMembers);
 
@@ -16,10 +16,10 @@ export async function execute(buttonInteraction: ButtonInteraction) {
     const approvalRequest = interaction.message;
 
     try {
-        user = await DatabaseService.getUserByDiscordUuid(discordUuid);
+        user = await getUserByDiscordUuid(discordUuid);
         member = await user.fetchGuildMember(interaction.guild);
         await addToWhitelist(user, discordUuid);
-        await user.changeStatus(Constants.inscriptionStatus.approved);
+        await user.changeStatus(inscriptionStatus.approved);
     }
 	catch (e) {
         if (e.message !== 'rcon-failed') {
@@ -29,7 +29,7 @@ export async function execute(buttonInteraction: ButtonInteraction) {
         return;
     }
 
-    await Utils.addPlayerRole(member);
+    await addPlayerRole(member);
     
     await updateMessage(approvalRequest, interaction);
     await notifyMember(member, interaction, discordUuid);
@@ -58,7 +58,7 @@ async function rconFailed(discordUuid: string, e: Error) {
         style: ButtonStyle.Danger
     });
 
-    const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
+    const embedToUpdate = deepCloneWithJson(interaction.message.embeds[0]);
     embedToUpdate.color = Colors.Yellow;
 
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmManualAdditionToWhitelist, reject);
@@ -68,7 +68,7 @@ async function rconFailed(discordUuid: string, e: Error) {
 }
 
 async function updateMessage(approvalRequest: Message, interaction: ButtonInteraction) {
-    const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
+    const embedToUpdate = deepCloneWithJson(approvalRequest.embeds[0]);
     embedToUpdate.color = Colors.Green;
     await interaction.message.edit({ content: Strings.events.approbation.requestGranted.replace('$discordUuid$', interaction.user.id), embeds: [embedToUpdate], components: [] });
 }

@@ -1,9 +1,9 @@
 import { ButtonInteraction, Colors, GuildMember, PermissionFlagsBits } from 'discord.js';
-import * as Utils from '../utils';
-import * as DatabaseService from '../services/database';
 import * as Strings from '../strings';
-import * as Constants from '../bot-constants';
 import { ButtonData } from '../models';
+import { inscriptionStatus } from '../bot-constants';
+import { changeStatus } from '../services/database';
+import { addPlayerRole, deepCloneWithJson, fetchGuildMember } from '../utils';
 
 export const data = new ButtonData('manually-added-whitelist', PermissionFlagsBits.BanMembers);
 
@@ -16,8 +16,8 @@ export async function execute(buttonInteraction: ButtonInteraction) {
     discordUuid = interaction.customId.split('_')[1];
 
     try {
-        member = await Utils.fetchGuildMember(interaction.guild, discordUuid);
-        await DatabaseService.changeStatus(discordUuid, Constants.inscriptionStatus.approved);
+        member = await fetchGuildMember(interaction.guild, discordUuid);
+        await changeStatus(discordUuid, inscriptionStatus.approved);
     }
 	catch (e) {
         await interaction.reply({ content: e.message, ephemeral: true });
@@ -25,13 +25,13 @@ export async function execute(buttonInteraction: ButtonInteraction) {
         return;
     }
 
-    await Utils.addPlayerRole(member);
+    await addPlayerRole(member);
     await updateEmbed();
     await notifyMember();
 }
 
 async function updateEmbed() {
-    const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
+    const embedToUpdate = deepCloneWithJson(interaction.message.embeds[0]);
     embedToUpdate.color = Colors.Green;
     await interaction.message.edit({ content: Strings.events.approbation.requestGranted.replace('$discordUuid$', interaction.user.id), embeds: [embedToUpdate], components: [] });
 }

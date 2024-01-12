@@ -1,8 +1,8 @@
 import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
-import * as DatabaseService from '../../services/database';
-import * as HttpService from '../../services/http';
 import * as Strings from '../../strings';
 import { UserFromMojangApi } from '../../models';
+import { getMojangUser } from '../../services/http';
+import { getUserByDiscordUuid } from '../../services/database';
 
 export const data = new SlashCommandBuilder()
     .setName('modifier-username')
@@ -24,7 +24,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     try {
         let mojangUser = await getMojangAccountForNewUsername(newUsername, discordUuid);
 
-        const user = await DatabaseService.getUserByDiscordUuid(discordUuid);
+        const user = await getUserByDiscordUuid(discordUuid);
 
         await user.editMinecraftUuid(mojangUser.id);
         await user.replaceWhitelistUsername(mojangUser.id);
@@ -37,12 +37,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 }
 
 async function getMojangAccountForNewUsername(newUsername: string, discordUuid: string): Promise<UserFromMojangApi> {
-    let userFromDb = await DatabaseService.getUserByDiscordUuid(discordUuid);
+    let userFromDb = await getUserByDiscordUuid(discordUuid);
 
     if (!userFromDb)
         throw new Error(Strings.errors.database.userDoesNotExist);
 
-    let userFromMojangApi = await HttpService.getMojangUser(newUsername);
+    let userFromMojangApi = await getMojangUser(newUsername);
 
     if (userFromDb.minecraft_uuid === userFromMojangApi.id)
         throw new Error(Strings.commands.editUsername.usernameIdenticalToPreviousOne);

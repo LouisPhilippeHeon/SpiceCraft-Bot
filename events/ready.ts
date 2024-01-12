@@ -1,11 +1,11 @@
 import { Client, Events } from 'discord.js';
-import * as DatabaseService from '../services/database';
+import { syncTags } from '../services/database';
 
 module.exports = {
 	name: Events.ClientReady,
 	once: true,
 	execute(client: Client) {
-		DatabaseService.tags.sync();
+		syncTags();
 		console.log(`Prêt ! Connecté en tant que ${client.user.tag}`);
 	}
 }

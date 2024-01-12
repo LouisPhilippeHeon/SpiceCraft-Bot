@@ -1,8 +1,7 @@
 import { ChannelType, Colors, Guild, GuildMember, Interaction, InteractionReplyOptions, MessagePayload, PermissionsBitField, Role, TextChannel } from 'discord.js';
-import * as Constants from './bot-constants';
-import * as Config from './config';
 import * as Strings from './strings';
-import { client } from './bot-constants';
+import { client, playerRoleName, whitelistChannelName } from './bot-constants';
+import { guildId } from './config';
 
 // structuredClone dosen't work in some circumstances
 export function deepCloneWithJson(objectToClone: any): any {
@@ -10,13 +9,13 @@ export function deepCloneWithJson(objectToClone: any): any {
 }
 
 export async function fetchBotChannel(guild: Guild, createIfNecessary = true): Promise<TextChannel> | null {
-	const channel = guild.channels.cache.find(channel => channel.name === Constants.whitelistChannelName) as TextChannel;
+	const channel = guild.channels.cache.find(channel => channel.name === whitelistChannelName) as TextChannel;
 	if (channel) return channel;
 
 	if (!createIfNecessary) return null;
 
 	return await guild.channels.create({
-		name: Constants.whitelistChannelName,
+		name: whitelistChannelName,
 		type: ChannelType.GuildText,
 		permissionOverwrites: [
 			{
@@ -25,7 +24,7 @@ export async function fetchBotChannel(guild: Guild, createIfNecessary = true): P
 			},
 			{
 				// Highest role of bot
-				id: client.guilds.cache.get(Config.guildId).members.cache.get(client.user.id).roles.highest,
+				id: client.guilds.cache.get(guildId).members.cache.get(client.user.id).roles.highest,
 				allow: [PermissionsBitField.Flags.ViewChannel]
 			}
 		],
@@ -33,12 +32,12 @@ export async function fetchBotChannel(guild: Guild, createIfNecessary = true): P
 }
 
 export async function fetchPlayerRole(guild: Guild, createIfNecessery = true): Promise<Role> | null {
-	const role = guild.roles.cache.find(role => role.name.toLowerCase() === Constants.playerRoleName.toLowerCase());
+	const role = guild.roles.cache.find(role => role.name.toLowerCase() === playerRoleName.toLowerCase());
 	if (role) return role;
 
 	if (!createIfNecessery) return null;
 	return await guild.roles.create({
-		name: Constants.playerRoleName,
+		name: playerRoleName,
 		color: Colors.Green,
 		reason: Strings.utils.createdPlayerRole,
 	});

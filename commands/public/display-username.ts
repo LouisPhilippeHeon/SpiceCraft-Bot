@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import * as DatabaseService from '../../services/database';
-import * as HttpService from '../../services/http';
 import * as Strings from '../../strings';
+import { getUsernameFromUuid } from '../../services/http';
+import { getUserByDiscordUuid } from '../../services/database';
 
 export const data = new SlashCommandBuilder()
     .setName('afficher-username')
@@ -16,8 +16,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     let user, usernameMinecraft;
 
     try {
-        user = await DatabaseService.getUserByDiscordUuid(discordUuid);
-        usernameMinecraft = await HttpService.getUsernameFromUuid(user.minecraft_uuid);;
+        user = await getUserByDiscordUuid(discordUuid);
+        usernameMinecraft = await getUsernameFromUuid(user.minecraft_uuid);
         await interaction.reply(usernameMinecraft);
     }
     catch (e) {

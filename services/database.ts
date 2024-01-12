@@ -10,7 +10,7 @@ const sequelize = new Sequelize('database', 'user', 'password', {
 	define: { 'underscored': true }
 });
 
-export const tags = sequelize.define('tags', {
+const tags = sequelize.define('tags', {
 	discord_uuid: {
 		type: Sequelize.STRING,
 		unique: true,
@@ -25,6 +25,10 @@ export const tags = sequelize.define('tags', {
 		allowNull: false,
 	},
 });
+
+export function syncTags(force = false) {
+	tags.sync(force);
+}
 
 export async function createUser(minecraftUuid: string, discordUuid: string) {
 	try {

@@ -62,3 +62,5 @@ export async function findApprovalRequestOfMember(guild: Guild, memberUuid: stri
 	const whitelistChannel = await Utils.fetchBotChannel(guild);
 	return Array.from((await whitelistChannel.messages.fetch({ limit: 100 })).values()).find(message => message.embeds[0]?.description.includes(memberUuid));
 }
+
+// TODO Edit request

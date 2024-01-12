@@ -1,10 +1,10 @@
 import { ActionRowBuilder, AuditLogEvent, ButtonBuilder, ButtonStyle, EmbedBuilder, Events, GuildMember, MessageCreateOptions } from 'discord.js';
 import * as DatabaseService from '../services/database';
 import * as AdminApprovalService from '../services/admin-approval';
-import * as Utils from '../utils';
 import * as Strings from '../strings';
-import * as Constants from '../bot-constants';
 import { UserFromDb } from '../models';
+import { fetchBotChannel } from '../utils';
+import { inscriptionStatus } from '../bot-constants';
 
 let userFromDb;
 
@@ -17,7 +17,7 @@ module.exports = {
 			if (!userFromDb) return;
 
 			// If user leaves server or was banned before his request was approved
-			if (userFromDb.inscription_status === Constants.inscriptionStatus.awaitingApproval) {
+			if (userFromDb.inscription_status === inscriptionStatus.awaitingApproval) {
 				await (await AdminApprovalService.findApprovalRequestOfMember(member.guild, member.user.id)).delete();
 				await DatabaseService.deleteEntry(member.user.id);
 				return;
@@ -34,22 +34,22 @@ module.exports = {
 				await handleUserLeft(member);
 		}
 		catch (e) {
-			if (e.code === 50013) console.error('Le bot n\'a pas la permission de lire les logs.');
+			if (e.code === 50013) console.error(Strings.errors.cantReadLogs);
 			else console.error(e);
 		}
 	}
 }
 
 async function handleUserLeft(member: GuildMember) {
-	const whitelistChannel = await Utils.fetchBotChannel(member.guild);
+	const whitelistChannel = await fetchBotChannel(member.guild);
 	await whitelistChannel.send(createMessage(member.user.id));
 }
 
 async function handleBan(userFromDb: UserFromDb, member: GuildMember) {
-	if (userFromDb.inscription_status === Constants.inscriptionStatus.rejected) return;
+	if (userFromDb.inscription_status === inscriptionStatus.rejected) return;
 
-	await DatabaseService.changeStatus(member.user.id, Constants.inscriptionStatus.rejected);
-	const whitelistChannel = await Utils.fetchBotChannel(member.guild);
+	await DatabaseService.changeStatus(member.user.id, inscriptionStatus.rejected);
+	const whitelistChannel = await fetchBotChannel(member.guild);
 	await whitelistChannel.send(createMessageBanned(member.user.id));
 }
 

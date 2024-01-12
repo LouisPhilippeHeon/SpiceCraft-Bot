@@ -1,9 +1,9 @@
 import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
-import * as DatabaseService from '../../services/database';
-import * as Constants from '../../bot-constants';
 import * as Strings from '../../strings';
-import * as HtmlService from '../../services/html';
 import { UserFromDb } from '../../models';
+import { inscriptionStatus } from '../../bot-constants';
+import { buildHtml } from '../../services/html';
+import { getUsers } from '../../services/database';
 
 export const data = new SlashCommandBuilder()
 	.setName('afficher')
@@ -13,9 +13,9 @@ export const data = new SlashCommandBuilder()
 		option.setName('statut')
 			.setDescription(Strings.commands.displayUsers.statusOptionDescription)
 			.addChoices(
-				{ name: 'Approuvé', value: Constants.inscriptionStatus.approved.toString() },
-				{ name: 'Rejeté', value: Constants.inscriptionStatus.rejected.toString() },
-				{ name: 'En attente', value: Constants.inscriptionStatus.awaitingApproval.toString() }
+				{ name: 'Approuvé', value: inscriptionStatus.approved.toString() },
+				{ name: 'Rejeté', value: inscriptionStatus.rejected.toString() },
+				{ name: 'En attente', value: inscriptionStatus.awaitingApproval.toString() }
 			))
 	.addStringOption(option =>
 		option.setName('format')
@@ -30,7 +30,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 	const status: number = interaction.options.getString('statut') ? Number(interaction.options.getString('statut')) : null;
 	const format = interaction.options.getString('format');
 
-	const usersFromDb = await DatabaseService.getUsers(status);
+	const usersFromDb = await getUsers(status);
 
 	if (usersFromDb.length === 0) {
 		await interaction.reply(Strings.commands.displayUsers.noUserFound);
@@ -62,7 +62,7 @@ async function sendAsJson(interaction: ChatInputCommandInteraction, usersFromDb:
 async function sendAsHtml(interaction: ChatInputCommandInteraction, usersFromDb: UserFromDb[]) {
 	await interaction.reply({
 		files: [{
-			attachment: Buffer.from(HtmlService.buildHtml(usersFromDb)),
+			attachment: Buffer.from(buildHtml(usersFromDb)),
 			name: Strings.commands.displayUsers.filenameHtml
 		}]
 	});

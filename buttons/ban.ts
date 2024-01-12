@@ -1,9 +1,9 @@
-import * as Constants from '../bot-constants';
 import { ButtonData } from '../models';
-import * as DatabaseService from '../services/database';
+import { getUserByDiscordUuid } from '../services/database';
 import * as Strings from '../strings';
-import * as Utils from '../utils';
 import { ButtonInteraction, Colors, PermissionFlagsBits } from 'discord.js';
+import { deepCloneWithJson } from '../utils';
+import { inscriptionStatus } from '../bot-constants';
 
 export const data = new ButtonData('ban', PermissionFlagsBits.BanMembers);
 
@@ -15,9 +15,9 @@ export async function execute(buttonInteraction: ButtonInteraction) {
     const discordUuid = interaction.customId.split('_')[1];
 
     try {
-        user = await DatabaseService.getUserByDiscordUuid(discordUuid);
+        user = await getUserByDiscordUuid(discordUuid);
         await user.removeFromWhitelist();
-        await user.changeStatus(Constants.inscriptionStatus.rejected);
+        await user.changeStatus(inscriptionStatus.rejected);
     }
 	catch (e) {
         await interaction.reply({ content: e.message, ephemeral: true });
@@ -31,7 +31,7 @@ export async function execute(buttonInteraction: ButtonInteraction) {
 }
 
 async function updateEmbed() {
-    const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
+    const embedToUpdate = deepCloneWithJson(interaction.message.embeds[0]);
     embedToUpdate.color = Colors.Green;
     await interaction.message.edit({ content: Strings.events.ban.messageUpdate.replace('$discordUuid$', interaction.user.id), embeds: [embedToUpdate], components: [] });
 }

@@ -1,12 +1,12 @@
-import * as DatabaseService from '../services/database';
 import * as Strings from '../strings';
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, DMChannel, Message } from 'discord.js';
-import * as Constants from '../bot-constants';
 import { ButtonData, UserFromDb, UserFromMojangApi } from '../models';
 import { getMojangUser } from '../services/http';
-import * as Utils from '../utils';
-import * as AdminApprovalService from '../services/admin-approval';
 import { ephemeralInteractions } from '../ephemeral-interactions';
+import { deepCloneWithJson, fetchBotChannel } from '../utils';
+import { inscriptionStatus, timeToWaitForUserInputBeforeTimeout } from '../bot-constants';
+import { changeMinecraftUuid, getUserByDiscordUuid, getUserByMinecraftUuid } from '../services/database';
+import {createUsernameChangeRequest, findApprovalRequestOfMember } from '../services/admin-approval';
 
 export const data = new ButtonData('inscription');
 
@@ -16,8 +16,8 @@ let interaction: ButtonInteraction;
 
 export async function execute(buttonInteraction: ButtonInteraction) {
     interaction = buttonInteraction;
-    await DatabaseService.getUserByDiscordUuid(interaction.user.id).then(async (user) => {
-        if (user.inscription_status === Constants.inscriptionStatus.rejected)
+    await getUserByDiscordUuid(interaction.user.id).then(async (user) => {
+        if (user.inscription_status === inscriptionStatus.rejected)
             await interaction.reply({ content: Strings.services.registering.adminsAlreadyDeniedRequest, ephemeral: true });
         else
             await updateExistingUser(user);
@@ -62,7 +62,7 @@ async function updateExistingUser(userFromDb: UserFromDb) {
     await interaction.reply({ content: Strings.services.registering.messageSentInDms, ephemeral: true });
 
     const collectorFilter = (message: Message) => message.author.id === interaction.user.id;
-    const usernameCollected = await dmChannel.awaitMessages({ filter: collectorFilter, max: 1, time: Constants.timeToWaitForUserInputBeforeTimeout });
+    const usernameCollected = await dmChannel.awaitMessages({ filter: collectorFilter, max: 1, time: timeToWaitForUserInputBeforeTimeout });
     if (usernameCollected.size === 0) {
         await dmChannel.send(Strings.services.registering.timeoutAnswer);
         return;
@@ -79,17 +79,17 @@ async function updateExistingUser(userFromDb: UserFromDb) {
         }
 
         // User awaiting approval, edit approval request instead of creating another request
-        if (userFromDb.inscription_status !== Constants.inscriptionStatus.approved) {
-            await DatabaseService.changeMinecraftUuid(interaction.user.id, userFromMojangApi.id);
+        if (userFromDb.inscription_status !== inscriptionStatus.approved) {
+            await changeMinecraftUuid(interaction.user.id, userFromMojangApi.id);
             await updateAdminApprovalRequest();
             return;
         }
 
         // Looks for another user with the same Minecraft UUID
-        if (await DatabaseService.getUserByMinecraftUuid(userFromMojangApi.id))
+        if (await getUserByMinecraftUuid(userFromMojangApi.id))
             await dmChannel.send(Strings.errors.usernameUsedWithAnotherAccount);
         else {
-            await AdminApprovalService.createUsernameChangeRequest(interaction.user, interaction.guild, userFromMojangApi);
+            await createUsernameChangeRequest(interaction.user, interaction.guild, userFromMojangApi);
             await dmChannel.send(Strings.services.registering.usernameUpdated);
         }
     }
@@ -102,9 +102,9 @@ async function updateExistingUser(userFromDb: UserFromDb) {
 }
 
 async function updateAdminApprovalRequest() {
-    const whitelistChannel = await Utils.fetchBotChannel(interaction.guild);
+    const whitelistChannel = await fetchBotChannel(interaction.guild);
     // Find approval request for the user in the whitelist channel
-    const approvalRequest = await AdminApprovalService.findApprovalRequestOfMember(interaction.guild, interaction.user.id);
+    const approvalRequest = await findApprovalRequestOfMember(interaction.guild, interaction.user.id);
     // If message is too old to be updated
     if (!approvalRequest) {
         await whitelistChannel.send(
@@ -114,7 +114,7 @@ async function updateAdminApprovalRequest() {
         );
     }
 	else {
-        const embedToUpdate = Utils.deepCloneWithJson(approvalRequest.embeds[0]);
+        const embedToUpdate = deepCloneWithJson(approvalRequest.embeds[0]);
 
         embedToUpdate.description = Strings.services.registering.embedDescription
 			.replace('$discordUuid$', interaction.user.id)

@@ -1,9 +1,9 @@
-import * as Constants from '../bot-constants';
 import { ButtonData } from '../models';
-import * as DatabaseService from '../services/database';
 import * as Strings from '../strings';
-import * as Utils from '../utils';
 import { ButtonInteraction, PermissionFlagsBits } from 'discord.js';
+import { fetchBotChannel, fetchPlayerRole } from '../utils';
+import { getUsers, syncTags } from '../services/database';
+import { filenameSeasonSave } from '../bot-constants';
 
 export const data = new ButtonData('confirm-end-season', PermissionFlagsBits.Administrator);
 
@@ -16,22 +16,22 @@ export async function execute(buttonInteraction: ButtonInteraction) {
     sendBackupToInteractionAuthor();
 
     await interaction.reply({ content: Strings.commands.endSeason.newSeasonBegins, ephemeral: true });
-    DatabaseService.tags.sync({ force: true });
+    syncTags(true);
     
-    const playerRole = await Utils.fetchPlayerRole(interaction.guild, false);
+    const playerRole = await fetchPlayerRole(interaction.guild, false);
     if (playerRole) await playerRole.delete();
     
-    const botChannel = await Utils.fetchBotChannel(interaction.guild, false);
+    const botChannel = await fetchBotChannel(interaction.guild, false);
     if (botChannel) await botChannel.delete();
 }
 
 async function sendBackupToInteractionAuthor() {
-    const users = await DatabaseService.getUsers();
+    const users = await getUsers();
     if (users.length > 0) {
         await interaction.user.send({
             files: [{
                 attachment: Buffer.from(JSON.stringify(users)),
-                name: Constants.filenameSeasonSave
+                name: filenameSeasonSave
             }]
         }).catch(async () => console.log(JSON.stringify(users)));
     }

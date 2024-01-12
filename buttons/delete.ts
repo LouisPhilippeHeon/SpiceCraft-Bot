@@ -1,8 +1,8 @@
 import { ButtonData } from '../models';
-import * as DatabaseService from '../services/database';
 import * as Strings from '../strings';
-import * as Utils from '../utils';
 import { ButtonInteraction, Colors, PermissionFlagsBits } from 'discord.js';
+import { deepCloneWithJson } from '../utils';
+import { getUserByDiscordUuid } from '../services/database';
 
 export const data = new ButtonData('delete', PermissionFlagsBits.Administrator);
 
@@ -13,7 +13,7 @@ export async function execute(interaction: ButtonInteraction) {
     const discordUuid = interaction.customId.split('_')[1];
 
     try {
-        user = await DatabaseService.getUserByDiscordUuid(discordUuid);
+        user = await getUserByDiscordUuid(discordUuid);
         await user.removeFromWhitelist();
     }
 	catch (e) {
@@ -24,7 +24,7 @@ export async function execute(interaction: ButtonInteraction) {
     // Member might have already been deleted, in this case, it will throw an error
     await user.delete().catch();
 
-    const embedToUpdate = Utils.deepCloneWithJson(interaction.message.embeds[0]);
+    const embedToUpdate = deepCloneWithJson(interaction.message.embeds[0]);
     embedToUpdate.color = Colors.Red;
 
     await interaction.message.edit({ content: Strings.commands.deleteEntry.messageUpdate, embeds: [embedToUpdate], components: [] });
