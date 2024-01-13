@@ -3,7 +3,7 @@ import * as Strings from '../strings';
 import { ButtonData } from '../models';
 import { deepCloneWithJson, fetchBotChannel, fetchGuildMember } from '../utils';
 import { inscriptionStatus } from '../bot-constants';
-import { changeStatus } from "../services/database";
+import { changeStatus } from '../services/database';
 
 export const data = new ButtonData('confirm-reject', PermissionFlagsBits.BanMembers);
 

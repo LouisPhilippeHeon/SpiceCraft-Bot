@@ -1,5 +1,5 @@
 import * as Strings from '../strings';
-import { client } from "../bot-constants";
+import { client } from '../bot-constants';
 import { formatDate } from '../utils';
 import { UserFromDb } from '../models';
 

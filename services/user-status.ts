@@ -1,8 +1,8 @@
-import * as DatabaseService from '../services/database';
-import * as Constants from '../bot-constants';
 import * as Strings from '../strings';
 import { ChatInputCommandInteraction, GuildMember } from 'discord.js';
 import { addPlayerRole, fetchGuildMember, removePlayerRole } from '../utils';
+import { inscriptionStatus } from '../bot-constants';
+import { changeStatus, getUserByDiscordUuid } from './database';
 
 export async function editUserStatus(interaction: ChatInputCommandInteraction, status: number) {
 	const idToEdit = interaction.options.getUser('membre').id;
@@ -10,14 +10,14 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
 
 	try {
 		member = await fetchGuildMember(interaction.guild, idToEdit);
-		await DatabaseService.changeStatus(idToEdit, status);
+		await changeStatus(idToEdit, status);
 
-		(status === Constants.inscriptionStatus.approved)
+		(status === inscriptionStatus.approved)
 				? await addPlayerRole(member)
 				: await removePlayerRole(member);
 
-		const user = await DatabaseService.getUserByDiscordUuid(idToEdit);
-		if (status === Constants.inscriptionStatus.approved)
+		const user = await getUserByDiscordUuid(idToEdit);
+		if (status === inscriptionStatus.approved)
 			await user.addToWhitelist();
 		else
 			await user.removeFromWhitelist();
@@ -31,7 +31,7 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
 			.replace('$discordUuid$', idToEdit.toString())
 			.replace('$status$', Strings.getStatusName(status));
 
-	if (status === Constants.inscriptionStatus.awaitingApproval) {
+	if (status === inscriptionStatus.awaitingApproval) {
 		await interaction.reply(interactionReplyMessage);
 		return;
 	}
@@ -48,6 +48,6 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
 }
 
 function getMessageToSendToUser(status: number): string {
-	if (status === Constants.inscriptionStatus.approved) return Strings.services.userStatus.dmAddedToWhitelist;
-	if (status === Constants.inscriptionStatus.rejected) return Strings.services.userStatus.dmRemovedFromWhitelist;
+	if (status === inscriptionStatus.approved) return Strings.services.userStatus.dmAddedToWhitelist;
+	if (status === inscriptionStatus.rejected) return Strings.services.userStatus.dmRemovedFromWhitelist;
 }

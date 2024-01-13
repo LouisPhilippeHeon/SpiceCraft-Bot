@@ -1,7 +1,7 @@
 import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, Message, Guild, User } from 'discord.js';
 import * as Strings from '../strings';
-import * as Models from '../models';
-import * as Utils from '../utils';
+import { fetchBotChannel } from '../utils';
+import { UserFromMojangApi } from '../models';
 
 export async function createApprovalRequest(user: User, guild: Guild, username: string, inviter: string) {
 	const approve = new ButtonBuilder({
@@ -31,10 +31,10 @@ export async function createApprovalRequest(user: User, guild: Guild, username: 
 
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(approve, reject);
 
-	await (await Utils.fetchBotChannel(guild)).send({ embeds: [approvalRequestEmbed], components: [row] });
+	await (await fetchBotChannel(guild)).send({ embeds: [approvalRequestEmbed], components: [row] });
 }
 
-export async function createUsernameChangeRequest(user: User, guild: Guild, userFromMojangApi: Models.UserFromMojangApi) {
+export async function createUsernameChangeRequest(user: User, guild: Guild, userFromMojangApi: UserFromMojangApi) {
 	const approve = new ButtonBuilder({
 		customId: `update_${user.id}_${userFromMojangApi.id}`,
 		label: Strings.components.buttons.approve,
@@ -55,11 +55,11 @@ export async function createUsernameChangeRequest(user: User, guild: Guild, user
 
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(approve, ignore);
 
-	await (await Utils.fetchBotChannel(guild)).send({ embeds: [approvalRequestEmbed], components: [row] });
+	await (await fetchBotChannel(guild)).send({ embeds: [approvalRequestEmbed], components: [row] });
 }
 
 export async function findApprovalRequestOfMember(guild: Guild, memberUuid: string): Promise<Message> {
-	const whitelistChannel = await Utils.fetchBotChannel(guild);
+	const whitelistChannel = await fetchBotChannel(guild);
 	return Array.from((await whitelistChannel.messages.fetch({ limit: 100 })).values()).find(message => message.embeds[0]?.description.includes(memberUuid));
 }
 
