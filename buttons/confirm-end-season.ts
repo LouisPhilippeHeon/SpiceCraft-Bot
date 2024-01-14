@@ -1,5 +1,5 @@
-import { ButtonData } from '../models';
 import * as Strings from '../strings';
+import { ButtonData } from '../models';
 import { ButtonInteraction, PermissionFlagsBits } from 'discord.js';
 import { fetchBotChannel, fetchPlayerRole } from '../utils';
 import { getUsers, syncTags } from '../services/database';

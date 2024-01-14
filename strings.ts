@@ -25,7 +25,7 @@ export namespace services {
 		requestSucessfullyUpdated = 'Ta demande à été mise à jour avec succès !',
 		waitForAdminApprobation = 'Ton inscription est en attente d\'approbation par les administrateurs, je t\'enverrais un message quand elle sera acceptée!',
 		usernameUpdated = 'Ton nom d\'utilisateur a été changé avec succès, je t\'envoie un message lorsque le nom d\'utilisateur sera mis à jour dans la whitelist.',
-		embedDescription = 'Compte Discord : <@$discordUuid$>.\nUsername Minecraft : $minecraftUsername$.',
+		embedDescription = 'Compte Discord : <@$discordUuid$>.\nUsername Minecraft : \`$minecraftUsername$\`.',
 		awaitingApprovalUserChangedMinecraftUsername = '<@$discordUuid$> a changé son username Minecraft pour \`$minecraftUsername$\` dans sa demande d\'ajout à la whitelist.',
 		minecraftAccountDoesNotExist = '❌ Le compte Minecraft « $minecraftUsername$ » n\'existe pas! Tu peux cliquer à nouveau le bouton \`S\'inscrire\` pour réessayer. ❌',
 		dmsAreClosed = 'Tes paramètres de confidentialité m\'empêchent de t\'envoyer des messages. Change ces paramètres pour continuer.',
@@ -182,9 +182,9 @@ export namespace errors {
 
 	enum rconErrors {
 		connexionError = 'Une erreur est survenue lors de la connexion au serveur avec RCON.',
-		add = `${connexionError} L'ajout du joueur ($username$) à la whitelist doit être effectué manuellement.`,
-		edit = `${connexionError} La modification de la whitelist doit être effectuée manuellement (retrait de $oldUsername$ et ajout de $newUsername$).`,
-		remove = `${connexionError} Le retrait du joueur ($username$) dans la whitelist doit être effectué manuellement.`
+		add = `${connexionError} L'ajout du joueur (\`$username$\`) à la whitelist doit être effectué manuellement.`,
+		edit = `${connexionError} La modification de la whitelist doit être effectuée manuellement (retrait de \`$oldUsername$\` et ajout de \`$newUsername$\`).`,
+		remove = `${connexionError} Le retrait du joueur (\`$username$\`) dans la whitelist doit être effectué manuellement.`
 	}
 
 	export import database = databaseErrors;

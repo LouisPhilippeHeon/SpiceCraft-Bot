@@ -1,9 +1,9 @@
-import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, Message, Guild, User } from 'discord.js';
 import * as Strings from '../strings';
-import { fetchBotChannel } from '../utils';
+import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, Message, Guild, User, APIEmbed } from 'discord.js';
+import { deepCloneWithJson, fetchBotChannel } from '../utils';
 import { UserFromMojangApi } from '../models';
 
-export async function createApprovalRequest(user: User, guild: Guild, username: string, inviter: string) {
+export async function createApprovalRequest(user: User, guild: Guild, username: string, inviter?: string) {
 	const approve = new ButtonBuilder({
 		customId: `approve_${user.id}`,
 		label: Strings.components.buttons.approve,
@@ -63,4 +63,15 @@ export async function findApprovalRequestOfMember(guild: Guild, memberUuid: stri
 	return Array.from((await whitelistChannel.messages.fetch({ limit: 100 })).values()).find(message => message.embeds[0]?.description.includes(memberUuid));
 }
 
-// TODO Edit request
+export async function editApprovalRequest(message: Message, content?: string | null, embedDescription?: string | null, components?: ActionRowBuilder<ButtonBuilder>[], color?: number) {
+	const embedToUpdate = deepCloneWithJson(message.embeds[0]) as APIEmbed;
+
+	if (color !== undefined) embedToUpdate.color = color;
+	if (embedDescription !== undefined) embedToUpdate.description = embedDescription;
+
+    await message.edit({
+		...content !== undefined && {content},
+		embeds: [embedToUpdate],
+		...components && {components}
+	});
+}

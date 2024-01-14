@@ -1,5 +1,5 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import * as Strings from '../../strings';
+import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { getUsernameFromUuid } from '../../services/http';
 import { getUserByDiscordUuid } from '../../services/database';
 

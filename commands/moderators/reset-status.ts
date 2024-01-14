@@ -1,7 +1,7 @@
+import * as Strings from '../../strings';
 import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { editUserStatus } from '../../services/user-status';
 import { inscriptionStatus } from '../../bot-constants';
-import * as Strings from '../../strings';
 
 export const data = new SlashCommandBuilder()
 	.setName('reinitialiser-statut')

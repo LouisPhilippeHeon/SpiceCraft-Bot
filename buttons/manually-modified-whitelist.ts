@@ -1,8 +1,9 @@
-import { ButtonInteraction, Colors, GuildMember, PermissionFlagsBits } from 'discord.js';
 import * as Strings from '../strings';
+import { ButtonInteraction, Colors, GuildMember, PermissionFlagsBits } from 'discord.js';
 import { ButtonData } from '../models';
 import { changeMinecraftUuid } from '../services/database';
-import { deepCloneWithJson, fetchGuildMember } from '../utils';
+import { fetchGuildMember } from '../utils';
+import { editApprovalRequest } from '../services/admin-approval';
 
 export const data = new ButtonData('manually-modified-whitelist', PermissionFlagsBits.BanMembers);
 
@@ -22,14 +23,8 @@ export async function execute(interaction: ButtonInteraction) {
       return;
    }
    
-   await updateMessage(interaction);
+   await editApprovalRequest(interaction.message, Strings.events.usernameChangeConfirmation.messageUpdate.replace('$discordUuid$', interaction.user.id), undefined, [], Colors.Green);
    await notifyMember(member, interaction, discordUuid);
-}
-
-async function updateMessage(interaction: ButtonInteraction) {
-   const embedToUpdate = deepCloneWithJson(interaction.message.embeds[0]);
-   embedToUpdate.color = Colors.Green;
-   await interaction.message.edit({ content: Strings.events.usernameChangeConfirmation.messageUpdate.replace('$discordUuid$', interaction.user.id), embeds: [embedToUpdate], components: [] });
 }
 
 async function notifyMember(member: GuildMember, interaction: ButtonInteraction, discordUuid: string) {

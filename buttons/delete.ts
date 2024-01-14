@@ -1,12 +1,12 @@
-import { ButtonData } from '../models';
 import * as Strings from '../strings';
+import { ButtonData, UserFromDb } from '../models';
 import { ButtonInteraction, Colors, PermissionFlagsBits } from 'discord.js';
-import { deepCloneWithJson } from '../utils';
 import { getUserByDiscordUuid } from '../services/database';
+import { editApprovalRequest } from '../services/admin-approval';
 
 export const data = new ButtonData('delete', PermissionFlagsBits.Administrator);
 
-let user;
+let user: UserFromDb;
 
 export async function execute(interaction: ButtonInteraction) {
     await interaction.message.delete();
@@ -21,13 +21,6 @@ export async function execute(interaction: ButtonInteraction) {
         return;
     }
 
-    // Member might have already been deleted, in this case, it will throw an error
-    await user.delete().catch();
-
-    const embedToUpdate = deepCloneWithJson(interaction.message.embeds[0]);
-    embedToUpdate.color = Colors.Red;
-
-    await interaction.message.edit({ content: Strings.commands.deleteEntry.messageUpdate, embeds: [embedToUpdate], components: [] });
-
+    await editApprovalRequest( interaction.message, Strings.commands.deleteEntry.messageUpdate, undefined, [], Colors.Red );
     await interaction.reply({ content: Strings.commands.deleteEntry.reply.replace('$discordUuid$', discordUuid), ephemeral: true });
 }

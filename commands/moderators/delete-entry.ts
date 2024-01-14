@@ -1,5 +1,5 @@
-import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import * as Strings from '../../strings';
+import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { fetchGuildMember, removePlayerRole } from '../../utils';
 import { getUserByDiscordUuid } from '../../services/database';
 

@@ -4,9 +4,10 @@ import { addPlayerRole, fetchGuildMember, removePlayerRole } from '../utils';
 import { inscriptionStatus } from '../bot-constants';
 import { changeStatus, getUserByDiscordUuid } from './database';
 
+let member: GuildMember;
+
 export async function editUserStatus(interaction: ChatInputCommandInteraction, status: number) {
 	const idToEdit = interaction.options.getUser('membre').id;
-	let member: GuildMember;
 
 	try {
 		member = await fetchGuildMember(interaction.guild, idToEdit);

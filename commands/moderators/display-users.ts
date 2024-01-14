@@ -1,5 +1,5 @@
-import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import * as Strings from '../../strings';
+import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { UserFromDb } from '../../models';
 import { inscriptionStatus } from '../../bot-constants';
 import { buildHtml } from '../../services/html';
@@ -27,7 +27,7 @@ export const data = new SlashCommandBuilder()
 			));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
-	const status: number = interaction.options.getString('statut') ? Number(interaction.options.getString('statut')) : null;
+	const status: number | undefined = interaction.options.getString('statut') ? Number(interaction.options.getString('statut')) : undefined;
 	const format = interaction.options.getString('format');
 
 	const usersFromDb = await getUsers(status);
@@ -88,11 +88,11 @@ function createMessages(usersFromDb: UserFromDb[]): string[] {
 	return messages;
 }
 
-async function sendMessages(interaction: ChatInputCommandInteraction, messages: string[], status: number) {
+async function sendMessages(interaction: ChatInputCommandInteraction, messages: string[], status?: number) {
 	await interaction.reply({
-		content: (status)
-			? Strings.commands.displayUsers.displayingUsersWithStatus.replace('$status$', Strings.getStatusName(status))
-			: Strings.commands.displayUsers.displayingAllUsers
+		content: (status === undefined)
+			? Strings.commands.displayUsers.displayingAllUsers
+			: Strings.commands.displayUsers.displayingUsersWithStatus.replace('$status$', Strings.getStatusName(status))
 	});
 
 	messages.forEach(async message => {

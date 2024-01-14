@@ -1,5 +1,5 @@
-import { rconConnexions } from '../config';
 import * as Strings from '../strings';
+import { rconConnexions } from '../config';
 import { getUsernameFromUuid } from './http';
 
 export async function whitelistAdd(uuid: string) {

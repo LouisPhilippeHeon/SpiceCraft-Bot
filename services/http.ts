@@ -1,5 +1,5 @@
-import http = require('https');
 import * as Strings from '../strings';
+import http = require('https');
 import { MojangApiError, UserFromMojangApi } from '../models';
 import { mojangApiUrl } from '../bot-constants';
 

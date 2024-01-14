@@ -1,5 +1,5 @@
-import { AuditLogEvent, Events, GuildMember } from 'discord.js';
 import * as Strings from '../strings';
+import { AuditLogEvent, Events, GuildMember } from 'discord.js';
 import { clientId } from '../config';
 import { playerRoleName } from '../bot-constants';
 import { deleteEntry } from '../services/database';

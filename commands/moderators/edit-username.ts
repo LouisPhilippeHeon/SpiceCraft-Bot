@@ -1,5 +1,5 @@
-import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import * as Strings from '../../strings';
+import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { UserFromMojangApi } from '../../models';
 import { getMojangUser } from '../../services/http';
 import { getUserByDiscordUuid } from '../../services/database';

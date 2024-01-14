@@ -1,10 +1,10 @@
-import { ActionRowBuilder, AuditLogEvent, ButtonBuilder, ButtonStyle, EmbedBuilder, Events, GuildMember, MessageCreateOptions } from 'discord.js';
-import * as DatabaseService from '../services/database';
-import * as AdminApprovalService from '../services/admin-approval';
 import * as Strings from '../strings';
+import { ActionRowBuilder, AuditLogEvent, ButtonBuilder, ButtonStyle, EmbedBuilder, Events, GuildMember, MessageCreateOptions } from 'discord.js';
 import { UserFromDb } from '../models';
 import { fetchBotChannel } from '../utils';
 import { inscriptionStatus } from '../bot-constants';
+import { changeStatus, deleteEntry, getUserByDiscordUuid } from '../services/database';
+import { findApprovalRequestOfMember } from '../services/admin-approval';
 
 let userFromDb;
 
@@ -13,13 +13,13 @@ module.exports = {
 	once: false,
 	async execute(member: GuildMember) {
 		try {
-			userFromDb = await DatabaseService.getUserByDiscordUuid(member.user.id).catch(() => userFromDb = null);
+			userFromDb = await getUserByDiscordUuid(member.user.id).catch(() => userFromDb = null);
 			if (!userFromDb) return;
 
 			// If user leaves server or was banned before his request was approved
 			if (userFromDb.inscription_status === inscriptionStatus.awaitingApproval) {
-				await (await AdminApprovalService.findApprovalRequestOfMember(member.guild, member.user.id)).delete();
-				await DatabaseService.deleteEntry(member.user.id);
+				await (await findApprovalRequestOfMember(member.guild, member.user.id)).delete();
+				await deleteEntry(member.user.id);
 				return;
 			}
 
@@ -48,7 +48,7 @@ async function handleUserLeft(member: GuildMember) {
 async function handleBan(userFromDb: UserFromDb, member: GuildMember) {
 	if (userFromDb.inscription_status === inscriptionStatus.rejected) return;
 
-	await DatabaseService.changeStatus(member.user.id, inscriptionStatus.rejected);
+	await changeStatus(member.user.id, inscriptionStatus.rejected);
 	const whitelistChannel = await fetchBotChannel(member.guild);
 	await whitelistChannel.send(createMessageBanned(member.user.id));
 }

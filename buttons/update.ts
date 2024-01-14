@@ -1,8 +1,8 @@
+import * as Strings from '../strings';
 import { ButtonData, UserFromDb } from '../models';
 import { getUserByDiscordUuid } from '../services/database';
-import * as Strings from '../strings';
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, GuildMember, PermissionFlagsBits } from 'discord.js';
-import { deepCloneWithJson } from '../utils';
+import { editApprovalRequest } from '../services/admin-approval';
 
 export const data = new ButtonData('update', PermissionFlagsBits.BanMembers);
 
@@ -28,7 +28,7 @@ export async function execute(buttonInteraction: ButtonInteraction) {
         return;
     }
    
-    await updateEmbed(interaction);
+    await editApprovalRequest(interaction.message, Strings.events.usernameChangeConfirmation.messageUpdate.replace('$discordUuid$', interaction.user.id), undefined, [], Colors.Green);
     await notifyMember(member, interaction, discordUuid);
 }
 
@@ -55,19 +55,10 @@ async function rconFailed(discordUuid: string, minecraftUuid: string, e: Error) 
         style: ButtonStyle.Secondary
     });
 
-    const embedToUpdate = deepCloneWithJson(interaction.message.embeds[0]);
-    embedToUpdate.color = Colors.Yellow;
-
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmManualModificationOfWhitelist, cancel);
-    await interaction.message.edit({ content: `${e.message} ${Strings.events.clickToConfirmChangesToWhitelist.replace('$discordUuid$', discordUuid)}`, embeds: [embedToUpdate], components: [row] });
+    await editApprovalRequest(interaction.message, `${e.message} ${Strings.events.clickToConfirmChangesToWhitelist.replace('$discordUuid$', discordUuid)}`, undefined, [row], Colors.Yellow);
 
     await interaction.reply({ content: Strings.events.usernameChangeConfirmation.changeWhitelistBeforeCliking, ephemeral: true });
-}
-
-async function updateEmbed(interaction: ButtonInteraction) {
-    const embedToUpdate = deepCloneWithJson(interaction.message.embeds[0]);
-    embedToUpdate.color = Colors.Green;
-    await interaction.message.edit({ content: Strings.events.usernameChangeConfirmation.messageUpdate.replace('$discordUuid$', interaction.user.id), embeds: [embedToUpdate], components: [] });
 }
 
 async function notifyMember(member: GuildMember, interaction: ButtonInteraction, discordUuid: string) {

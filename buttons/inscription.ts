@@ -3,10 +3,10 @@ import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, DMChan
 import { ButtonData, UserFromDb, UserFromMojangApi } from '../models';
 import { getMojangUser } from '../services/http';
 import { ephemeralInteractions } from '../ephemeral-interactions';
-import { deepCloneWithJson, fetchBotChannel } from '../utils';
+import { fetchBotChannel } from '../utils';
 import { inscriptionStatus, timeToWaitForUserInputBeforeTimeout } from '../bot-constants';
 import { changeMinecraftUuid, getUserByDiscordUuid, getUserByMinecraftUuid } from '../services/database';
-import {createUsernameChangeRequest, findApprovalRequestOfMember } from '../services/admin-approval';
+import { createUsernameChangeRequest, editApprovalRequest, findApprovalRequestOfMember } from '../services/admin-approval';
 
 export const data = new ButtonData('inscription');
 
@@ -25,7 +25,7 @@ export async function execute(buttonInteraction: ButtonInteraction) {
 }
 
 async function askIfFistTimeUser() {
-    // Avoid having mutiple of these messages, because it means user could go to register process multiple times
+    // Avoid having mutiple of these messages, because it means user could start register process multiple times
     if (ephemeralInteractions.get(interaction.user.id)) {
         await (ephemeralInteractions.get(interaction.user.id).deleteReply());
         ephemeralInteractions.delete(interaction.user.id);
@@ -79,7 +79,7 @@ async function updateExistingUser(userFromDb: UserFromDb) {
         }
 
         // User awaiting approval, edit approval request instead of creating another request
-        if (userFromDb.inscription_status !== inscriptionStatus.approved) {
+        if (userFromDb.inscription_status === inscriptionStatus.awaitingApproval) {
             await changeMinecraftUuid(interaction.user.id, userFromMojangApi.id);
             await updateAdminApprovalRequest();
             return;
@@ -106,21 +106,19 @@ async function updateAdminApprovalRequest() {
     // Find approval request for the user in the whitelist channel
     const approvalRequest = await findApprovalRequestOfMember(interaction.guild, interaction.user.id);
     // If message is too old to be updated
-    if (!approvalRequest) {
-        await whitelistChannel.send(
-            Strings.services.registering.awaitingApprovalUserChangedMinecraftUsername
-				.replace('$discordUuid$', interaction.user.id.toString())
-				.replace('$minecraftUsername$', userFromMojangApi.name)
-        );
-    }
-	else {
-        const embedToUpdate = deepCloneWithJson(approvalRequest.embeds[0]);
-
-        embedToUpdate.description = Strings.services.registering.embedDescription
+    if (approvalRequest) {
+        const description = Strings.services.registering.embedDescription
 			.replace('$discordUuid$', interaction.user.id)
 			.replace('$minecraftUsername$', userFromMojangApi.name);
 
-        await approvalRequest.edit({ embeds: [embedToUpdate] });
+        await editApprovalRequest(approvalRequest, undefined, description, undefined, undefined);
+    }
+	else {
+        const message = Strings.services.registering.awaitingApprovalUserChangedMinecraftUsername
+				.replace('$discordUuid$', interaction.user.id.toString())
+				.replace('$minecraftUsername$', userFromMojangApi.name);
+
+        await whitelistChannel.send(message);
     }
 
     await dmChannel.send(Strings.services.registering.requestSucessfullyUpdated);
