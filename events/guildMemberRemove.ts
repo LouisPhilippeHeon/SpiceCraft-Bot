@@ -6,6 +6,7 @@ import { inscriptionStatus } from '../bot-constants';
 import { changeStatus, deleteEntry, getUserByDiscordUuid } from '../services/database';
 import { findApprovalRequestOfMember } from '../services/admin-approval';
 
+const template = require('es6-template-strings');
 let userFromDb;
 
 module.exports = {
@@ -68,11 +69,11 @@ function createMessage(discordUuid: string): MessageCreateOptions {
 
 	const deleteEmbed = new EmbedBuilder({
 		title: Strings.components.titles.userLeft,
-		description: Strings.components.descriptions.userLeft.replace('$discordUuid$', discordUuid)
+		description: template(Strings.components.descriptions.userLeft, {discordUuid: discordUuid})
 	});
 
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmDelete, ignore);
-	return { embeds: [deleteEmbed], components: [row] }
+	return { embeds: [deleteEmbed], components: [row] };
 }
 
 function createMessageBanned(bannedUuid: string): MessageCreateOptions {
@@ -90,9 +91,9 @@ function createMessageBanned(bannedUuid: string): MessageCreateOptions {
 
 	const banEmbed = new EmbedBuilder({
 		title: Strings.components.titles.userBanned,
-		description: Strings.components.descriptions.userBanned.replace('$discordUuid$', bannedUuid)
+		description: template(Strings.components.descriptions.userBanned, {discordUuid: bannedUuid})
 	});
 
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmBan, ignore);
-	return { embeds: [banEmbed], components: [row] }
+	return { embeds: [banEmbed], components: [row] };
 }

@@ -13,6 +13,7 @@
   "dependencies": {
     "discord.js": "^14.11.0",
     "dotenv": "^16.3.1",
+    "es6-template-strings": "^2.0.1",
     "rcon-client": "^4.2.4",
     "sequelize": "^6.32.1",
     "sqlite3": "^5.1.6"
