@@ -5,6 +5,8 @@ import { inscriptionStatus } from '../../bot-constants';
 import { buildHtml } from '../../services/html';
 import { getUsers } from '../../services/database';
 
+const template = require('es6-template-strings');
+
 export const data = new SlashCommandBuilder()
 	.setName('afficher')
 	.setDescription(Strings.commands.displayUsers.description)
@@ -50,11 +52,13 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 	}
 }
 
-async function sendAsJson(interaction: ChatInputCommandInteraction, usersFromDb: UserFromDb[], status: number) {
+async function sendAsJson(interaction: ChatInputCommandInteraction, usersFromDb: UserFromDb[], status?: number) {
 	await interaction.reply({
 		files: [{
 			attachment: Buffer.from(JSON.stringify(usersFromDb)),
-			name: (status) ? Strings.commands.displayUsers.filenameJsonWithStatus.replace('$status$', Strings.getStatusName(status)) : Strings.commands.displayUsers.filenameJson
+			name: (status !== undefined)
+				? template(Strings.commands.displayUsers.filenameJsonWithStatus, {status: Strings.getStatusName(status)})
+				: Strings.commands.displayUsers.filenameJson
 		}]
 	});
 }
@@ -78,10 +82,11 @@ function createMessages(usersFromDb: UserFromDb[]): string[] {
 			messages.push(currentMessage);
 			currentMessage = '';
 		}
-		currentMessage += Strings.commands.displayUsers.databaseEntryLine
-			.replace('$discordUuid$', user.discord_uuid)
-			.replace('$minecraftUuid$', user.minecraft_uuid)
-			.replace('$statusEmoji$', Strings.statusToEmoji(user.inscription_status));
+		currentMessage += template(Strings.commands.displayUsers.databaseEntryLine, {
+			discordUuid: user.discord_uuid,
+			minecraftUuid: user.minecraft_uuid,
+			statusEmoji: Strings.statusToEmoji(user.inscription_status)
+		});
 	});
 	messages.push(currentMessage);
 
@@ -92,7 +97,7 @@ async function sendMessages(interaction: ChatInputCommandInteraction, messages: 
 	await interaction.reply({
 		content: (status === undefined)
 			? Strings.commands.displayUsers.displayingAllUsers
-			: Strings.commands.displayUsers.displayingUsersWithStatus.replace('$status$', Strings.getStatusName(status))
+			: template(Strings.commands.displayUsers.displayingUsersWithStatus, {status: Strings.getStatusName(status)})
 	});
 
 	messages.forEach(async message => {

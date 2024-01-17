@@ -2,6 +2,8 @@ import * as Strings from '../strings';
 import { rconConnexions } from '../config';
 import { getUsernameFromUuid } from './http';
 
+const template = require('es6-template-strings');
+
 export async function whitelistAdd(uuid: string) {
 	const username = await getUsernameFromUuid(uuid);
 
@@ -13,7 +15,7 @@ export async function whitelistAdd(uuid: string) {
 		}
 	}
 	catch {
-		throw new Error(Strings.errors.rcon.add.replace('$username$', username));
+		throw new Error(template(Strings.errors.rcon.add, {username: username}));
 	}
 }
 
@@ -28,7 +30,7 @@ export async function whitelistRemove(uuid: string) {
 		}
 	}
 	catch {
-		throw new Error(Strings.errors.rcon.remove.replace('$username$', username));
+		throw new Error(template(Strings.errors.rcon.remove, {username: username}));
 	}
 }
 
@@ -45,6 +47,6 @@ export async function whitelistReplaceUsername(newUuid: string, oldUuid: string)
 		}
 	}
 	catch {
-		throw new Error(Strings.errors.rcon.edit.replace('$oldUsername$', oldUsername).replace('$newUsername$', newUsername));
+		throw new Error(template(Strings.errors.rcon.edit, {oldUsername: oldUsername, newUsername: newUsername}));
 	}
 }

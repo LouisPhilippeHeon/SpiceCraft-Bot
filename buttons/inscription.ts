@@ -8,6 +8,8 @@ import { inscriptionStatus, timeToWaitForUserInputBeforeTimeout } from '../bot-c
 import { changeMinecraftUuid, getUserByDiscordUuid, getUserByMinecraftUuid } from '../services/database';
 import { createUsernameChangeRequest, editApprovalRequest, findApprovalRequestOfMember } from '../services/admin-approval';
 
+const template = require('es6-template-strings');
+
 export const data = new ButtonData('inscription');
 
 let dmChannel: DMChannel;
@@ -107,16 +109,18 @@ async function updateAdminApprovalRequest() {
     const approvalRequest = await findApprovalRequestOfMember(interaction.guild, interaction.user.id);
     // If message is too old to be updated
     if (approvalRequest) {
-        const description = Strings.services.registering.embedDescription
-			.replace('$discordUuid$', interaction.user.id)
-			.replace('$minecraftUsername$', userFromMojangApi.name);
+        const description = template(Strings.services.registering.embedDescription, {
+            discordUuid: interaction.user.id,
+            minecraftUsername: userFromMojangApi.name
+        });
 
         await editApprovalRequest(approvalRequest, undefined, description, undefined, undefined);
     }
 	else {
-        const message = Strings.services.registering.awaitingApprovalUserChangedMinecraftUsername
-				.replace('$discordUuid$', interaction.user.id.toString())
-				.replace('$minecraftUsername$', userFromMojangApi.name);
+        const message = template(Strings.services.registering.awaitingApprovalUserChangedMinecraftUsername, {
+            discordUuid: interaction.user.id,
+            minecraftUsername: userFromMojangApi.name
+        });
 
         await whitelistChannel.send(message);
     }

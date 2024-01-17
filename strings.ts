@@ -2,7 +2,7 @@ import * as Constants from './bot-constants';
 
 export namespace services {
 	enum htmlService {
-		template = '<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Utilisateurs</title><style>h1, h2, h3, h4, h5, h6, p, table { font-family: arial, sans-serif;color: #d4dfe4;} html {background-color: #141414;padding: 0 40px;}table { border-collapse: collapse; width: 100%;border-spacing:0;}td,th{border:1px solid #4d4d4d;padding:8px;}tr:nth-child(even){background-color: #303030;}.user{display: flex; align-items: center; height:auto;}td:nth-child(3){text-align:center;}img{height: 50px;border-radius: 5px;margin-right: 10px;}.date:first-letter {text-transform: capitalize;}</style></head><body><h1>Utilisateurs de SpiceCraft</h1><table><tr><th>Utilisateur</th><th>Nom d\'utilisateur Minecraft</th><th>Statut</th><th>Date d\'inscription</th><th>Dernière modification</th></tr>$tableRows$</table></body><script>async function fetchUsername (minecraftUuid) { const apiUrl = `https://sessionserver.mojang.com/session/minecraft/profile/${minecraftUuid}`; const response = await fetch("https://corsproxy.io/?" + apiUrl, {}); const user = await response.json(); document.getElementById(minecraftUuid).innerHTML = user.name;}</script></html>',
+		template = '<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Utilisateurs</title><style>h1, h2, h3, h4, h5, h6, p, table { font-family: arial, sans-serif;color: #d4dfe4;} html {background-color: #141414;padding: 0 40px;}table { border-collapse: collapse; width: 100%;border-spacing:0;}td,th{border:1px solid #4d4d4d;padding:8px;}tr:nth-child(even){background-color: #303030;}.user{display: flex; align-items: center; height:auto;}td:nth-child(3){text-align:center;}img{height: 50px;border-radius: 5px;margin-right: 10px;}.date:first-letter {text-transform: capitalize;}</style></head><body><h1>Utilisateurs de SpiceCraft</h1><table><tr><th>Utilisateur</th><th>Nom d\'utilisateur Minecraft</th><th>Statut</th><th>Date d\'inscription</th><th>Dernière modification</th></tr>$tableRows$</table></body><script>async function fetchUsername (minecraftUuid) { const apiUrl = `https://api.mojang.com/user/profile/${minecraftUuid}`; const response = await fetch("https://corsproxy.io/?" + apiUrl, {}); const user = await response.json(); document.getElementById(minecraftUuid).innerHTML = user.name;}</script></html>',
 		rowTemplate = '<tr><td><div class="user"><img src="$imgUrl$" alt="Photo de profil de $username$">$username$</div></td><td id="$minecraftUuid$"><button onclick="fetchUsername(\'$minecraftUuid$\')">Afficher</button></td><td>$status$</td><td class="date">$createdAt$</td><td class="date">$updatedAt$</td></tr>'
 	}
 
@@ -10,9 +10,10 @@ export namespace services {
 		dmAddedToWhitelist = 'Tu a été ajouté à la whitelist de SpiceCraft.',
 		dmRemovedFromWhitelist = 'Tu a été retiré de la whitelist de SpiceCraft. Contacte les administrateurs pour plus de détails.',
 		cantSendDm = 'Attention : Impossible d\'envoyer un message à cet utilisateur en raison de ses paramètres de confidentialité !',
-		statusChanged = 'Le statut de <@$discordUuid$> à été changé pour "$status$".'
+		statusChanged = 'Le statut de <@${discordUuid}> à été changé pour "${status}".'
 	}
 
+	// TODO Move
 	export enum registeringService {
 		timeoutAnswer = 'Temps de réponse maximum dépassé, réessaye en cliqant le bouton `S\'inscrire` à nouveau.',
 		messageSentInDms = 'Merci de répondre au bot qui t\'a a envoyé un message en privé !',
@@ -25,8 +26,8 @@ export namespace services {
 		requestSucessfullyUpdated = 'Ta demande à été mise à jour avec succès !',
 		waitForAdminApprobation = 'Ton inscription est en attente d\'approbation par les administrateurs, je t\'enverrais un message quand elle sera acceptée!',
 		usernameUpdated = 'Ton nom d\'utilisateur a été changé avec succès, je t\'envoie un message lorsque le nom d\'utilisateur sera mis à jour dans la whitelist.',
-		embedDescription = 'Compte Discord : <@$discordUuid$>.\nUsername Minecraft : \`$minecraftUsername$\`.',
-		awaitingApprovalUserChangedMinecraftUsername = '<@$discordUuid$> a changé son username Minecraft pour \`$minecraftUsername$\` dans sa demande d\'ajout à la whitelist.',
+		embedDescription = 'Compte Discord : <@${discordUuid}>.\nUsername Minecraft : \`${minecraftUsername}\`.',
+		awaitingApprovalUserChangedMinecraftUsername = '<@${discordUuid}> a changé son username Minecraft pour \`${minecraftUsername}\` dans sa demande d\'ajout à la whitelist.',
 		minecraftAccountDoesNotExist = '❌ Le compte Minecraft « $minecraftUsername$ » n\'existe pas! Tu peux cliquer à nouveau le bouton \`S\'inscrire\` pour réessayer. ❌',
 		dmsAreClosed = 'Tes paramètres de confidentialité m\'empêchent de t\'envoyer des messages. Change ces paramètres pour continuer.',
 		sameMinecraftAccountAsBefore = 'Pas besoin de mettre à jour ton nom d\'utilisateur, car il est identique à celui associé au compte Minecraft dans la whitelist.'
@@ -102,11 +103,11 @@ export namespace commands {
 
 	enum displayUsersCommand {
 		noUserFound = 'Aucun utilisateur à afficher.',
-		displayingUsersWithStatus = 'Affichage des utilisateurs avec le statut "$status$"',
+		displayingUsersWithStatus = 'Affichage des utilisateurs avec le statut "${status}"',
 		displayingAllUsers = 'Affichage de tous les utilisateurs',
-		databaseEntryLine = '<@$discordUuid$> | [Afficher](<https://api.mojang.com/user/profile/$minecraftUuid$>) | $statusEmoji$\n',
+		databaseEntryLine = '<@${discordUuid}> | [Afficher](<https://api.mojang.com/user/profile/${minecraftUuid}>) | ${statusEmoji}\n',
 		filenameJson = 'utilisateurs.json',
-		filenameJsonWithStatus = 'utilisateurs_$status$.json',
+		filenameJsonWithStatus = 'utilisateurs_${status}.json',
 		filenameHtml = 'utilisateurs.html',
 		description = 'Affiche les utilisateurs inscrit selon leur statut (optionnel).',
 		statusOptionDescription = 'Rechercher les utilisateur avec un statut particulier.',
@@ -162,7 +163,7 @@ export namespace errors {
 	export const commandExecution = 'Une erreur s\'est produite lors de l\'exécution de cette commande !';
 	export const commandNotFound = 'Aucune commande ne corresponsant à $command$ n\'a été trouvée.';
 	export const buttonExecution = 'Une erreur inconnue s\'est produite !';
-	export const buttonNotFound = 'Aucun bouton ne corresponsant à $button$ n\'a été trouvée.';
+	export const buttonNotFound = 'Aucun bouton ne corresponsant à ${button} n\'a été trouvée.';
 	export const unauthorized = 'Tu n\'as pas les permissions requises pour effectuer ceci.';
 	export const cantReadLogs = 'Le bot n\'a pas la permission de lire les logs.';
 
@@ -182,9 +183,9 @@ export namespace errors {
 
 	enum rconErrors {
 		connexionError = 'Une erreur est survenue lors de la connexion au serveur avec RCON.',
-		add = `${connexionError} L'ajout du joueur (\`$username$\`) à la whitelist doit être effectué manuellement.`,
-		edit = `${connexionError} La modification de la whitelist doit être effectuée manuellement (retrait de \`$oldUsername$\` et ajout de \`$newUsername$\`).`,
-		remove = `${connexionError} Le retrait du joueur (\`$username$\`) dans la whitelist doit être effectué manuellement.`
+		add = connexionError + ' L\'ajout du joueur (\`${username}\`) à la whitelist doit être effectué manuellement.',
+		edit = connexionError + ' La modification de la whitelist doit être effectuée manuellement (retrait de \`${oldUsername}\` et ajout de \`${newUsername}\`).',
+		remove = connexionError + ' Le retrait du joueur (\`${username}\`) dans la whitelist doit être effectué manuellement.'
 	}
 
 	export import database = databaseErrors;
@@ -208,17 +209,17 @@ export namespace components {
 	}
 
 	enum embedTitles {
-		approvalRequest = '$discordUsername$ veut être ajouté à la whitelist.',
-		usernameChangeRequest = '$discordUsername$ demande un changement de nom d\'utilisateur.',
+		approvalRequest = '${discordUsername} veut être ajouté à la whitelist.',
+		usernameChangeRequest = '${discordUsername} demande un changement de nom d\'utilisateur.',
 		userLeft = 'Un utilisateur a quitté. Faut-il le retirer de la whitelist du serveur et de la base de données ?',
 		userBanned = 'Un utilisateur a été banni. Faut-il le bannir du serveur Minecraft en plus du sereur Discord ?',
 		rules = 'Les règles',
 	}
 
 	enum embedDescription {
-		approvalRequest = 'Compte Discord : <@$discordUuid$>.\nUsername Minecraft : `$username$`.',
-		approvalRequestNewUser = 'Compte Discord : <@$discordUuid$>.\nUsername Minecraft : `$username$`.\nPersonne qui a invité : $inviter$.',
-		usernameChangeRequest = 'Compte Discord : <@$discordUuid$>.\nNouveau username Minecraft : `$username$`.',
+		approvalRequest = 'Compte Discord : <@${discordUuid}>.\nUsername Minecraft : \`${username}\`.',
+		approvalRequestNewUser = 'Compte Discord : <@${discordUuid}>.\nUsername Minecraft : \`${username}\`.\nPersonne qui a invité : ${inviter}.',
+		usernameChangeRequest = 'Compte Discord : <@${discordUuid}>.\nNouveau username Minecraft : \`${username}\`.',
 		userLeft = 'Compte Discord : <@${discordUuid}>.',
 		userBanned = 'Compte Discord : <@${discordUuid}>.',
 		rules = '1. Jouer sur le serveur signifie que vous avez pris connaissance des règles.\n2. Il est possible de construire une base dans l\'overworld à l\'extérieur d\'un carré de 600 blocs de largeur autour de 0,0 (donc, si une des coordonnées excède +300 ou -300, vous pouvez construire votre base). Ce carré est donc réservé pour les boutiques!\n3. Assurez vous que vos constructions sur le toit du nether soient spawn-proof.\n4. Aucun grief ou vol n\'est toléré. Cela inclut boutiques, maisons et farms.\n5. Aucun hack, cheat, xray, minimap ou tout autre avantage injuste n\'est toléré, ceci inclut les ressource packs, clients, mods et autres. Les seules modifications du client autorisées sont Optifine, Iris, Sodium, Phosphore et Litematica.\n6. Le PVP est toléré uniquement si tous les participants y consentent.\n7. Les pranks sont acceptés, à condition d\'être inoffensifs et de bon goût.\n8. Respectez le territoire des autres joueurs. Ne construisez pas proche du territoire d\'un autre sans son accord.\n9. Il est interdit d\'être toxique, méchant ou rude avec un autre joueur, sur Discord ou dans le serveur Minecraft directement.\n10. La seed est privée, par conséquent il est interdit d\'essayer de la découvrir. Si un joueur est en possession de la seed du serveur, il lui est interdit de l\'utiliser pour obtenir un avantage, cela inclut trouver les slime chunks, certains biomes, des portails de l\'end, etc...\n11. Si vous voyez un ou des joueurs enfreindre ces règlements, veuillez aviser un admin le plus rapiement possible sur Discord.\n12. Si un joueur enfreint un de ces règlements, les conséquences sont à la discrétion des administrateurs.\n13. Les conséquences peuvent aller jusqu\'à un bannissement permanent, tout comme elles peuvent être plus légères.'

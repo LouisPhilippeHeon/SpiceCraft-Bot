@@ -1,7 +1,6 @@
 import { ChannelType, Colors, Guild, GuildMember, Interaction, InteractionReplyOptions, MessagePayload, PermissionsBitField, Role, TextChannel } from 'discord.js';
 import * as Strings from './strings';
 import { client, playerRoleName, whitelistChannelName } from './bot-constants';
-import { guildId } from './config';
 
 // structuredClone dosen't work in some circumstances
 export function deepCloneWithJson(objectToClone: any): any {
@@ -24,7 +23,7 @@ export async function fetchBotChannel(guild: Guild, createIfNecessary = true): P
 			},
 			{
 				// Highest role of bot
-				id: client.guilds.cache.get(guildId).members.cache.get(client.user.id).roles.highest,
+				id: client.guilds.cache.get(guild.id).members.cache.get(client.user.id).roles.highest,
 				allow: [PermissionsBitField.Flags.ViewChannel]
 			}
 		],

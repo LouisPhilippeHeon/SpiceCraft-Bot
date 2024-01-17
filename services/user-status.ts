@@ -4,6 +4,8 @@ import { addPlayerRole, fetchGuildMember, removePlayerRole } from '../utils';
 import { inscriptionStatus } from '../bot-constants';
 import { changeStatus, getUserByDiscordUuid } from './database';
 
+const template = require('es6-template-strings');
+
 let member: GuildMember;
 
 export async function editUserStatus(interaction: ChatInputCommandInteraction, status: number) {
@@ -28,24 +30,19 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
 		return;
 	}
 
-	const interactionReplyMessage = Strings.services.userStatus.statusChanged
-			.replace('$discordUuid$', idToEdit.toString())
-			.replace('$status$', Strings.getStatusName(status));
+	const interactionReplyMessage = template(Strings.services.userStatus.statusChanged, {discordUuid: idToEdit, status: Strings.getStatusName(status)});
 
-	if (status === inscriptionStatus.awaitingApproval) {
-		await interaction.reply(interactionReplyMessage);
-		return;
+	if (!interaction.options.getBoolean('silencieux') || status === inscriptionStatus.awaitingApproval) {
+		try {
+			await member.send(getMessageToSendToUser(status));
+		}
+		catch {
+			await interaction.reply(interactionReplyMessage + '\n' + Strings.services.userStatus.cantSendDm);
+			return;
+		}
 	}
 
-	if (interaction.options.getBoolean('silencieux')) return;
-
-	try {
-		await member.send(getMessageToSendToUser(status));
-		await interaction.reply(interactionReplyMessage);
-	}
-	catch {
-		await interaction.reply(interactionReplyMessage + '\n' + Strings.services.userStatus.cantSendDm);
-	}
+	await interaction.reply(interactionReplyMessage);
 }
 
 function getMessageToSendToUser(status: number): string {

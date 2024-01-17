@@ -3,6 +3,8 @@ import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, Message, Gu
 import { deepCloneWithJson, fetchBotChannel } from '../utils';
 import { UserFromMojangApi } from '../models';
 
+const template = require('es6-template-strings');
+
 export async function createApprovalRequest(user: User, guild: Guild, username: string, inviter?: string) {
 	const approve = new ButtonBuilder({
 		customId: `approve_${user.id}`,
@@ -19,12 +21,12 @@ export async function createApprovalRequest(user: User, guild: Guild, username: 
 	let description: string;
 
 	if (inviter)
-		description = Strings.components.descriptions.approvalRequestNewUser.replace('$discordUuid$', user.id).replace('$username$', username).replace('$inviter$', inviter.substring(0, 32));
+		description = template(Strings.components.descriptions.approvalRequestNewUser, {discordUuid: user.id, username: username, inviter: inviter.substring(0, 32)});
 	else
-		description = Strings.components.descriptions.approvalRequest.replace('$discordUuid$', user.id).replace('$username$', username);
+		description = template(Strings.components.descriptions.approvalRequest, {discordUuid: user.id, username: username});
 
 	const approvalRequestEmbed = new EmbedBuilder({
-		title: Strings.components.titles.approvalRequest.replace('$discordUsername$', user.username),
+		title: template(Strings.components.titles.approvalRequest, {discordUsername: user.username}),
 		description: description,
 		thumbnail: { url: user.displayAvatarURL({ size: 256 }) }
 	});
@@ -48,8 +50,8 @@ export async function createUsernameChangeRequest(user: User, guild: Guild, user
 	});
 
 	const approvalRequestEmbed = new EmbedBuilder({
-		title: Strings.components.titles.usernameChangeRequest.replace('$discordUsername$', user.username),
-		description: Strings.components.descriptions.usernameChangeRequest.replace('$discordUuid$', user.id).replace('$username$', userFromMojangApi.name),
+		title: template(Strings.components.titles.usernameChangeRequest, {discordUsername: user.username}),
+		description: template(Strings.components.descriptions.usernameChangeRequest, {discordUuid: user.id, username: userFromMojangApi.name}),
 		thumbnail: { url: user.displayAvatarURL({ size: 256 }) }
 	});
 

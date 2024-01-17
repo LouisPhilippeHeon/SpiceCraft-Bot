@@ -4,6 +4,8 @@ import { Events } from 'discord.js';
 import { replyOrFollowUp } from '../utils';
 import { InteractionWithCommands } from '../models';
 
+const template = require('es6-template-strings');
+
 module.exports = {
 	name: Events.InteractionCreate,
 	once: false,
@@ -24,7 +26,7 @@ async function handleButtonInteraction(interaction: InteractionWithCommands) {
 	const button = interaction.client.buttons.get(buttonName);
 
 	if (!button) {
-		console.error(Strings.errors.buttonNotFound.replace('$button$', interaction.customId));
+		console.error(template(Strings.errors.buttonNotFound, {button: interaction.customId}));
 		return;
 	}
 
