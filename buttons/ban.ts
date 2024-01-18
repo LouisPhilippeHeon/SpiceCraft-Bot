@@ -5,6 +5,8 @@ import { ButtonInteraction, Colors, PermissionFlagsBits } from 'discord.js';
 import { inscriptionStatus } from '../bot-constants';
 import { editApprovalRequest } from '../services/admin-approval';
 
+const template = require('es6-template-strings');
+
 export const data = new ButtonData('ban', PermissionFlagsBits.BanMembers);
 
 let user;
@@ -25,6 +27,6 @@ export async function execute(buttonInteraction: ButtonInteraction) {
         return;
     }
 
-    await editApprovalRequest(interaction.message, Strings.events.ban.messageUpdate.replace('$discordUuid$', interaction.user.id), undefined, [], Colors.Green);
-    await interaction.reply({ content: Strings.events.ban.reply.replace('$discordUuid$', discordUuid), ephemeral: true });
+    await editApprovalRequest(interaction.message, template(Strings.events.ban.messageUpdate, {discordUuid: interaction.user.id}), undefined, [], Colors.Green);
+    await interaction.reply({ content: template(Strings.events.ban.reply, {discordUuid: discordUuid}), ephemeral: true });
 }

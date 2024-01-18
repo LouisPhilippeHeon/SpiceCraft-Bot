@@ -3,6 +3,8 @@ import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder }
 import { fetchGuildMember, removePlayerRole } from '../../utils';
 import { getUserByDiscordUuid } from '../../services/database';
 
+const template = require('es6-template-strings');
+
 export const data = new SlashCommandBuilder()
 	.setName('supprimer-entree')
 	.setDescription(Strings.commands.deleteEntry.description)
@@ -23,7 +25,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 		).catch();
 
 		await user.removeFromWhitelist();
-		await interaction.reply({ content: Strings.commands.deleteEntry.reply.replace('$discordUuid$', discordUuid), ephemeral: true });
+		await interaction.reply({ content: template(Strings.commands.deleteEntry.reply, {discordUuid: discordUuid}), ephemeral: true });
 	}
 	catch (e) {
 		await interaction.reply(e.message);

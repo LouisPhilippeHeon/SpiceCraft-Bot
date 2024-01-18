@@ -2,15 +2,15 @@ import * as Constants from './bot-constants';
 
 export namespace services {
 	enum htmlService {
-		template = '<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Utilisateurs</title><style>h1, h2, h3, h4, h5, h6, p, table { font-family: arial, sans-serif;color: #d4dfe4;} html {background-color: #141414;padding: 0 40px;}table { border-collapse: collapse; width: 100%;border-spacing:0;}td,th{border:1px solid #4d4d4d;padding:8px;}tr:nth-child(even){background-color: #303030;}.user{display: flex; align-items: center; height:auto;}td:nth-child(3){text-align:center;}img{height: 50px;border-radius: 5px;margin-right: 10px;}.date:first-letter {text-transform: capitalize;}</style></head><body><h1>Utilisateurs de SpiceCraft</h1><table><tr><th>Utilisateur</th><th>Nom d\'utilisateur Minecraft</th><th>Statut</th><th>Date d\'inscription</th><th>Dernière modification</th></tr>$tableRows$</table></body><script>async function fetchUsername (minecraftUuid) { const apiUrl = `https://api.mojang.com/user/profile/${minecraftUuid}`; const response = await fetch("https://corsproxy.io/?" + apiUrl, {}); const user = await response.json(); document.getElementById(minecraftUuid).innerHTML = user.name;}</script></html>',
-		rowTemplate = '<tr><td><div class="user"><img src="$imgUrl$" alt="Photo de profil de $username$">$username$</div></td><td id="$minecraftUuid$"><button onclick="fetchUsername(\'$minecraftUuid$\')">Afficher</button></td><td>$status$</td><td class="date">$createdAt$</td><td class="date">$updatedAt$</td></tr>'
+		template = '<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Utilisateurs</title><style>h1, h2, h3, h4, h5, h6, p, table { font-family: arial, sans-serif;color: #d4dfe4;} html {background-color: #141414;padding: 0 40px;}table { border-collapse: collapse; width: 100%;border-spacing:0;}td,th{border:1px solid #4d4d4d;padding:8px;}tr:nth-child(even){background-color: #303030;}.user{display: flex; align-items: center; height:auto;}td:nth-child(3){text-align:center;}img{height: 50px;border-radius: 5px;margin-right: 10px;}.date:first-letter {text-transform: capitalize;}</style></head><body><h1>Utilisateurs de SpiceCraft</h1><table><tr><th>Utilisateur</th><th>Nom d\'utilisateur Minecraft</th><th>Statut</th><th>Date d\'inscription</th><th>Dernière modification</th></tr>${tableRows}</table></body><script>async function fetchUsername (minecraftUuid) { const apiUrl = `https://api.mojang.com/user/profile/${minecraftUuid}`; const response = await fetch("https://corsproxy.io/?" + apiUrl, {}); const user = await response.json(); document.getElementById(minecraftUuid).innerHTML = user.name;}</script></html>',
+		rowTemplate = '<tr><td><div class="user"><img src="${imgUrl}" alt="Photo de profil de ${username}">${username}</div></td><td id="${minecraftUuid}"><button onclick="fetchUsername(\'${minecraftUuid}\')">Afficher</button></td><td>${status}</td><td class="date">${createdAt}</td><td class="date">${updatedAt}</td></tr>'
 	}
 
 	export enum userStatusService {
 		dmAddedToWhitelist = 'Tu a été ajouté à la whitelist de SpiceCraft.',
 		dmRemovedFromWhitelist = 'Tu a été retiré de la whitelist de SpiceCraft. Contacte les administrateurs pour plus de détails.',
 		cantSendDm = 'Attention : Impossible d\'envoyer un message à cet utilisateur en raison de ses paramètres de confidentialité !',
-		statusChanged = 'Le statut de <@${discordUuid}> à été changé pour "${status}".'
+		statusChanged = 'Le statut de <@${discordUuid}> à été changé pour «\u00a0${status}\u00a0».'
 	}
 
 	// TODO Move
@@ -28,7 +28,7 @@ export namespace services {
 		usernameUpdated = 'Ton nom d\'utilisateur a été changé avec succès, je t\'envoie un message lorsque le nom d\'utilisateur sera mis à jour dans la whitelist.',
 		embedDescription = 'Compte Discord : <@${discordUuid}>.\nUsername Minecraft : \`${minecraftUsername}\`.',
 		awaitingApprovalUserChangedMinecraftUsername = '<@${discordUuid}> a changé son username Minecraft pour \`${minecraftUsername}\` dans sa demande d\'ajout à la whitelist.',
-		minecraftAccountDoesNotExist = '❌ Le compte Minecraft « $minecraftUsername$ » n\'existe pas! Tu peux cliquer à nouveau le bouton \`S\'inscrire\` pour réessayer. ❌',
+		minecraftAccountDoesNotExist = '❌ Le compte Minecraft « ${minecraftUsername} » n\'existe pas! Tu peux cliquer à nouveau le bouton \\`S\'inscrire\\` pour réessayer. ❌',
 		dmsAreClosed = 'Tes paramètres de confidentialité m\'empêchent de t\'envoyer des messages. Change ces paramètres pour continuer.',
 		sameMinecraftAccountAsBefore = 'Pas besoin de mettre à jour ton nom d\'utilisateur, car il est identique à celui associé au compte Minecraft dans la whitelist.'
 	}
@@ -39,36 +39,36 @@ export namespace services {
 }
 
 export namespace events {
-	export const clickToConfirmChangesToWhitelist = 'Clique sur le bouton lorsque c\'est fait, afin que <@$discordUuid$> soit informé du changement lié à sa demande.';
+	export const clickToConfirmChangesToWhitelist = 'Clique sur le bouton lorsque c\'est fait, afin que <@${discordUuid}> soit informé du changement lié à sa demande.';
 
 	enum approbationButton {
 		messageSentToPlayerToConfirmInscription = 'Tu a été ajouté à la whitelist. Si tu n\'arrive pas à te connecter, ton username Minecraft est peut-être incorrect. Si c\'est le cas, clique à nouveau sur le bouton d\'inscription.',
-		requestGranted = '✅ La demande a été approuvée par <@$discordUuid$>.',
-		success = 'Un message a été envoyé à <@$discordUuid$> pour l\'informer de son ajout à la whitelist.',
-		successNoDm = '<@$discordUuid$> a été ajouté à la whitelist. Cependant, ses paramètres de confidentialité m\'empêchent de lui envoyer un message afin de lui en informer.',
+		requestGranted = '✅ La demande a été approuvée par <@${discordUuid}>.',
+		success = 'Un message a été envoyé à <@${discordUuid}> pour l\'informer de son ajout à la whitelist.',
+		successNoDm = '<@${discordUuid}> a été ajouté à la whitelist. Cependant, ses paramètres de confidentialité m\'empêchent de lui envoyer un message afin de lui en informer.',
 		changeWhitelistBeforeCliking = 'N\'oublies pas d\'ajouter manuellement le joueur à la whitelist AVANT de cliquer sur le bouton !'
 	}
 
 	enum rejectionButton {
 		messageSentToUserToInformRejection = 'Désolé, mais les administrateurs ont choisi de ne pas t\'ajouter à la whitelist. Contacte-les pour plus de détails.',
-		requestDenied = '❌ La demande a été rejetée par <@$discordUuid$>.',
-		askConfirmation = 'Es-tu certain de vouloir rejeter <@$discordUuid$> ?',
-		success = 'Un message a été envoyé à <@$discordUuid$> pour l\'informer du rejet.',
-		successNoDm = '<@$discordUuid$> a été rejeté. Cependant, ses paramètres de confidentialité m\'empêchent de lui envoyer un message afin de lui en informer.',
-		userStillInBdExplanation = 'Cet utilisateur est encore dans la base de données, avec le statut "rejeté", donc s\'il rejoint à nouveau le serveur, le bot se souvient que <@$discordUuid$> est rejeté. Si tu souhaite le supprimer, tu peux utiliser la commande /supprimer-entree'
+		requestDenied = '❌ La demande a été rejetée par <@${discordUuid}>.',
+		askConfirmation = 'Es-tu certain de vouloir rejeter <@${discordUuid}> ?',
+		success = 'Un message a été envoyé à <@${discordUuid}> pour l\'informer du rejet.',
+		successNoDm = '<@${discordUuid}> a été rejeté. Cependant, ses paramètres de confidentialité m\'empêchent de lui envoyer un message afin de lui en informer.',
+		userStillInBdExplanation = 'Cet utilisateur est encore dans la base de données, avec le statut «\u00a0rejeté\u00a0», donc s\'il rejoint à nouveau le serveur, le bot se souvient que <@${discordUuid}> est rejeté. Si tu souhaite le supprimer, tu peux utiliser la commande /supprimer-entree'
 	}
 
 	enum usernameChangeConfirmationButton {
-		messageUpdate = '✅ La mise à jour de username a été complétée (avec l\'autorisation de <@$discordUuid$>).',
+		messageUpdate = '✅ La mise à jour de username a été complétée (avec l\'autorisation de <@${discordUuid}>).',
 		messageSentToConfirmUsernameChange = 'Ton username Minecraft a été mis à jour dans la whitelist.',
-		success = 'Un message a été envoyé à <@$discordUuid$> pour l\'informer de la mise à jour du username.',
-		successNoDm = 'Mise a jour du compte Minecraft de <@$discordUuid$> effectuée avec succès, dans la whitelist et la base de données. Cependant, ses paramètres de confidentialité m\'empêchent de lui envoyer un message afin de lui en informer.',
+		success = 'Un message a été envoyé à <@${discordUuid}> pour l\'informer de la mise à jour du username.',
+		successNoDm = 'Mise a jour du compte Minecraft de <@${discordUuid}> effectuée avec succès, dans la whitelist et la base de données. Cependant, ses paramètres de confidentialité m\'empêchent de lui envoyer un message afin de lui en informer.',
 		changeWhitelistBeforeCliking = 'N\'oublies pas de modifier manuellement la whitelist AVANT de cliquer sur le bouton !'
 	}
 
 	enum banButton {
-		messageUpdate = '🔨 Le joueur a été retiré de la whitelist du serveur Minecraft par <@$discordUuid$>.',
-		reply = '<@$discordUuid$> a été retiré du serveur Minecraft avec succès.'
+		messageUpdate = '🔨 Le joueur a été retiré de la whitelist du serveur Minecraft par <@${discordUuid}>.',
+		reply = '<@${discordUuid}> a été retiré du serveur Minecraft avec succès.'
 	}
 
 	enum registerButton {
@@ -90,20 +90,20 @@ export namespace commands {
 	}
 
 	enum resetStatusCommand {
-		description = 'Remettre le statut d\'un membre à "en attente".',
+		description = 'Remettre le statut d\'un membre à «\u00a0en attente\u00a0».',
 		userOptionDescription = 'Membre dont il faut réinitialiser le statut'
 	}
 
 	enum deleteEntryCommand {
 		messageUpdate = '🗑️ L\'utilisateur a été supprimé de la whitelist et de la base de données.',
-		reply = '<@$discordUuid$> à été supprimé de la whitelist et de la base de données avec succès.',
+		reply = '<@${discordUuid}> à été supprimé de la whitelist et de la base de données avec succès.',
 		description = 'Supprime une rangée dans la base de données.',
 		userIdOption = 'Retirer l\'entrée pour quel UUID Discord ?'
 	}
 
 	enum displayUsersCommand {
 		noUserFound = 'Aucun utilisateur à afficher.',
-		displayingUsersWithStatus = 'Affichage des utilisateurs avec le statut "${status}"',
+		displayingUsersWithStatus = 'Affichage des utilisateurs avec le statut «\u00a0${status}\u00a0»',
 		displayingAllUsers = 'Affichage de tous les utilisateurs',
 		databaseEntryLine = '<@${discordUuid}> | [Afficher](<https://api.mojang.com/user/profile/${minecraftUuid}>) | ${statusEmoji}\n',
 		filenameJson = 'utilisateurs.json',
@@ -161,7 +161,7 @@ export namespace errors {
 	export const usernameUsedWithAnotherAccount = '⚠️ Un autre joueur est déjà inscrit avec ce nom d\'utilisateur Minecraft. S\'il s\'agit bien de ton nom d\'utilisateur, contacte un administrateur. ⚠️';
 	export const noDiscordUserWithThisUuid = 'Cet utilisateur Discord n\'est pas membre du serveur.';
 	export const commandExecution = 'Une erreur s\'est produite lors de l\'exécution de cette commande !';
-	export const commandNotFound = 'Aucune commande ne corresponsant à $command$ n\'a été trouvée.';
+	export const commandNotFound = 'Aucune commande ne corresponsant à ${command} n\'a été trouvée.';
 	export const buttonExecution = 'Une erreur inconnue s\'est produite !';
 	export const buttonNotFound = 'Aucun bouton ne corresponsant à ${button} n\'a été trouvée.';
 	export const unauthorized = 'Tu n\'as pas les permissions requises pour effectuer ceci.';

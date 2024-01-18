@@ -7,6 +7,8 @@ import { createApprovalRequest } from '../services/admin-approval';
 import { getMojangUser } from '../services/http';
 import { timeToWaitForUserInputBeforeTimeout } from '../bot-constants';
 
+const template = require('es6-template-strings');
+
 export const data = new ButtonData('register');
 
 const rulesEmbed = new EmbedBuilder({
@@ -94,7 +96,7 @@ async function registerUser(isFirstTimeMember: boolean) {
     }
 	catch (e) {
         if (e.message === Strings.errors.api.noMojangAccountWithThatUsername)
-            await dmChannel.send(Strings.services.registering.minecraftAccountDoesNotExist.replace('$minecraftUsername$', usernameSentByUser));
+            await dmChannel.send(template(Strings.services.registering.minecraftAccountDoesNotExist, {minecraftUsername: usernameSentByUser}));
         else
             await dmChannel.send(e.message);
     }

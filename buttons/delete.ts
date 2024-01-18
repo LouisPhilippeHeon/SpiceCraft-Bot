@@ -4,6 +4,8 @@ import { ButtonInteraction, Colors, PermissionFlagsBits } from 'discord.js';
 import { getUserByDiscordUuid } from '../services/database';
 import { editApprovalRequest } from '../services/admin-approval';
 
+const template = require('es6-template-strings');
+
 export const data = new ButtonData('delete', PermissionFlagsBits.Administrator);
 
 let user: UserFromDb;
@@ -22,5 +24,5 @@ export async function execute(interaction: ButtonInteraction) {
     }
 
     await editApprovalRequest( interaction.message, Strings.commands.deleteEntry.messageUpdate, undefined, [], Colors.Red );
-    await interaction.reply({ content: Strings.commands.deleteEntry.reply.replace('$discordUuid$', discordUuid), ephemeral: true });
+    await interaction.reply({ content: template(Strings.commands.deleteEntry.reply, {discordUuid: discordUuid}), ephemeral: true });
 }

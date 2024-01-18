@@ -2,6 +2,8 @@ import * as Strings from '../strings';
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, PermissionFlagsBits } from 'discord.js';
 import { ButtonData } from '../models';
 
+const template = require('es6-template-strings');
+
 export const data = new ButtonData('reject', PermissionFlagsBits.BanMembers);
 
 export async function execute(interaction: ButtonInteraction) {
@@ -20,5 +22,5 @@ export async function execute(interaction: ButtonInteraction) {
     });
 
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmRejection, cancel);
-    await interaction.reply({ content: Strings.events.rejection.askConfirmation.replace('$discordUuid$', discordUuid), components: [row] });
+    await interaction.reply({ content: template(Strings.events.rejection.askConfirmation, {discordUuid: discordUuid}), components: [row] });
 }

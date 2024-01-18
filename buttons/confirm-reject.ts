@@ -6,6 +6,8 @@ import { inscriptionStatus } from '../bot-constants';
 import { changeStatus } from '../services/database';
 import { editApprovalRequest } from '../services/admin-approval';
 
+const template = require('es6-template-strings');
+
 export const data = new ButtonData('confirm-reject', PermissionFlagsBits.BanMembers);
 
 let member;
@@ -27,7 +29,7 @@ export async function execute(interaction: ButtonInteraction) {
     }
 	catch (e) {
         if (statusChanged)
-            await interaction.reply(e.message + '\n' + Strings.events.rejection.userStillInBdExplanation.replace('$discordUuid$', discordUuid));
+            await interaction.reply(e.message + '\n' + template(Strings.events.rejection.userStillInBdExplanation, {discordUuid: discordUuid}));
         else
             await interaction.reply({ content: e.message, ephemeral: true });
         if (approvalRequest) await approvalRequest.delete();
@@ -35,7 +37,7 @@ export async function execute(interaction: ButtonInteraction) {
     }
 
     if (approvalRequest)
-        await editApprovalRequest(approvalRequest, Strings.events.rejection.requestDenied.replace('$discordUuid$', interaction.user.id), undefined, [], Colors.Red);
+        await editApprovalRequest(approvalRequest, template(Strings.events.rejection.requestDenied, {discordUuid: interaction.user.id}), undefined, [], Colors.Red);
 
     await notifyMember(member, interaction, discordUuid);
 }
@@ -43,9 +45,9 @@ export async function execute(interaction: ButtonInteraction) {
 async function notifyMember(member: GuildMember, interaction: ButtonInteraction, discordUuid: string) {
     try {
         await member.send(Strings.events.rejection.messageSentToUserToInformRejection);
-        await interaction.reply({ content: Strings.events.rejection.success.replace('$discordUuid$', discordUuid), ephemeral: true });
+        await interaction.reply({ content: template(Strings.events.rejection.success, {discordUuid: discordUuid}), ephemeral: true });
     }
 	catch {
-        await interaction.reply({ content: Strings.events.rejection.successNoDm.replace('$discordUuid$', discordUuid), ephemeral: true });
+        await interaction.reply({ content: template(Strings.events.rejection.successNoDm, {discordUuid: discordUuid}), ephemeral: true });
     }
 }

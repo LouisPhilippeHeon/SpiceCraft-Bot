@@ -97,7 +97,7 @@ async function updateExistingUser(userFromDb: UserFromDb) {
     }
 	catch (e) {
         if (e.message === Strings.errors.api.noMojangAccountWithThatUsername)
-            await dmChannel.send(Strings.services.registering.minecraftAccountDoesNotExist.replace('$minecraftUsername$', usernameSentByUser));
+            await dmChannel.send(template(Strings.services.registering.minecraftAccountDoesNotExist, {minecraftUsername: usernameSentByUser}));
         else
             await dmChannel.send(e.message);
     }

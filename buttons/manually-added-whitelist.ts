@@ -6,6 +6,8 @@ import { changeStatus } from '../services/database';
 import { addPlayerRole, fetchGuildMember } from '../utils';
 import { editApprovalRequest } from '../services/admin-approval';
 
+const template = require('es6-template-strings');
+
 export const data = new ButtonData('manually-added-whitelist', PermissionFlagsBits.BanMembers);
 
 let member: GuildMember;
@@ -27,16 +29,16 @@ export async function execute(buttonInteraction: ButtonInteraction) {
     }
 
     await addPlayerRole(member);
-    await editApprovalRequest(interaction.message, Strings.events.approbation.requestGranted.replace('$discordUuid$', interaction.user.id), undefined, [], Colors.Green);
+    await editApprovalRequest(interaction.message, template(Strings.events.approbation.requestGranted, {discordUuid: interaction.user.id}), undefined, [], Colors.Green);
     await notifyMember();
 }
 
 async function notifyMember() {
     try {
         await member.send(Strings.events.approbation.messageSentToPlayerToConfirmInscription);
-        await interaction.reply({ content: Strings.events.approbation.success.replace('$discordUuid$', discordUuid), ephemeral: true });
+        await interaction.reply({ content: template(Strings.events.approbation.success, {discordUuid: discordUuid}), ephemeral: true });
     }
 	catch {
-        await interaction.reply({ content: Strings.events.approbation.successNoDm.replace('$discordUuid$', discordUuid), ephemeral: true });
+        await interaction.reply({ content: template(Strings.events.approbation.successNoDm, {discordUuid: discordUuid}), ephemeral: true });
     }
 }

@@ -6,6 +6,8 @@ import { addPlayerRole } from '../utils';
 import { getUserByDiscordUuid } from '../services/database';
 import { editApprovalRequest } from '../services/admin-approval';
 
+const template = require('es6-template-strings');
+
 export const data = new ButtonData('approve', PermissionFlagsBits.BanMembers);
 
 let member, user;
@@ -32,7 +34,7 @@ export async function execute(buttonInteraction: ButtonInteraction) {
 
     await addPlayerRole(member);
     
-    await editApprovalRequest(interaction.message, Strings.events.approbation.requestGranted.replace('$discordUuid$', interaction.user.id), undefined, [], Colors.Green);
+    await editApprovalRequest(interaction.message, template(Strings.events.approbation.requestGranted, {discordUuid: interaction.user.id}), undefined, [], Colors.Green);
     await notifyMember(member, interaction, discordUuid);
 }
 
@@ -60,7 +62,7 @@ async function rconFailed(discordUuid: string, e: Error) {
     });
 
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmManualAdditionToWhitelist, reject);
-    await editApprovalRequest(interaction.message, `${e.message} ${Strings.events.clickToConfirmChangesToWhitelist.replace('$discordUuid$', discordUuid)}`, undefined, [row], Colors.Yellow);
+    await editApprovalRequest(interaction.message, `${e.message} ${template(Strings.events.clickToConfirmChangesToWhitelist, {discordUuid: discordUuid})}`, undefined, [row], Colors.Yellow);
 
     await interaction.reply({ content: Strings.events.approbation.changeWhitelistBeforeCliking, ephemeral: true });
 }
@@ -68,9 +70,9 @@ async function rconFailed(discordUuid: string, e: Error) {
 async function notifyMember(member: GuildMember, interaction: ButtonInteraction, discordUuid: string) {
     try {
         await member.send(Strings.events.approbation.messageSentToPlayerToConfirmInscription);
-        await interaction.reply({ content: Strings.events.approbation.success.replace('$discordUuid$', discordUuid), ephemeral: true });
+        await interaction.reply({ content: template(Strings.events.approbation.success, {discordUuid: discordUuid}), ephemeral: true });
     }
 	catch {
-        await interaction.reply({ content: Strings.events.approbation.successNoDm.replace('$discordUuid$', discordUuid), ephemeral: true });
+        await interaction.reply({ content: template(Strings.events.approbation.successNoDm, {discordUuid: discordUuid}), ephemeral: true });
     }
 }

@@ -52,7 +52,7 @@ async function handleChatInputCommand(interaction: InteractionWithCommands) {
 	const command = interaction.client.commands.get(interaction.commandName);
 
 	if (!command) {
-		console.error(Strings.errors.commandNotFound.replace('$command$', interaction.commandName));
+		console.error(template(Strings.errors.commandNotFound, {command: interaction.commandName}));
 		return;
 	}
 
