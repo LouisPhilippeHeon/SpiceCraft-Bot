@@ -4,8 +4,7 @@ import { UserFromDb } from '../../models';
 import { inscriptionStatus } from '../../bot-constants';
 import { buildHtml } from '../../services/html';
 import { getUsers } from '../../services/database';
-
-const template = require('es6-template-strings');
+import { template } from '../../utils';
 
 export const data = new SlashCommandBuilder()
 	.setName('afficher')

@@ -26,8 +26,13 @@ const tags = sequelize.define('tags', {
 	},
 });
 
-export function syncTags(force = false) {
-	tags.sync(force);
+export async function syncTags() {
+	await tags.sync();
+}
+
+export async function drop() {
+	await sequelize.drop('tags');
+	await syncTags();
 }
 
 export async function createUser(minecraftUuid: string, discordUuid: string) {

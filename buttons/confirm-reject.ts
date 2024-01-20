@@ -1,16 +1,14 @@
 import * as Strings from '../strings';
 import { ButtonInteraction, Colors, GuildMember, Message, PermissionFlagsBits } from 'discord.js';
 import { ButtonData } from '../models';
-import { fetchBotChannel, fetchGuildMember } from '../utils';
+import { fetchBotChannel, fetchGuildMember, template } from '../utils';
 import { inscriptionStatus } from '../bot-constants';
 import { changeStatus } from '../services/database';
 import { editApprovalRequest } from '../services/admin-approval';
 
-const template = require('es6-template-strings');
-
 export const data = new ButtonData('confirm-reject', PermissionFlagsBits.BanMembers);
 
-let member;
+let member: GuildMember;
 let statusChanged = false;
 
 export async function execute(interaction: ButtonInteraction) {

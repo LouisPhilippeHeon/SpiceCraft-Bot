@@ -1,8 +1,7 @@
 import * as Strings from '../strings';
 import { rconConnexions } from '../config';
 import { getUsernameFromUuid } from './http';
-
-const template = require('es6-template-strings');
+import { template } from '../utils';
 
 export async function whitelistAdd(uuid: string) {
 	const username = await getUsernameFromUuid(uuid);

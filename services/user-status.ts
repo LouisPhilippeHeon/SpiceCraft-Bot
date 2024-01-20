@@ -1,10 +1,8 @@
 import * as Strings from '../strings';
 import { ChatInputCommandInteraction, GuildMember } from 'discord.js';
-import { addPlayerRole, fetchGuildMember, removePlayerRole } from '../utils';
+import { addPlayerRole, fetchGuildMember, removePlayerRole, template } from '../utils';
 import { inscriptionStatus } from '../bot-constants';
 import { changeStatus, getUserByDiscordUuid } from './database';
-
-const template = require('es6-template-strings');
 
 let member: GuildMember;
 

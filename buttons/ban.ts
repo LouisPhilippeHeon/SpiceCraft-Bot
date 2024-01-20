@@ -1,15 +1,14 @@
 import * as Strings from '../strings';
-import { ButtonData } from '../models';
+import { ButtonData, UserFromDb } from '../models';
 import { getUserByDiscordUuid } from '../services/database';
 import { ButtonInteraction, Colors, PermissionFlagsBits } from 'discord.js';
 import { inscriptionStatus } from '../bot-constants';
 import { editApprovalRequest } from '../services/admin-approval';
-
-const template = require('es6-template-strings');
+import { template } from '../utils';
 
 export const data = new ButtonData('ban', PermissionFlagsBits.BanMembers);
 
-let user;
+let user: UserFromDb;
 let interaction: ButtonInteraction;
 
 export async function execute(buttonInteraction: ButtonInteraction) {

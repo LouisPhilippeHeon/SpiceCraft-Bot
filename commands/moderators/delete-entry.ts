@@ -1,9 +1,7 @@
 import * as Strings from '../../strings';
 import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
-import { fetchGuildMember, removePlayerRole } from '../../utils';
+import { fetchGuildMember, removePlayerRole, template } from '../../utils';
 import { getUserByDiscordUuid } from '../../services/database';
-
-const template = require('es6-template-strings');
 
 export const data = new SlashCommandBuilder()
 	.setName('supprimer-entree')

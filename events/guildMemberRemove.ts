@@ -1,13 +1,12 @@
 import * as Strings from '../strings';
 import { ActionRowBuilder, AuditLogEvent, ButtonBuilder, ButtonStyle, EmbedBuilder, Events, GuildMember, MessageCreateOptions } from 'discord.js';
 import { UserFromDb } from '../models';
-import { fetchBotChannel } from '../utils';
+import { fetchBotChannel, template } from '../utils';
 import { inscriptionStatus } from '../bot-constants';
 import { changeStatus, deleteEntry, getUserByDiscordUuid } from '../services/database';
 import { findApprovalRequestOfMember } from '../services/admin-approval';
 
-const template = require('es6-template-strings');
-let userFromDb;
+let userFromDb: UserFromDb;
 
 module.exports = {
 	name: Events.GuildMemberRemove,

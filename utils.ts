@@ -94,3 +94,5 @@ export function formatDate(dateToFormat: Date): string {
 
 	return date.toLocaleDateString('fr-FR', options);
 }
+
+export const template = require('es6-template-strings');

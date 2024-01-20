@@ -2,21 +2,19 @@ import * as Strings from '../strings';
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, GuildMember, PermissionFlagsBits } from 'discord.js';
 import { ButtonData, UserFromDb } from '../models';
 import { inscriptionStatus } from '../bot-constants';
-import { addPlayerRole } from '../utils';
+import { addPlayerRole, template } from '../utils';
 import { getUserByDiscordUuid } from '../services/database';
 import { editApprovalRequest } from '../services/admin-approval';
 
-const template = require('es6-template-strings');
-
 export const data = new ButtonData('approve', PermissionFlagsBits.BanMembers);
 
-let member, user;
+let member: GuildMember;
+let user: UserFromDb;
 let interaction: ButtonInteraction;
 
 export async function execute(buttonInteraction: ButtonInteraction) {
     interaction = buttonInteraction;
     const discordUuid = interaction.customId.split('_')[1];
-    const approvalRequest = interaction.message;
 
     try {
         user = await getUserByDiscordUuid(discordUuid);

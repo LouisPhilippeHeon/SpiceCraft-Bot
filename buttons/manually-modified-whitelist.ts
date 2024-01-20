@@ -2,10 +2,8 @@ import * as Strings from '../strings';
 import { ButtonInteraction, Colors, GuildMember, PermissionFlagsBits } from 'discord.js';
 import { ButtonData } from '../models';
 import { changeMinecraftUuid } from '../services/database';
-import { fetchGuildMember } from '../utils';
+import { fetchGuildMember, template } from '../utils';
 import { editApprovalRequest } from '../services/admin-approval';
-
-const template = require('es6-template-strings');
 
 export const data = new ButtonData('manually-modified-whitelist', PermissionFlagsBits.BanMembers);
 

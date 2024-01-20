@@ -3,8 +3,7 @@ import { ButtonData, UserFromDb } from '../models';
 import { ButtonInteraction, Colors, PermissionFlagsBits } from 'discord.js';
 import { getUserByDiscordUuid } from '../services/database';
 import { editApprovalRequest } from '../services/admin-approval';
-
-const template = require('es6-template-strings');
+import { template } from '../utils';
 
 export const data = new ButtonData('delete', PermissionFlagsBits.Administrator);
 

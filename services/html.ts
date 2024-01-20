@@ -1,9 +1,7 @@
 import * as Strings from '../strings';
 import { client } from '../bot-constants';
-import { formatDate } from '../utils';
+import { formatDate, template } from '../utils';
 import { UserFromDb } from '../models';
-
-const template = require('es6-template-strings');
 
 let rows = '';
 

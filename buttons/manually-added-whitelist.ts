@@ -3,10 +3,8 @@ import { ButtonInteraction, Colors, GuildMember, PermissionFlagsBits } from 'dis
 import { ButtonData } from '../models';
 import { inscriptionStatus } from '../bot-constants';
 import { changeStatus } from '../services/database';
-import { addPlayerRole, fetchGuildMember } from '../utils';
+import { addPlayerRole, fetchGuildMember, template } from '../utils';
 import { editApprovalRequest } from '../services/admin-approval';
-
-const template = require('es6-template-strings');
 
 export const data = new ButtonData('manually-added-whitelist', PermissionFlagsBits.BanMembers);
 

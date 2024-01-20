@@ -2,7 +2,7 @@ import * as Strings from '../strings';
 import { ButtonData } from '../models';
 import { ButtonInteraction, PermissionFlagsBits } from 'discord.js';
 import { fetchBotChannel, fetchPlayerRole } from '../utils';
-import { getUsers, syncTags } from '../services/database';
+import { drop, getUsers } from '../services/database';
 import { filenameSeasonSave } from '../bot-constants';
 
 export const data = new ButtonData('confirm-end-season', PermissionFlagsBits.Administrator);
@@ -16,7 +16,7 @@ export async function execute(buttonInteraction: ButtonInteraction) {
     sendBackupToInteractionAuthor();
 
     await interaction.reply({ content: Strings.commands.endSeason.newSeasonBegins, ephemeral: true });
-    syncTags(true);
+    await drop();
     
     const playerRole = await fetchPlayerRole(interaction.guild, false);
     if (playerRole) await playerRole.delete();

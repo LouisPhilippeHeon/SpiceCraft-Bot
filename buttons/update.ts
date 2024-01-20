@@ -3,12 +3,12 @@ import { ButtonData, UserFromDb } from '../models';
 import { getUserByDiscordUuid } from '../services/database';
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, GuildMember, PermissionFlagsBits } from 'discord.js';
 import { editApprovalRequest } from '../services/admin-approval';
-
-const template = require('es6-template-strings');
+import { template } from '../utils';
 
 export const data = new ButtonData('update', PermissionFlagsBits.BanMembers);
 
-let member, user;
+let member: GuildMember;
+let user: UserFromDb;
 let interaction: ButtonInteraction;
 
 export async function execute(buttonInteraction: ButtonInteraction) {

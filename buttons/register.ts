@@ -6,8 +6,7 @@ import { createUser } from '../services/database';
 import { createApprovalRequest } from '../services/admin-approval';
 import { getMojangUser } from '../services/http';
 import { timeToWaitForUserInputBeforeTimeout } from '../bot-constants';
-
-const template = require('es6-template-strings');
+import { template } from '../utils';
 
 export const data = new ButtonData('register');
 

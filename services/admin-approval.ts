@@ -1,9 +1,7 @@
 import * as Strings from '../strings';
 import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, Message, Guild, User, APIEmbed } from 'discord.js';
-import { deepCloneWithJson, fetchBotChannel } from '../utils';
+import { deepCloneWithJson, fetchBotChannel, template } from '../utils';
 import { UserFromMojangApi } from '../models';
-
-const template = require('es6-template-strings');
 
 export async function createApprovalRequest(user: User, guild: Guild, username: string, inviter?: string) {
 	const approve = new ButtonBuilder({

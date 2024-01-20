@@ -1,10 +1,8 @@
 import * as Strings from '../strings';
 import * as assert from 'assert';
 import { Events } from 'discord.js';
-import { replyOrFollowUp } from '../utils';
+import { replyOrFollowUp, template } from '../utils';
 import { InteractionWithCommands } from '../models';
-
-const template = require('es6-template-strings');
 
 module.exports = {
 	name: Events.InteractionCreate,

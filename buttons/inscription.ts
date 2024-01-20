@@ -3,12 +3,10 @@ import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, DMChan
 import { ButtonData, UserFromDb, UserFromMojangApi } from '../models';
 import { getMojangUser } from '../services/http';
 import { ephemeralInteractions } from '../ephemeral-interactions';
-import { fetchBotChannel } from '../utils';
+import { fetchBotChannel, template } from '../utils';
 import { inscriptionStatus, timeToWaitForUserInputBeforeTimeout } from '../bot-constants';
 import { changeMinecraftUuid, getUserByDiscordUuid, getUserByMinecraftUuid } from '../services/database';
 import { createUsernameChangeRequest, editApprovalRequest, findApprovalRequestOfMember } from '../services/admin-approval';
-
-const template = require('es6-template-strings');
 
 export const data = new ButtonData('inscription');
 

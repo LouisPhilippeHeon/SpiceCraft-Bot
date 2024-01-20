@@ -1,8 +1,7 @@
 import * as Strings from '../strings';
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, PermissionFlagsBits } from 'discord.js';
 import { ButtonData } from '../models';
-
-const template = require('es6-template-strings');
+import { template } from '../utils';
 
 export const data = new ButtonData('reject', PermissionFlagsBits.BanMembers);
 
