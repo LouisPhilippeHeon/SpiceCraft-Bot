@@ -69,7 +69,7 @@ export async function replyOrFollowUp(message: string | MessagePayload | Interac
 
 export async function sendMessageToMember(message: string, member: GuildMember, interaction: Interaction, replyOnSuccess?: string, replyOnFailure?: string) {
 	if (!interaction.isRepliable())
-		throw new Error('rip bozo');
+		throw new Error(Strings.errors.notRepliable);
 
 	try {
 		await member.send(message);

@@ -166,6 +166,7 @@ export namespace errors {
 	export const buttonNotFound = 'Aucun bouton ne corresponsant à ${button} n\'a été trouvée.';
 	export const unauthorized = 'Tu n\'as pas les permissions requises pour effectuer ceci.';
 	export const cantReadLogs = 'Le bot n\'a pas la permission de lire les logs.';
+	export const notRepliable = 'Impossible de répondre à cette interaction.'
 
 	enum apiErrors {
 		couldNotConnectToApi = 'Erreur lors de la connexion à l\'API de Mojang.',
