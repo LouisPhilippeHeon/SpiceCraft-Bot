@@ -3,7 +3,7 @@ import { ButtonData, UserFromDb } from '../models';
 import { getUserByDiscordUuid } from '../services/database';
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, GuildMember, PermissionFlagsBits } from 'discord.js';
 import { editApprovalRequest } from '../services/admin-approval';
-import { template } from '../utils';
+import { sendMessageToMember, template } from '../utils';
 
 export const data = new ButtonData('update', PermissionFlagsBits.BanMembers);
 
@@ -31,7 +31,14 @@ export async function execute(buttonInteraction: ButtonInteraction) {
     }
    
     await editApprovalRequest(interaction.message, template(Strings.events.usernameChangeConfirmation.messageUpdate, {discordUuid: interaction.user.id}), undefined, [], Colors.Green);
-    await notifyMember(member, interaction, discordUuid);
+
+    await sendMessageToMember(
+        Strings.events.usernameChangeConfirmation.messageSentToConfirmUsernameChange,
+        member,
+        interaction,
+        template(Strings.events.usernameChangeConfirmation.success, {discordUuid: discordUuid}),
+        template(Strings.events.usernameChangeConfirmation.successNoDm, {discordUuid: discordUuid})
+    );
 }
 
 async function modifyWhitelist(user: UserFromDb, minecraftUuid: string, discordUuid: string) {
@@ -61,14 +68,4 @@ async function rconFailed(discordUuid: string, minecraftUuid: string, e: Error) 
     await editApprovalRequest(interaction.message, `${e.message} ${template(Strings.events.clickToConfirmChangesToWhitelist, {discordUuid: discordUuid})}`, undefined, [row], Colors.Yellow);
 
     await interaction.reply({ content: Strings.events.usernameChangeConfirmation.changeWhitelistBeforeCliking, ephemeral: true });
-}
-
-async function notifyMember(member: GuildMember, interaction: ButtonInteraction, discordUuid: string) {
-    try {
-        await member.send(Strings.events.usernameChangeConfirmation.messageSentToConfirmUsernameChange);
-        await interaction.reply({ content: template(Strings.events.usernameChangeConfirmation.success, {discordUuid: discordUuid}), ephemeral: true });
-    }
-	catch {
-        await interaction.reply({ content: template(Strings.events.usernameChangeConfirmation.successNoDm, {discordUuid: discordUuid}), ephemeral: true });
-    }
 }

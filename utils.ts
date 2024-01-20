@@ -1,5 +1,5 @@
-import { ChannelType, Colors, Guild, GuildMember, Interaction, InteractionReplyOptions, MessagePayload, PermissionsBitField, Role, TextChannel } from 'discord.js';
 import * as Strings from './strings';
+import { ChannelType, Colors, Guild, GuildMember, Interaction, InteractionReplyOptions, MessagePayload, PermissionsBitField, Role, TextChannel } from 'discord.js';
 import { client, playerRoleName, whitelistChannelName } from './bot-constants';
 
 // structuredClone dosen't work in some circumstances
@@ -65,6 +65,22 @@ export async function replyOrFollowUp(message: string | MessagePayload | Interac
 		await interaction.followUp(message);
 	else
 		await interaction.reply(message);
+}
+
+export async function sendMessageToMember(message: string, member: GuildMember, interaction: Interaction, replyOnSuccess?: string, replyOnFailure?: string) {
+	if (!interaction.isRepliable())
+		throw new Error('rip bozo');
+
+	try {
+		await member.send(message);
+
+		if (replyOnSuccess)
+			await interaction.reply({ content: replyOnSuccess, ephemeral: true });
+	}
+	catch {
+		if (replyOnFailure)
+			await interaction.reply({ content: replyOnFailure, ephemeral: true });
+	}
 }
 
 export function formatDate(dateToFormat: Date): string {

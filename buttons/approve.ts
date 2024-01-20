@@ -2,7 +2,7 @@ import * as Strings from '../strings';
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, GuildMember, PermissionFlagsBits } from 'discord.js';
 import { ButtonData, UserFromDb } from '../models';
 import { inscriptionStatus } from '../bot-constants';
-import { addPlayerRole, template } from '../utils';
+import { addPlayerRole, sendMessageToMember, template } from '../utils';
 import { getUserByDiscordUuid } from '../services/database';
 import { editApprovalRequest } from '../services/admin-approval';
 
@@ -31,9 +31,15 @@ export async function execute(buttonInteraction: ButtonInteraction) {
     }
 
     await addPlayerRole(member);
-    
     await editApprovalRequest(interaction.message, template(Strings.events.approbation.requestGranted, {discordUuid: interaction.user.id}), undefined, [], Colors.Green);
-    await notifyMember(member, interaction, discordUuid);
+
+    await sendMessageToMember(
+        Strings.events.approbation.messageSentToPlayerToConfirmInscription,
+        member,
+        interaction,
+        template(Strings.events.approbation.success, {discordUuid: discordUuid}),
+        template(Strings.events.approbation.successNoDm, {discordUuid: discordUuid})
+    );
 }
 
 async function addToWhitelist(user: UserFromDb, discordUuid: string) {
@@ -63,14 +69,4 @@ async function rconFailed(discordUuid: string, e: Error) {
     await editApprovalRequest(interaction.message, `${e.message} ${template(Strings.events.clickToConfirmChangesToWhitelist, {discordUuid: discordUuid})}`, undefined, [row], Colors.Yellow);
 
     await interaction.reply({ content: Strings.events.approbation.changeWhitelistBeforeCliking, ephemeral: true });
-}
-
-async function notifyMember(member: GuildMember, interaction: ButtonInteraction, discordUuid: string) {
-    try {
-        await member.send(Strings.events.approbation.messageSentToPlayerToConfirmInscription);
-        await interaction.reply({ content: template(Strings.events.approbation.success, {discordUuid: discordUuid}), ephemeral: true });
-    }
-	catch {
-        await interaction.reply({ content: template(Strings.events.approbation.successNoDm, {discordUuid: discordUuid}), ephemeral: true });
-    }
 }

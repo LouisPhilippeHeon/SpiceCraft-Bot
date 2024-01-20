@@ -1,7 +1,7 @@
 import * as Strings from '../strings';
 import { ButtonInteraction, Colors, GuildMember, Message, PermissionFlagsBits } from 'discord.js';
 import { ButtonData } from '../models';
-import { fetchBotChannel, fetchGuildMember, template } from '../utils';
+import { fetchBotChannel, fetchGuildMember, sendMessageToMember, template } from '../utils';
 import { inscriptionStatus } from '../bot-constants';
 import { changeStatus } from '../services/database';
 import { editApprovalRequest } from '../services/admin-approval';
@@ -37,15 +37,11 @@ export async function execute(interaction: ButtonInteraction) {
     if (approvalRequest)
         await editApprovalRequest(approvalRequest, template(Strings.events.rejection.requestDenied, {discordUuid: interaction.user.id}), undefined, [], Colors.Red);
 
-    await notifyMember(member, interaction, discordUuid);
-}
-
-async function notifyMember(member: GuildMember, interaction: ButtonInteraction, discordUuid: string) {
-    try {
-        await member.send(Strings.events.rejection.messageSentToUserToInformRejection);
-        await interaction.reply({ content: template(Strings.events.rejection.success, {discordUuid: discordUuid}), ephemeral: true });
-    }
-	catch {
-        await interaction.reply({ content: template(Strings.events.rejection.successNoDm, {discordUuid: discordUuid}), ephemeral: true });
-    }
+    await sendMessageToMember(
+        Strings.events.rejection.messageSentToUserToInformRejection,
+        member,
+        interaction,
+        template(Strings.events.rejection.success, {discordUuid: discordUuid}),
+        template(Strings.events.rejection.successNoDm, {discordUuid: discordUuid})
+    );
 }
