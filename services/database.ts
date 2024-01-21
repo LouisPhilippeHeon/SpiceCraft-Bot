@@ -78,10 +78,10 @@ export async function changeMinecraftUuid(discordUuid: string, minecraftUuid: st
 export async function getUserByDiscordUuid(discordUuid: string): Promise<UserFromDb> {
 	const tag = await tags.findOne({ where: { discord_uuid: discordUuid }});
 
-	if (tag)
-		return Object.assign(new UserFromDb(), tag.get({ plain: true }));
+	if (!tag)
+		throw new Error(Errors.database.userDoesNotExist);
 
-	throw new Error(Errors.database.userDoesNotExist);
+	return Object.assign(new UserFromDb(), tag.get({ plain: true }));
 }
 
 export async function getUserByMinecraftUuid(minecraftUuid: string): Promise<UserFromDb | null> {
@@ -102,6 +102,9 @@ export async function getUsers(status?: number): Promise<UserFromDb[]> {
 
 export async function deleteEntry(discordUuid: string) {
 	const tagToDelete = await tags.findOne({ where: { discord_uuid: discordUuid }})
-	if (!tagToDelete) throw new Error(Errors.database.userDoesNotExist);
+
+	if (!tagToDelete)
+		throw new Error(Errors.database.userDoesNotExist);
+
 	tagToDelete.destroy();
 }
