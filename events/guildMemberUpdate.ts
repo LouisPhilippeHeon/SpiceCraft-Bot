@@ -1,8 +1,8 @@
-import * as Strings from '../strings';
-import { AuditLogEvent, Events, GuildMember } from 'discord.js';
-import { clientId } from '../config';
 import { playerRoleName } from '../bot-constants';
+import { clientId } from '../config';
 import { deleteEntry } from '../services/database';
+import { AuditLogEvent, Events, GuildMember } from 'discord.js';
+import { Errors } from '../strings';
 
 module.exports = {
 	name: Events.GuildMemberUpdate,
@@ -20,7 +20,7 @@ module.exports = {
 					await deleteEntry(newMember.user.id);
 			}
 			catch (e) {
-				if (e.code === 50013) console.error(Strings.errors.cantReadLogs);
+				if (e.code === 50013) console.error(Errors.discord.cantReadLogs);
 				else console.error(e);
 			}
 		}

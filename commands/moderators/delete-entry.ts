@@ -1,15 +1,15 @@
-import * as Strings from '../../strings';
-import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
-import { fetchGuildMember, removePlayerRole } from '../../utils';
 import { getUserByDiscordUuid } from '../../services/database';
+import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
+import { Commands } from '../../strings';
+import { fetchGuildMember, removePlayerRole, template } from '../../utils';
 
 export const data = new SlashCommandBuilder()
 	.setName('supprimer-entree')
-	.setDescription(Strings.commands.deleteEntry.description)
+	.setDescription(Commands.deleteEntry.description)
 	.addStringOption(option =>
 		option.setName('discord-uuid')
-			.setDescription(Strings.commands.deleteEntry.userIdOption)
-			.setRequired(true))
+			  .setDescription(Commands.deleteEntry.userIdOption)
+			  .setRequired(true))
 	.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers);
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -23,7 +23,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 		).catch();
 
 		await user.removeFromWhitelist();
-		await interaction.reply({ content: Strings.commands.deleteEntry.reply.replace('$discordUuid$', discordUuid), ephemeral: true });
+		await interaction.reply({ content: template(Commands.deleteEntry.reply, {discordUuid: discordUuid}), ephemeral: true });
 	}
 	catch (e) {
 		await interaction.reply(e.message);

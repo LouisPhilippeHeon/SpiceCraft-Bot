@@ -1,7 +1,6 @@
-import { ChannelType, Colors, Guild, GuildMember, Interaction, InteractionReplyOptions, MessagePayload, PermissionsBitField, Role, TextChannel } from 'discord.js';
-import * as Strings from './strings';
 import { client, playerRoleName, whitelistChannelName } from './bot-constants';
-import { guildId } from './config';
+import { ChannelType, Colors, Guild, GuildMember, Interaction, InteractionReplyOptions, MessagePayload, PermissionsBitField, Role, TextChannel } from 'discord.js';
+import { Errors, Utils } from './strings';
 
 // structuredClone dosen't work in some circumstances
 export function deepCloneWithJson(objectToClone: any): any {
@@ -24,7 +23,7 @@ export async function fetchBotChannel(guild: Guild, createIfNecessary = true): P
 			},
 			{
 				// Highest role of bot
-				id: client.guilds.cache.get(guildId).members.cache.get(client.user.id).roles.highest,
+				id: client.guilds.cache.get(guild.id).members.cache.get(client.user.id).roles.highest,
 				allow: [PermissionsBitField.Flags.ViewChannel]
 			}
 		],
@@ -39,7 +38,7 @@ export async function fetchPlayerRole(guild: Guild, createIfNecessery = true): P
 	return await guild.roles.create({
 		name: playerRoleName,
 		color: Colors.Green,
-		reason: Strings.utils.createdPlayerRole,
+		reason: Utils.createdPlayerRole,
 	});
 }
 
@@ -55,7 +54,7 @@ export async function removePlayerRole(member: GuildMember) {
 
 export async function fetchGuildMember(guild: Guild, id: string): Promise<GuildMember> {
 	return await guild.members.fetch(id).catch(() => {
-		throw Error(Strings.errors.noDiscordUserWithThisUuid);
+		throw Error(Errors.discord.noDiscordUserWithThisUuid);
 	});
 }
 
@@ -66,6 +65,22 @@ export async function replyOrFollowUp(message: string | MessagePayload | Interac
 		await interaction.followUp(message);
 	else
 		await interaction.reply(message);
+}
+
+export async function sendMessageToMember(message: string, member: GuildMember, interaction: Interaction, replyOnSuccess?: string, replyOnFailure?: string) {
+	if (!interaction.isRepliable())
+		throw new Error(Errors.discord.notRepliable);
+
+	try {
+		await member.send(message);
+
+		if (replyOnSuccess)
+			await interaction.reply({content: replyOnSuccess, ephemeral: true});
+	}
+	catch {
+		if (replyOnFailure)
+			await interaction.reply({content: replyOnFailure, ephemeral: true});
+	}
 }
 
 export function formatDate(dateToFormat: Date): string {
@@ -95,3 +110,5 @@ export function formatDate(dateToFormat: Date): string {
 
 	return date.toLocaleDateString('fr-FR', options);
 }
+
+export const template = require('es6-template-strings');

@@ -1,8 +1,8 @@
-import * as Strings from '../strings';
 import * as assert from 'assert';
 import { Events } from 'discord.js';
-import { replyOrFollowUp } from '../utils';
 import { InteractionWithCommands } from '../models';
+import { Errors } from '../strings';
+import { replyOrFollowUp, template } from '../utils';
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -24,7 +24,7 @@ async function handleButtonInteraction(interaction: InteractionWithCommands) {
 	const button = interaction.client.buttons.get(buttonName);
 
 	if (!button) {
-		console.error(Strings.errors.buttonNotFound.replace('$button$', interaction.customId));
+		console.error(template(Errors.interaction.buttonNotFound, {button: interaction.customId}));
 		return;
 	}
 
@@ -36,10 +36,10 @@ async function handleButtonInteraction(interaction: InteractionWithCommands) {
 		await button.execute(interaction);
 	}
 	catch (e) {
-		if (e.code === 'ERR_ASSERTION')	await replyOrFollowUp({ content: Strings.errors.unauthorized, ephemeral: true }, interaction);
+		if (e.code === 'ERR_ASSERTION') await replyOrFollowUp({ content: Errors.interaction.unauthorized, ephemeral: true }, interaction);
 		else {
 			console.error(e);
-			await replyOrFollowUp({ content: Strings.errors.buttonExecution, ephemeral: true }, interaction);
+			await replyOrFollowUp({content: Errors.interaction.buttonExecution, ephemeral: true}, interaction);
 		}
 	}
 }
@@ -50,7 +50,7 @@ async function handleChatInputCommand(interaction: InteractionWithCommands) {
 	const command = interaction.client.commands.get(interaction.commandName);
 
 	if (!command) {
-		console.error(Strings.errors.commandNotFound.replace('$command$', interaction.commandName));
+		console.error(template(Errors.interaction.commandNotFound, {command: interaction.commandName}));
 		return;
 	}
 
@@ -59,6 +59,6 @@ async function handleChatInputCommand(interaction: InteractionWithCommands) {
 	}
 	catch (error) {
 		console.error(error);
-		await replyOrFollowUp({ content: Strings.errors.commandExecution, ephemeral: true }, interaction);
+		await replyOrFollowUp({content: Errors.interaction.commandExecution, ephemeral: true}, interaction);
 	}
 }

@@ -1,51 +1,48 @@
-import * as Strings from '../strings';
+import { editApprovalRequest } from '../services/admin-approval';
+import { changeStatus } from '../services/database';
+import { inscriptionStatus } from '../bot-constants';
 import { ButtonInteraction, Colors, GuildMember, Message, PermissionFlagsBits } from 'discord.js';
 import { ButtonData } from '../models';
-import { fetchBotChannel, fetchGuildMember } from '../utils';
-import { inscriptionStatus } from '../bot-constants';
-import { changeStatus } from '../services/database';
-import { editApprovalRequest } from '../services/admin-approval';
+import { ButtonEvents } from '../strings';
+import { fetchBotChannel, fetchGuildMember, sendMessageToMember, template } from '../utils';
 
 export const data = new ButtonData('confirm-reject', PermissionFlagsBits.BanMembers);
 
-let member;
+let member: GuildMember;
 let statusChanged = false;
 
 export async function execute(interaction: ButtonInteraction) {
-    const discordUuid = interaction.customId.split('_')[1];
-    const messageUuid = interaction.customId.split('_')[2];
+	const discordUuid = interaction.customId.split('_')[1];
+	const messageUuid = interaction.customId.split('_')[2];
 
-    const whitelistChannel = await fetchBotChannel(interaction.guild);
-    let approvalRequest: Message = await whitelistChannel.messages.fetch(messageUuid).catch(() => approvalRequest = undefined);
+	const whitelistChannel = await fetchBotChannel(interaction.guild);
+	let approvalRequest: Message = await whitelistChannel.messages.fetch(messageUuid).catch(() => approvalRequest = undefined);
 
-    await interaction.message.delete();
+	await interaction.message.delete();
 
-    try {
-        await changeStatus(discordUuid, inscriptionStatus.approved);
-        statusChanged = true;
-        member = await fetchGuildMember(interaction.guild, discordUuid);
-    }
+	try {
+		await changeStatus(discordUuid, inscriptionStatus.approved);
+		statusChanged = true;
+		member = await fetchGuildMember(interaction.guild, discordUuid);
+	}
 	catch (e) {
-        if (statusChanged)
-            await interaction.reply(e.message + '\n' + Strings.events.rejection.userStillInBdExplanation.replace('$discordUuid$', discordUuid));
-        else
-            await interaction.reply({ content: e.message, ephemeral: true });
-        if (approvalRequest) await approvalRequest.delete();
-        return;
-    }
+		if (statusChanged)
+			await interaction.reply(e.message + '\n' + template(ButtonEvents.rejection.userStillInBdExplanation, {discordUuid: discordUuid}));
+		else
+			await interaction.reply({ content: e.message, ephemeral: true });
 
-    if (approvalRequest)
-        await editApprovalRequest(approvalRequest, Strings.events.rejection.requestDenied.replace('$discordUuid$', interaction.user.id), undefined, [], Colors.Red);
+		if (approvalRequest) await approvalRequest.delete();
+		return;
+	}
 
-    await notifyMember(member, interaction, discordUuid);
-}
+	if (approvalRequest)
+		await editApprovalRequest(approvalRequest, template(ButtonEvents.rejection.requestDenied, {discordUuid: interaction.user.id}), undefined, [], Colors.Red);
 
-async function notifyMember(member: GuildMember, interaction: ButtonInteraction, discordUuid: string) {
-    try {
-        await member.send(Strings.events.rejection.messageSentToUserToInformRejection);
-        await interaction.reply({ content: Strings.events.rejection.success.replace('$discordUuid$', discordUuid), ephemeral: true });
-    }
-	catch {
-        await interaction.reply({ content: Strings.events.rejection.successNoDm.replace('$discordUuid$', discordUuid), ephemeral: true });
-    }
+	await sendMessageToMember(
+		ButtonEvents.rejection.messageSentToUserToInformRejection,
+		member,
+		interaction,
+		template(ButtonEvents.rejection.success, {discordUuid: discordUuid}),
+		template(ButtonEvents.rejection.successNoDm, {discordUuid: discordUuid})
+	);
 }

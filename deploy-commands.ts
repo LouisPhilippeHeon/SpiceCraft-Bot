@@ -1,7 +1,7 @@
-import { REST, Routes } from 'discord.js';
 import { clientId, guildId, token } from './config';
-import { join } from 'node:path';
+import { REST, Routes } from 'discord.js';
 import { readdirSync } from 'node:fs';
+import { join } from 'node:path';
 
 const commands = [];
 // Grab all the command files from the commands directory you created earlier

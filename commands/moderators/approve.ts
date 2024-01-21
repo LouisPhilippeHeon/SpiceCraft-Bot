@@ -1,18 +1,18 @@
-import * as Strings from '../../strings';
-import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
-import { editUserStatus } from '../../services/user-status';
 import { inscriptionStatus } from '../../bot-constants';
+import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
+import { Commands } from '../../strings';
+import { editUserStatus } from '../../services/user-status';
 
 export const data = new SlashCommandBuilder()
 	.setName('approuver')
-	.setDescription(Strings.commands.approve.description)
+	.setDescription(Commands.approve.description)
 	.addUserOption(option =>
 		option.setName('membre')
-			.setDescription(Strings.commands.approve.memberOptionDescription)
-			.setRequired(true))
+			  .setDescription(Commands.approve.memberOptionDescription)
+			  .setRequired(true))
 	.addBooleanOption(option =>
 		option.setName('silencieux')
-			.setDescription(Strings.commands.approve.silentOptionDescription))
+			  .setDescription(Commands.approve.silentOptionDescription))
 	.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers);
 
 export async function execute(interaction: ChatInputCommandInteraction) {

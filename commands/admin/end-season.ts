@@ -1,28 +1,28 @@
-import * as Strings from '../../strings';
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
+import { Commands, Components } from '../../strings';
 
 export const data = new SlashCommandBuilder()
 	.setName('terminer-saison')
-	.setDescription(Strings.commands.endSeason.description)
+	.setDescription(Commands.endSeason.description)
 	.setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
 export async function execute(interaction: ChatInputCommandInteraction) {
 	const confirm = new ButtonBuilder({
 		customId: 'confirm-end-season',
-		label: Strings.components.buttons.endSeason,
+		label: Components.buttons.endSeason,
 		style: ButtonStyle.Danger
 	});
 
 	const cancel = new ButtonBuilder({
 		customId: 'dissmiss',
-		label: Strings.components.buttons.cancel,
+		label: Components.buttons.cancel,
 		style: ButtonStyle.Secondary
 	});
 
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirm, cancel);
 
 	await interaction.reply({
-		content: Strings.commands.endSeason.warning,
+		content: Commands.endSeason.warning,
 		components: [row]
 	});
 }
