@@ -1,8 +1,8 @@
+import { client } from './bot-constants';
+import { token } from './config';
+import { Collection } from 'discord.js';
 import fs = require('node:fs');
 import path = require('node:path');
-import { Collection } from 'discord.js';
-import { token } from './config';
-import { client } from './bot-constants';
 
 client.commands = new Collection();
 client.buttons = new Collection();

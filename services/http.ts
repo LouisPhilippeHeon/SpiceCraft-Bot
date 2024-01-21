@@ -1,7 +1,7 @@
-import * as Strings from '../strings';
+import { mojangApiUrl } from '../bot-constants';
 import http = require('https');
 import { MojangApiError, UserFromMojangApi } from '../models';
-import { mojangApiUrl } from '../bot-constants';
+import { Errors } from '../strings';
 
 export function getMojangUser(username: string): Promise<UserFromMojangApi> {
 	return new Promise((resolve, reject) => {
@@ -18,12 +18,12 @@ export function getMojangUser(username: string): Promise<UserFromMojangApi> {
 					reject(e);
 				}
 				if ((body as MojangApiError).errorMessage)
-					reject(new Error(Strings.errors.api.noMojangAccountWithThatUsername));
+					reject(new Error(Errors.api.noMojangAccountWithThatUsername));
 				resolve(body as UserFromMojangApi);
 			});
 		});
 		req.on('error', () => {
-			reject(new Error(Strings.errors.api.couldNotConnectToApi));
+			reject(new Error(Errors.api.couldNotConnectToApi));
 		});
 		req.end();
 	});
@@ -44,12 +44,12 @@ export function getUsernameFromUuid(uuid: string): Promise<string> {
 					reject(e);
 				}
 				if (!body.name)
-					reject(new Error(Strings.errors.api.noMojangAccountWithThatUuid));
+					reject(new Error(Errors.api.noMojangAccountWithThatUuid));
 				resolve(body.name);
 			});
 		});
 		req.on('error', () => {
-			reject(new Error(Strings.errors.api.couldNotConnectToApi));
+			reject(new Error(Errors.api.couldNotConnectToApi));
 		});
 		req.end();
 	});

@@ -1,10 +1,10 @@
-import * as Strings from '../strings';
-import { ActionRowBuilder, AuditLogEvent, ButtonBuilder, ButtonStyle, EmbedBuilder, Events, GuildMember, MessageCreateOptions } from 'discord.js';
-import { UserFromDb } from '../models';
-import { fetchBotChannel, template } from '../utils';
+import { findApprovalRequestOfMember } from '../services/admin-approval';
 import { inscriptionStatus } from '../bot-constants';
 import { changeStatus, deleteEntry, getUserByDiscordUuid } from '../services/database';
-import { findApprovalRequestOfMember } from '../services/admin-approval';
+import { ActionRowBuilder, AuditLogEvent, ButtonBuilder, ButtonStyle, EmbedBuilder, Events, GuildMember, MessageCreateOptions } from 'discord.js';
+import { UserFromDb } from '../models';
+import { Components, Errors } from '../strings';
+import { fetchBotChannel, template } from '../utils';
 
 let userFromDb: UserFromDb;
 
@@ -34,7 +34,7 @@ module.exports = {
 				await handleUserLeft(member);
 		}
 		catch (e) {
-			if (e.code === 50013) console.error(Strings.errors.cantReadLogs);
+			if (e.code === 50013) console.error(Errors.discord.cantReadLogs);
 			else console.error(e);
 		}
 	}
@@ -55,20 +55,20 @@ async function handleBan(userFromDb: UserFromDb, member: GuildMember) {
 
 function createMessage(discordUuid: string): MessageCreateOptions {
 	const confirmDelete = new ButtonBuilder({
-	customId: `delete_${discordUuid}`,
-	label: Strings.components.buttons.yes,
-	style: ButtonStyle.Danger
+		customId: `delete_${discordUuid}`,
+		label: Components.buttons.yes,
+		style: ButtonStyle.Danger
 	});
 
 	const ignore = new ButtonBuilder({
 		customId: 'dissmiss',
-		label: Strings.components.buttons.ignore,
+		label: Components.buttons.ignore,
 		style: ButtonStyle.Secondary
 	});
 
 	const deleteEmbed = new EmbedBuilder({
-		title: Strings.components.titles.userLeft,
-		description: template(Strings.components.descriptions.userLeft, {discordUuid: discordUuid})
+		title: Components.titles.userLeft,
+		description: template(Components.descriptions.userLeft, {discordUuid: discordUuid})
 	});
 
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmDelete, ignore);
@@ -78,19 +78,19 @@ function createMessage(discordUuid: string): MessageCreateOptions {
 function createMessageBanned(bannedUuid: string): MessageCreateOptions {
 	const confirmBan = new ButtonBuilder({
 		customId: `ban_${bannedUuid}`,
-		label: Strings.components.buttons.yes,
+		label: Components.buttons.yes,
 		style: ButtonStyle.Danger
 	});
 
 	const ignore = new ButtonBuilder({
 		customId: 'dissmiss',
-		label: Strings.components.buttons.ignore,
+		label: Components.buttons.ignore,
 		style: ButtonStyle.Secondary
 	});
 
 	const banEmbed = new EmbedBuilder({
-		title: Strings.components.titles.userBanned,
-		description: template(Strings.components.descriptions.userBanned, {discordUuid: bannedUuid})
+		title: Components.titles.userBanned,
+		description: template(Components.descriptions.userBanned, {discordUuid: bannedUuid})
 	});
 
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmBan, ignore);

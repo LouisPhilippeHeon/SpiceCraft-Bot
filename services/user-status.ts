@@ -1,8 +1,8 @@
-import * as Strings from '../strings';
-import { ChatInputCommandInteraction, GuildMember } from 'discord.js';
-import { addPlayerRole, fetchGuildMember, removePlayerRole, template } from '../utils';
 import { inscriptionStatus } from '../bot-constants';
 import { changeStatus, getUserByDiscordUuid } from './database';
+import { ChatInputCommandInteraction, GuildMember } from 'discord.js';
+import { Services, getStatusName } from '../strings';
+import { addPlayerRole, fetchGuildMember, removePlayerRole, template } from '../utils';
 
 let member: GuildMember;
 
@@ -12,30 +12,33 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
 	try {
 		member = await fetchGuildMember(interaction.guild, idToEdit);
 		await changeStatus(idToEdit, status);
-
-		(status === inscriptionStatus.approved)
-				? await addPlayerRole(member)
-				: await removePlayerRole(member);
-
 		const user = await getUserByDiscordUuid(idToEdit);
-		if (status === inscriptionStatus.approved)
+
+		if (status === inscriptionStatus.approved) {
+			await addPlayerRole(member);
 			await user.addToWhitelist();
-		else
+		}
+		else {
 			await user.removeFromWhitelist();
+			await removePlayerRole(member);
+		}
 	}
 	catch (e) {
 		await interaction.reply(e.message);
 		return;
 	}
 
-	const interactionReplyMessage = template(Strings.services.userStatus.statusChanged, {discordUuid: idToEdit, status: Strings.getStatusName(status)});
+	const interactionReplyMessage = template(Services.userStatus.statusChanged, {
+		discordUuid: idToEdit,
+		status: getStatusName(status)
+	});
 
 	if (!interaction.options.getBoolean('silencieux') || status === inscriptionStatus.awaitingApproval) {
 		try {
 			await member.send(getMessageToSendToUser(status));
 		}
 		catch {
-			await interaction.reply(interactionReplyMessage + '\n' + Strings.services.userStatus.cantSendDm);
+			await interaction.reply(interactionReplyMessage + '\n' + Services.userStatus.cantSendDm);
 			return;
 		}
 	}
@@ -44,6 +47,8 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
 }
 
 function getMessageToSendToUser(status: number): string {
-	if (status === inscriptionStatus.approved) return Strings.services.userStatus.dmAddedToWhitelist;
-	if (status === inscriptionStatus.rejected) return Strings.services.userStatus.dmRemovedFromWhitelist;
+	if (status === inscriptionStatus.approved)
+		return Services.userStatus.dmAddedToWhitelist;
+	if (status === inscriptionStatus.rejected)
+		return Services.userStatus.dmRemovedFromWhitelist;
 }

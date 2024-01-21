@@ -1,31 +1,31 @@
-import * as Strings from '../../strings';
-import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
-import { UserFromDb } from '../../models';
 import { inscriptionStatus } from '../../bot-constants';
-import { buildHtml } from '../../services/html';
 import { getUsers } from '../../services/database';
+import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
+import { buildHtml } from '../../services/html';
+import { UserFromDb } from '../../models';
+import { Commands, getStatusName, statusToEmoji } from '../../strings';
 import { template } from '../../utils';
 
 export const data = new SlashCommandBuilder()
 	.setName('afficher')
-	.setDescription(Strings.commands.displayUsers.description)
+	.setDescription(Commands.displayUsers.description)
 	.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
 	.addStringOption(option =>
 		option.setName('statut')
-			.setDescription(Strings.commands.displayUsers.statusOptionDescription)
-			.addChoices(
-				{ name: 'Approuvé', value: inscriptionStatus.approved.toString() },
-				{ name: 'Rejeté', value: inscriptionStatus.rejected.toString() },
-				{ name: 'En attente', value: inscriptionStatus.awaitingApproval.toString() }
-			))
+			  .setDescription(Commands.displayUsers.statusOptionDescription)
+			  .addChoices(
+				  { name: 'Approuvé', value: inscriptionStatus.approved.toString() },
+				  { name: 'Rejeté', value: inscriptionStatus.rejected.toString() },
+				  { name: 'En attente', value: inscriptionStatus.awaitingApproval.toString() }
+			  ))
 	.addStringOption(option =>
 		option.setName('format')
-			.setDescription(Strings.commands.displayUsers.formatOptionDescription)
-			.addChoices(
-				{ name: 'HTML', value: 'html' },
-				{ name: 'JSON', value: 'json' },
-				{ name: 'Messages', value: 'messages' }
-			));
+			  .setDescription(Commands.displayUsers.formatOptionDescription)
+			  .addChoices(
+				  { name: 'HTML', value: 'html' },
+				  { name: 'JSON', value: 'json' },
+				  { name: 'Messages', value: 'messages' }
+			  ));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
 	const status: number | undefined = interaction.options.getString('statut') ? Number(interaction.options.getString('statut')) : undefined;
@@ -34,7 +34,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 	const usersFromDb = await getUsers(status);
 
 	if (usersFromDb.length === 0) {
-		await interaction.reply(Strings.commands.displayUsers.noUserFound);
+		await interaction.reply(Commands.displayUsers.noUserFound);
 		return;
 	}
 
@@ -56,8 +56,8 @@ async function sendAsJson(interaction: ChatInputCommandInteraction, usersFromDb:
 		files: [{
 			attachment: Buffer.from(JSON.stringify(usersFromDb)),
 			name: (status !== undefined)
-				? template(Strings.commands.displayUsers.filenameJsonWithStatus, {status: Strings.getStatusName(status)})
-				: Strings.commands.displayUsers.filenameJson
+				? template(Commands.displayUsers.filenameJsonWithStatus, {status: getStatusName(status)})
+				: Commands.displayUsers.filenameJson
 		}]
 	});
 }
@@ -66,7 +66,7 @@ async function sendAsHtml(interaction: ChatInputCommandInteraction, usersFromDb:
 	await interaction.reply({
 		files: [{
 			attachment: Buffer.from(buildHtml(usersFromDb)),
-			name: Strings.commands.displayUsers.filenameHtml
+			name: Commands.displayUsers.filenameHtml
 		}]
 	});
 }
@@ -81,10 +81,10 @@ function createMessages(usersFromDb: UserFromDb[]): string[] {
 			messages.push(currentMessage);
 			currentMessage = '';
 		}
-		currentMessage += template(Strings.commands.displayUsers.databaseEntryLine, {
+		currentMessage += template(Commands.displayUsers.databaseEntryLine, {
 			discordUuid: user.discord_uuid,
 			minecraftUuid: user.minecraft_uuid,
-			statusEmoji: Strings.statusToEmoji(user.inscription_status)
+			statusEmoji: statusToEmoji(user.inscription_status)
 		});
 	});
 	messages.push(currentMessage);
@@ -95,8 +95,8 @@ function createMessages(usersFromDb: UserFromDb[]): string[] {
 async function sendMessages(interaction: ChatInputCommandInteraction, messages: string[], status?: number) {
 	await interaction.reply({
 		content: (status === undefined)
-			? Strings.commands.displayUsers.displayingAllUsers
-			: template(Strings.commands.displayUsers.displayingUsersWithStatus, {status: Strings.getStatusName(status)})
+			? Commands.displayUsers.displayingAllUsers
+			: template(Commands.displayUsers.displayingUsersWithStatus, {status: getStatusName(status)})
 	});
 
 	messages.forEach(async message => {

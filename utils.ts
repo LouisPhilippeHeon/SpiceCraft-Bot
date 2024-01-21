@@ -1,6 +1,6 @@
-import * as Strings from './strings';
-import { ChannelType, Colors, Guild, GuildMember, Interaction, InteractionReplyOptions, MessagePayload, PermissionsBitField, Role, TextChannel } from 'discord.js';
 import { client, playerRoleName, whitelistChannelName } from './bot-constants';
+import { ChannelType, Colors, Guild, GuildMember, Interaction, InteractionReplyOptions, MessagePayload, PermissionsBitField, Role, TextChannel } from 'discord.js';
+import { Errors, Utils } from './strings';
 
 // structuredClone dosen't work in some circumstances
 export function deepCloneWithJson(objectToClone: any): any {
@@ -38,7 +38,7 @@ export async function fetchPlayerRole(guild: Guild, createIfNecessery = true): P
 	return await guild.roles.create({
 		name: playerRoleName,
 		color: Colors.Green,
-		reason: Strings.utils.createdPlayerRole,
+		reason: Utils.createdPlayerRole,
 	});
 }
 
@@ -54,7 +54,7 @@ export async function removePlayerRole(member: GuildMember) {
 
 export async function fetchGuildMember(guild: Guild, id: string): Promise<GuildMember> {
 	return await guild.members.fetch(id).catch(() => {
-		throw Error(Strings.errors.noDiscordUserWithThisUuid);
+		throw Error(Errors.discord.noDiscordUserWithThisUuid);
 	});
 }
 
@@ -69,17 +69,17 @@ export async function replyOrFollowUp(message: string | MessagePayload | Interac
 
 export async function sendMessageToMember(message: string, member: GuildMember, interaction: Interaction, replyOnSuccess?: string, replyOnFailure?: string) {
 	if (!interaction.isRepliable())
-		throw new Error(Strings.errors.notRepliable);
+		throw new Error(Errors.discord.notRepliable);
 
 	try {
 		await member.send(message);
 
 		if (replyOnSuccess)
-			await interaction.reply({ content: replyOnSuccess, ephemeral: true });
+			await interaction.reply({content: replyOnSuccess, ephemeral: true});
 	}
 	catch {
 		if (replyOnFailure)
-			await interaction.reply({ content: replyOnFailure, ephemeral: true });
+			await interaction.reply({content: replyOnFailure, ephemeral: true});
 	}
 }
 
