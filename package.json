@@ -6,7 +6,8 @@
   "scripts": {
     "debug": "ts-node index.ts",
     "start": "node index.js",
-    "build": "npx tsc"
+    "build": "npx tsc",
+	"deploy-commands": "ts-node deploy-commands.ts"
   },
   "author": "",
   "license": "ISC",

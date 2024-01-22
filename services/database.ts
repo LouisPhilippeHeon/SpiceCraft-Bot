@@ -38,11 +38,13 @@ export async function drop() {
 
 export async function createUser(discordUuid: string, minecraftUuid: string, status = inscriptionStatus.awaitingApproval): Promise<UserFromDb> {
 	try {
-		return await tags.create({
+		const tag = await tags.create({
 			discord_uuid: discordUuid,
 			minecraft_uuid: minecraftUuid,
 			inscription_status: status
 		});
+
+		return Object.assign(new UserFromDb(), tag.get({ plain: true }))
 	}
 	catch (e) {
 		if (e.name === 'SequelizeUniqueConstraintError')
