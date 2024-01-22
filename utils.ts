@@ -75,11 +75,11 @@ export async function sendMessageToMember(message: string, member: GuildMember, 
 		await member.send(message);
 
 		if (replyOnSuccess)
-			await interaction.reply({content: replyOnSuccess, ephemeral: true});
+			await interaction.reply({ content: replyOnSuccess, ephemeral: true });
 	}
 	catch {
 		if (replyOnFailure)
-			await interaction.reply({content: replyOnFailure, ephemeral: true});
+			await interaction.reply({ content: replyOnFailure, ephemeral: true });
 	}
 }
 

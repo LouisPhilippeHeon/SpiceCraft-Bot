@@ -124,7 +124,7 @@ async function getRulesAcknowledgment() {
 
 async function saveNewUserToDb() {
 	try {
-		await createUser(userFromMojangApi.id, interaction.user.id);
+		await createUser(interaction.user.id, userFromMojangApi.id);
 		await createApprovalRequest(interaction.user, interaction.guild, userFromMojangApi.name, userThatInvited);
 		await dmChannel.send(ButtonEvents.enrolling.waitForAdminApprobation);
 	}

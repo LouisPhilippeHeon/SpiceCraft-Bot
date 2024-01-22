@@ -6,11 +6,11 @@ import { fetchGuildMember, removePlayerRole, template } from '../../utils';
 export const data = new SlashCommandBuilder()
 	.setName('supprimer-entree')
 	.setDescription(Commands.deleteEntry.description)
+	.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
 	.addStringOption(option =>
 		option.setName('discord-uuid')
 			  .setDescription(Commands.deleteEntry.userIdOption)
-			  .setRequired(true))
-	.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers);
+			  .setRequired(true));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
 	const discordUuid = interaction.options.getString('discord-uuid');

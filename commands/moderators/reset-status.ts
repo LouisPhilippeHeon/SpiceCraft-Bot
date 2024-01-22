@@ -6,11 +6,11 @@ import { editUserStatus } from '../../services/user-status';
 export const data = new SlashCommandBuilder()
 	.setName('reinitialiser-statut')
 	.setDescription(Commands.resetStatus.description)
+	.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
 	.addUserOption(option =>
 		option.setName('membre')
 			  .setDescription(Commands.resetStatus.userOptionDescription)
-			  .setRequired(true))
-	.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers);
+			  .setRequired(true));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
 	await editUserStatus(interaction, inscriptionStatus.awaitingApproval);

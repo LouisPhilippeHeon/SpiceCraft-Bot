@@ -7,6 +7,7 @@ import { Commands, Errors } from '../../strings';
 export const data = new SlashCommandBuilder()
 	.setName('modifier-username')
 	.setDescription(Commands.editUsername.description)
+	.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
 	.addStringOption(option =>
 		option.setName('discord-uuid')
 			  .setDescription(Commands.editUsername.userOptionDescription)
@@ -14,8 +15,9 @@ export const data = new SlashCommandBuilder()
 	.addStringOption(option =>
 		option.setName('username')
 			  .setDescription(Commands.editUsername.newUsernameOptionDescription)
-			  .setRequired(true))
-	.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers);
+			  .setMinLength(3)
+			  .setMaxLength(32)
+			  .setRequired(true));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
 	const discordUuid = interaction.options.getString('discord-uuid');
