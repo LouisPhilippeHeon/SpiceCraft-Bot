@@ -1,9 +1,9 @@
-import { editApprovalRequest } from '../services/admin-approval';
-import { getUserByDiscordUuid } from '../services/database';
+import { editApprovalRequest } from '../../services/admin-approval';
+import { getUserByDiscordUuid } from '../../services/database';
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, GuildMember, PermissionFlagsBits } from 'discord.js';
-import { ButtonData, UserFromDb } from '../models';
-import { ButtonEvents, Components } from '../strings';
-import { sendMessageToMember, template } from '../utils';
+import { ButtonData, UserFromDb } from '../../models';
+import { ButtonEvents, Components } from '../../strings';
+import { sendMessageToMember, template } from '../../utils';
 
 export const data = new ButtonData('update', PermissionFlagsBits.BanMembers);
 

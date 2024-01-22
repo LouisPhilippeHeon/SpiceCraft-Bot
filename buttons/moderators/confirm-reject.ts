@@ -1,10 +1,10 @@
-import { editApprovalRequest } from '../services/admin-approval';
-import { changeStatus } from '../services/database';
-import { inscriptionStatus } from '../bot-constants';
+import { editApprovalRequest } from '../../services/admin-approval';
+import { changeStatus } from '../../services/database';
+import { inscriptionStatus } from '../../bot-constants';
 import { ButtonInteraction, Colors, GuildMember, Message, PermissionFlagsBits } from 'discord.js';
-import { ButtonData } from '../models';
-import { ButtonEvents } from '../strings';
-import { fetchBotChannel, fetchGuildMember, sendMessageToMember, template } from '../utils';
+import { ButtonData } from '../../models';
+import { ButtonEvents } from '../../strings';
+import { fetchBotChannel, fetchGuildMember, sendMessageToMember, template } from '../../utils';
 
 export const data = new ButtonData('confirm-reject', PermissionFlagsBits.BanMembers);
 

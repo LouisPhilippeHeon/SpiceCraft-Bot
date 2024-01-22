@@ -1,5 +1,5 @@
 import { ButtonInteraction, PermissionFlagsBits } from 'discord.js';
-import { ButtonData } from '../models';
+import { ButtonData } from '../../models';
 
 export const data = new ButtonData('dissmiss', PermissionFlagsBits.BanMembers);
 

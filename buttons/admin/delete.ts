@@ -1,9 +1,9 @@
-import { editApprovalRequest } from '../services/admin-approval';
-import { getUserByDiscordUuid } from '../services/database';
+import { editApprovalRequest } from '../../services/admin-approval';
+import { getUserByDiscordUuid } from '../../services/database';
 import { ButtonInteraction, Colors, PermissionFlagsBits } from 'discord.js';
-import { ButtonData, UserFromDb } from '../models';
-import { Commands } from '../strings';
-import { template } from '../utils';
+import { ButtonData, UserFromDb } from '../../models';
+import { Commands } from '../../strings';
+import { template } from '../../utils';
 
 export const data = new ButtonData('delete', PermissionFlagsBits.Administrator);
 

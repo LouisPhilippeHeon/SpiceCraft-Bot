@@ -1,12 +1,12 @@
-import { createUsernameChangeRequest, editApprovalRequest, findApprovalRequestOfMember } from '../services/admin-approval';
-import { inscriptionStatus, timeToWaitForUserInputBeforeTimeout } from '../bot-constants';
-import { changeMinecraftUuid, getUserByDiscordUuid, getUserByMinecraftUuid } from '../services/database';
+import { createUsernameChangeRequest, editApprovalRequest, findApprovalRequestOfMember } from '../../services/admin-approval';
+import { inscriptionStatus, timeToWaitForUserInputBeforeTimeout } from '../../bot-constants';
+import { changeMinecraftUuid, getUserByDiscordUuid, getUserByMinecraftUuid } from '../../services/database';
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, DMChannel, Message } from 'discord.js';
-import { ephemeralInteractions } from '../ephemeral-interactions';
-import { getMojangUser } from '../services/http';
-import { ButtonData, UserFromDb, UserFromMojangApi } from '../models';
-import { ButtonEvents, Components, Errors } from '../strings';
-import { fetchBotChannel, template } from '../utils';
+import { ephemeralInteractions } from '../../ephemeral-interactions';
+import { getMojangUser } from '../../services/http';
+import { ButtonData, UserFromDb, UserFromMojangApi } from '../../models';
+import { ButtonEvents, Components, Errors } from '../../strings';
+import { fetchBotChannel, template } from '../../utils';
 
 export const data = new ButtonData('inscription');
 

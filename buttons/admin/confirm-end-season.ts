@@ -1,9 +1,9 @@
-import { filenameSeasonSave } from '../bot-constants';
-import { drop, getUsers } from '../services/database';
+import { filenameSeasonSave } from '../../bot-constants';
+import { drop, getUsers } from '../../services/database';
 import { ButtonInteraction, PermissionFlagsBits } from 'discord.js';
-import { ButtonData } from '../models';
-import { Commands } from '../strings';
-import { fetchBotChannel, fetchPlayerRole } from '../utils';
+import { ButtonData } from '../../models';
+import { Commands } from '../../strings';
+import { fetchBotChannel, fetchPlayerRole } from '../../utils';
 
 export const data = new ButtonData('confirm-end-season', PermissionFlagsBits.Administrator);
 

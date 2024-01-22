@@ -1,12 +1,12 @@
-import { createApprovalRequest } from '../services/admin-approval';
-import { timeToWaitForUserInputBeforeTimeout } from '../bot-constants';
-import { createUser } from '../services/database';
+import { createApprovalRequest } from '../../services/admin-approval';
+import { timeToWaitForUserInputBeforeTimeout } from '../../bot-constants';
+import { createUser } from '../../services/database';
 import { ActionRowBuilder, ButtonBuilder, ButtonComponent, ButtonInteraction, ButtonStyle, DMChannel, EmbedBuilder, Message, MessageReaction, User } from 'discord.js';
-import { ephemeralInteractions } from '../ephemeral-interactions';
-import { getMojangUser } from '../services/http';
-import { ButtonData, UserFromMojangApi } from '../models';
-import { ButtonEvents, Components, Errors } from '../strings';
-import { template } from '../utils';
+import { ephemeralInteractions } from '../../ephemeral-interactions';
+import { getMojangUser } from '../../services/http';
+import { ButtonData, UserFromMojangApi } from '../../models';
+import { ButtonEvents, Components, Errors } from '../../strings';
+import { template } from '../../utils';
 
 export const data = new ButtonData('register');
 

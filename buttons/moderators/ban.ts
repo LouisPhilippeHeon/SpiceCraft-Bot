@@ -1,10 +1,10 @@
-import { editApprovalRequest } from '../services/admin-approval';
-import { inscriptionStatus } from '../bot-constants';
-import { getUserByDiscordUuid } from '../services/database';
+import { editApprovalRequest } from '../../services/admin-approval';
+import { inscriptionStatus } from '../../bot-constants';
+import { getUserByDiscordUuid } from '../../services/database';
 import { ButtonInteraction, Colors, PermissionFlagsBits } from 'discord.js';
-import { ButtonData, UserFromDb } from '../models';
-import { ButtonEvents } from '../strings';
-import { template } from '../utils';
+import { ButtonData, UserFromDb } from '../../models';
+import { ButtonEvents } from '../../strings';
+import { template } from '../../utils';
 
 export const data = new ButtonData('ban', PermissionFlagsBits.BanMembers);
 

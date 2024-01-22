@@ -154,6 +154,7 @@ export namespace Components {
 export namespace Errors {
 	export const usernameUsedWithAnotherAccount = '⚠️ Un autre joueur est déjà inscrit avec ce nom d\'utilisateur Minecraft. S\'il s\'agit bien de ton nom d\'utilisateur, contacte un administrateur. ⚠️';
 	export const userResponseTimeout = 'Temps de réponse maximum dépassé, réessaye en cliqant le bouton `S\'inscrire` à nouveau.';
+	export const missingDataOrExecute = 'Le ${itemType} ${filePath} n\'a pas les propriétés «\u00a0data\u00a0» ou «\u00a0execute\u00a0».';
 
 	export enum interaction {
 		commandExecution = 'Une erreur s\'est produite lors de l\'exécution de cette commande !',

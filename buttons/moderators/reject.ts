@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, PermissionFlagsBits } from 'discord.js';
-import { ButtonData } from '../models';
-import { ButtonEvents, Components } from '../strings';
-import { template } from '../utils';
+import { ButtonData } from '../../models';
+import { ButtonEvents, Components } from '../../strings';
+import { template } from '../../utils';
 
 export const data = new ButtonData('reject', PermissionFlagsBits.BanMembers);
 

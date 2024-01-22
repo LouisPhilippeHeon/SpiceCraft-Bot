@@ -1,9 +1,9 @@
-import { editApprovalRequest } from '../services/admin-approval';
-import { changeMinecraftUuid } from '../services/database';
+import { editApprovalRequest } from '../../services/admin-approval';
+import { changeMinecraftUuid } from '../../services/database';
 import { ButtonInteraction, Colors, GuildMember, PermissionFlagsBits } from 'discord.js';
-import { ButtonData } from '../models';
-import { ButtonEvents } from '../strings';
-import { fetchGuildMember, sendMessageToMember, template } from '../utils';
+import { ButtonData } from '../../models';
+import { ButtonEvents } from '../../strings';
+import { fetchGuildMember, sendMessageToMember, template } from '../../utils';
 
 export const data = new ButtonData('manually-modified-whitelist', PermissionFlagsBits.BanMembers);
 

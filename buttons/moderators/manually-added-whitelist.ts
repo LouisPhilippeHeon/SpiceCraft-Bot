@@ -1,10 +1,10 @@
-import { editApprovalRequest } from '../services/admin-approval';
-import { inscriptionStatus } from '../bot-constants';
-import { changeStatus } from '../services/database';
+import { editApprovalRequest } from '../../services/admin-approval';
+import { inscriptionStatus } from '../../bot-constants';
+import { changeStatus } from '../../services/database';
 import { ButtonInteraction, Colors, GuildMember, PermissionFlagsBits } from 'discord.js';
-import { ButtonData } from '../models';
-import { ButtonEvents } from '../strings';
-import { addPlayerRole, fetchGuildMember, sendMessageToMember, template } from '../utils';
+import { ButtonData } from '../../models';
+import { ButtonEvents } from '../../strings';
+import { addPlayerRole, fetchGuildMember, sendMessageToMember, template } from '../../utils';
 
 export const data = new ButtonData('manually-added-whitelist', PermissionFlagsBits.BanMembers);
 
