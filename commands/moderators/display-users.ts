@@ -7,7 +7,7 @@ import { Commands, getStatusName, statusToEmoji } from '../../strings';
 import { template } from '../../utils';
 
 export const data = new SlashCommandBuilder()
-	.setName('afficher')
+	.setName('afficher-membres')
 	.setDescription(Commands.displayUsers.description)
 	.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
 	.addStringOption(option =>

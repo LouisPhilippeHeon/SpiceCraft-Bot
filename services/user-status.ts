@@ -8,6 +8,7 @@ let member: GuildMember;
 
 export async function editUserStatus(interaction: ChatInputCommandInteraction, status: number) {
 	const idToEdit = interaction.options.getUser('membre').id;
+	const silent = interaction.options.getBoolean('silencieux');
 
 	try {
 		member = await fetchGuildMember(interaction.guild, idToEdit);
@@ -19,8 +20,8 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
 			await user.addToWhitelist();
 		}
 		else {
-			await user.removeFromWhitelist();
 			await removePlayerRole(member);
+			await user.removeFromWhitelist();
 		}
 	}
 	catch (e) {
@@ -33,7 +34,7 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
 		status: getStatusName(status)
 	});
 
-	if (!interaction.options.getBoolean('silencieux') || status === inscriptionStatus.awaitingApproval) {
+	if (!silent && status !== inscriptionStatus.awaitingApproval) {
 		try {
 			await member.send(getMessageToSendToUser(status));
 		}

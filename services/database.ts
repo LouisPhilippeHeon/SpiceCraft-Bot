@@ -1,6 +1,7 @@
 import { UserFromDb } from '../models';
 const Sequelize = require('sequelize');
 import { Errors } from '../strings';
+import { inscriptionStatus } from "../bot-constants";
 
 const sequelize = new Sequelize('database', 'user', 'password', {
 	host: 'localhost',
@@ -35,12 +36,15 @@ export async function drop() {
 	await syncTags();
 }
 
-export async function createUser(minecraftUuid: string, discordUuid: string) {
+export async function createUser(discordUuid: string, minecraftUuid: string, status = inscriptionStatus.awaitingApproval): Promise<UserFromDb> {
 	try {
-		await tags.create({
-			minecraft_uuid: minecraftUuid,
+		const tag = await tags.create({
 			discord_uuid: discordUuid,
+			minecraft_uuid: minecraftUuid,
+			inscription_status: status
 		});
+
+		return Object.assign(new UserFromDb(), tag.get({ plain: true }))
 	}
 	catch (e) {
 		if (e.name === 'SequelizeUniqueConstraintError')
