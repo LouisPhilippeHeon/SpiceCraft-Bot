@@ -52,17 +52,20 @@ async function saveNewUser(interaction: ChatInputCommandInteraction, discordUuid
 
 		const userFromMojangApi = await getMojangUser(usernameMinecraft);
 		const user = await createUser(discordUuid, userFromMojangApi.id, status);
-		
-// Continuer apprès add to whitelist
-		if (status === inscriptionStatus.approved)
+
+		let rconFailure: boolean = false;
+
+		if (status === inscriptionStatus.approved) {
 			await addPlayerRole(member);
+			await user.addToWhitelist().catch(() => rconFailure = true);
+		}
 
-			await user.addToWhitelist();
-
-		if (!silent && status !== inscriptionStatus.awaitingApproval)
+		const sendDm = !silent && status !== inscriptionStatus.awaitingApproval;
+		if (sendDm && !rconFailure)
 			await sendMessageToMember(getMessageToSendToUser(status), member, interaction, undefined, template(Commands.addMember.successNoDm, {discordUuid: discordUuid}));
 		
-		await interaction.reply({ content: template(Commands.addMember.success, {discordUuid: discordUuid}), ephemeral: true });
+		const replyMessage = template((sendDm && rconFailure) ? Commands.addMember.successNoDm : Commands.addMember.success, {discordUuid: discordUuid});
+		await interaction.reply({ content: replyMessage, ephemeral: true });
 	}
 	catch (e) {
 		await interaction.reply({ content: e.message, ephemeral: true });
