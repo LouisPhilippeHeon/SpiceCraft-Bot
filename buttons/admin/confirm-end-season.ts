@@ -32,6 +32,7 @@ async function sendBackupToInteractionAuthor() {
 				attachment: Buffer.from(JSON.stringify(users)),
 				name: filenameSeasonSave
 			}]
-		}).catch(() => console.log(JSON.stringify(users)));
+		}).catch();
+		console.log(JSON.stringify(users))
 	}
 }
