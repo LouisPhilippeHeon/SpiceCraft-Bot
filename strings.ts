@@ -76,7 +76,8 @@ export namespace Commands {
 		messageUpdate = '🗑️ L\'utilisateur a été supprimé de la whitelist et de la base de données.',
 		reply = '<@${discordUuid}> à été supprimé de la whitelist et de la base de données avec succès.',
 		description = 'Supprime une rangée dans la base de données.',
-		userIdOption = 'Retirer l\'entrée pour quel UUID Discord ?'
+		userIdOption = 'Retirer l\'entrée pour quel UUID Discord ?',
+		removeFromWhitelistOption = 'Retirer le joueur de la whitelist (par défaut: Oui) ?'
 	}
 
 	export enum displayUsername {
