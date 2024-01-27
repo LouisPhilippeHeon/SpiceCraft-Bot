@@ -1,5 +1,6 @@
 import { clientId, guildId, token } from './config';
 import { REST, Routes } from 'discord.js';
+import { error, info, warn } from './services/logger';
 import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -18,7 +19,7 @@ for (const folder of commandFolders) {
 		if ('data' in command && 'execute' in command)
 			commands.push(command.data.toJSON());
 		else
-			console.log(`La commande ${filePath} n'a pas les propriétés "data" ou "execute".`);
+			warn(`La commande ${filePath} n'a pas les propriétés "data" ou "execute".`);
 	}
 }
 
@@ -28,7 +29,7 @@ const rest = new REST().setToken(token);
 // Deploy commands
 (async () => {
 	try {
-		console.log(`Début du rafraichissement de ${commands.length} commandes slash.`);
+		info(`Début du rafraichissement de ${commands.length} commandes slash.`);
 
 		// Refresh all commands in the guild with the current set
 		const data: any = await rest.put(
@@ -36,9 +37,9 @@ const rest = new REST().setToken(token);
 			{ body: commands },
 		);
 
-		console.log(`Rafraichissement réussi de ${data.length} commandes slash.`);
+		info(`Rafraichissement réussi de ${data.length} commandes slash.`);
 	}
 	catch (e) {
-		console.error(e);
+		error(e);
 	}
 })();

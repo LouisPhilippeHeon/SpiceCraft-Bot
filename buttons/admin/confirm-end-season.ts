@@ -1,6 +1,6 @@
-import { filenameSeasonSave } from '../../bot-constants';
 import { drop, getUsers } from '../../services/database';
 import { ButtonInteraction, PermissionFlagsBits } from 'discord.js';
+import { info } from '../../services/logger';
 import { ButtonData } from '../../models';
 import { Commands } from '../../strings';
 import { fetchBotChannel, fetchPlayerRole } from '../../utils';
@@ -30,9 +30,9 @@ async function sendBackupToInteractionAuthor() {
 		await interaction.user.send({
 			files: [{
 				attachment: Buffer.from(JSON.stringify(users)),
-				name: filenameSeasonSave
+				name: Commands.endSeason.saveFilename
 			}]
 		}).catch();
-		console.log(JSON.stringify(users))
+		info(JSON.stringify(users))
 	}
 }

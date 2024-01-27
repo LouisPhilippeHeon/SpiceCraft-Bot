@@ -17,22 +17,22 @@ export namespace ButtonEvents {
 	}
 
 	export enum enrolling {
+		adminsAlreadyDeniedRequest = '🚫 Les administrateurs ont déjà refusé ta demande ! 🚫',
 		askIfFirstTimePlaying = 'As-tu déjà joué sur SpiceCraft ?',
+		askWhatIsMinecraftUsername = 'Quel est ton nom d\'utilisateur sur Minecraft ?',
+		askWhatIsNewMinecraftUsername = 'Quel est le bon nom d\'utilisateur ?',
+		askWhoInvitedNewPlayer = 'Qui t\'a invité sur SpiceCraft ? Inscrit son nom d\'utilisateur Discord.',
+		awaitingApprovalUserChangedMinecraftUsername = '<@${discordUuid}> a changé son username Minecraft pour \`${minecraftUsername}\` dans sa demande d\'ajout à la whitelist.',
+		dmsAreClosed = 'Tes paramètres de confidentialité m\'empêchent de t\'envoyer des messages. Change ces paramètres pour continuer.',
+		embedDescription = 'Compte Discord : <@${discordUuid}>.\nUsername Minecraft : \`${minecraftUsername}\`.',
 		messageSentInDms = 'Merci de répondre au bot qui t\'a a envoyé un message en privé !',
 		messageSentInDmsNewUser = 'Bienvenue, nous sommes heureux de t\'accueillir ! Merci de répondre au bot qui t\'a envoyé un message en privé !',
-		askWhatIsMinecraftUsername = 'Quel est ton nom d\'utilisateur sur Minecraft ?',
-		adminsAlreadyDeniedRequest = '🚫 Les administrateurs ont déjà refusé ta demande ! 🚫',
-		askWhoInvitedNewPlayer = 'Qui t\'a invité sur SpiceCraft ? Inscrit son nom d\'utilisateur Discord.',
-		askWhatIsNewMinecraftUsername = 'Quel est le bon nom d\'utilisateur ?',
+		minecraftAccountDoesNotExist = '❌ Le compte Minecraft « ${minecraftUsername} » n\'existe pas! Tu peux cliquer à nouveau le bouton \\`S\'inscrire\\` pour réessayer. ❌',
 		reactToAcceptRules = 'Réagit avec ✅ pour indiquer que tu a lu et accepté les règles.',
 		requestSucessfullyUpdated = 'Ta demande à été mise à jour avec succès !',
-		waitForAdminApprobation = 'Ton inscription est en attente d\'approbation par les administrateurs, je t\'enverrais un message quand elle sera acceptée!',
+		sameMinecraftAccountAsBefore = 'Pas besoin de mettre à jour ton nom d\'utilisateur, car il est identique à celui associé au compte Minecraft dans la whitelist.',
 		usernameUpdated = 'Ton nom d\'utilisateur a été changé avec succès, je t\'envoie un message lorsque le nom d\'utilisateur sera mis à jour dans la whitelist.',
-		embedDescription = 'Compte Discord : <@${discordUuid}>.\nUsername Minecraft : \`${minecraftUsername}\`.',
-		awaitingApprovalUserChangedMinecraftUsername = '<@${discordUuid}> a changé son username Minecraft pour \`${minecraftUsername}\` dans sa demande d\'ajout à la whitelist.',
-		minecraftAccountDoesNotExist = '❌ Le compte Minecraft « ${minecraftUsername} » n\'existe pas! Tu peux cliquer à nouveau le bouton \\`S\'inscrire\\` pour réessayer. ❌',
-		dmsAreClosed = 'Tes paramètres de confidentialité m\'empêchent de t\'envoyer des messages. Change ces paramètres pour continuer.',
-		sameMinecraftAccountAsBefore = 'Pas besoin de mettre à jour ton nom d\'utilisateur, car il est identique à celui associé au compte Minecraft dans la whitelist.'
+		waitForAdminApprobation = 'Ton inscription est en attente d\'approbation par les administrateurs, je t\'enverrais un message quand elle sera acceptée!'
 	}
 
 	export enum rejection {
@@ -45,11 +45,11 @@ export namespace ButtonEvents {
 	}
 
 	export enum usernameChangeConfirmation {
+		changeWhitelistBeforeCliking = 'N\'oublies pas de modifier manuellement la whitelist AVANT de cliquer sur le bouton !',
 		messageUpdate = '✅ La mise à jour de username a été complétée (avec l\'autorisation de <@${discordUuid}>).',
 		messageSentToConfirmUsernameChange = 'Ton username Minecraft a été mis à jour dans la whitelist.',
 		success = 'Un message a été envoyé à <@${discordUuid}> pour l\'informer de la mise à jour du username.',
-		successNoDm = 'Mise a jour du compte Minecraft de <@${discordUuid}> effectuée avec succès, dans la whitelist et la base de données. Cependant, ses paramètres de confidentialité m\'empêchent de lui envoyer un message afin de lui en informer.',
-		changeWhitelistBeforeCliking = 'N\'oublies pas de modifier manuellement la whitelist AVANT de cliquer sur le bouton !'
+		successNoDm = 'Mise a jour du compte Minecraft de <@${discordUuid}> effectuée avec succès, dans la whitelist et la base de données. Cependant, ses paramètres de confidentialité m\'empêchent de lui envoyer un message afin de lui en informer.'
 	}
 }
 
@@ -73,11 +73,11 @@ export namespace Commands {
 	}
 
 	export enum deleteEntry {
-		messageUpdate = '🗑️ L\'utilisateur a été supprimé de la whitelist et de la base de données.',
-		reply = '<@${discordUuid}> à été supprimé de la whitelist et de la base de données avec succès.',
 		description = 'Supprime une rangée dans la base de données.',
-		userIdOption = 'Retirer l\'entrée pour quel UUID Discord ?',
-		removeFromWhitelistOption = 'Retirer le joueur de la whitelist (par défaut: Oui) ?'
+		messageUpdate = '🗑️ L\'utilisateur a été supprimé de la whitelist et de la base de données.',
+		removeFromWhitelistOption = 'Retirer le joueur de la whitelist (par défaut: Oui) ?',
+		reply = '<@${discordUuid}> à été supprimé de la whitelist et de la base de données avec succès.',
+		userIdOption = 'Retirer l\'entrée pour quel UUID Discord ?'
 	}
 
 	export enum findDiscordMember {
@@ -91,37 +91,38 @@ export namespace Commands {
 	}
 
 	export enum displayUsers {
-		noUserFound = 'Aucun utilisateur à afficher.',
-		displayingUsersWithStatus = 'Affichage des utilisateurs avec le statut « ${status} »',
-		displayingAllUsers = 'Affichage de tous les utilisateurs',
 		databaseEntryLine = '<@${discordUuid}> | [Afficher](<https://api.mojang.com/user/profile/${minecraftUuid}>) | ${statusEmoji}\n',
+		description = 'Affiche les utilisateurs inscrit selon leur statut (optionnel).',
+		displayingAllUsers = 'Affichage de tous les utilisateurs',
+		displayingUsersWithStatus = 'Affichage des utilisateurs avec le statut « ${status} »',
+		filenameHtml = 'utilisateurs.html',
 		filenameJson = 'utilisateurs.json',
 		filenameJsonWithStatus = 'utilisateurs_${status}.json',
-		filenameHtml = 'utilisateurs.html',
-		description = 'Affiche les utilisateurs inscrit selon leur statut (optionnel).',
-		statusOptionDescription = 'Rechercher les utilisateur avec un statut particulier.',
-		formatOptionDescription = 'Afficher les données avec quel format?'
+		formatOptionDescription = 'Afficher les données avec quel format?',
+		noUserFound = 'Aucun utilisateur à afficher.',
+		statusOptionDescription = 'Rechercher les utilisateur avec un statut particulier.'
 	}
 
 	export enum editUsername {
-		usernameIdenticalToPreviousOne = 'Pas besoin de changer le nom d\'utilisateur, le nouveau est identique à celui déjà dans la base de données.',
 		confirmationMessage = 'Nom d\'utilisateur changé.',
 		description = 'Manuellement modifier le nom d\'utilisateur Minecraft d\'un joueur.',
+		newUsernameOptionDescription = 'Quel est le nouveau nom d\'utilisateur ?',
 		userOptionDescription = 'Modifier l\'entrée pour quel UUID Discord ?',
-		newUsernameOptionDescription = 'Quel est le nouveau nom d\'utilisateur ?'
+		usernameIdenticalToPreviousOne = 'Pas besoin de changer le nom d\'utilisateur, le nouveau est identique à celui déjà dans la base de données.'
 	}
 
 	export enum endSeason {
-		warning = `Attention ! Es-tu certain de vouloir terminer la saison en cours? La base de donnée sera effacée, les rôles seront remis à zéro et tous les messages sur le channel #${whitelistChannelName} seront effacés.`,
 		description = `Efface la base de données, efface les messages de #${whitelistChannelName} et supprime le rôle ${playerRoleName}.`,
+		newSeasonBegins = 'Nouvelle saison !',
+		saveFilename = 'sauvegarde_saison.json',
 		seasonEnded = 'La saison a pris fin !',
-		newSeasonBegins = 'Nouvelle saison !'
+		warning = `Attention ! Es-tu certain de vouloir terminer la saison en cours? La base de donnée sera effacée, les rôles seront remis à zéro et tous les messages sur le channel #${whitelistChannelName} seront effacés.`
 	}
 
 	export enum reject {
 		description = 'Rejeter le membre du serveur Minecraft et lui retirer le rôle joueur sur le Discord.',
-		userOptionDescription = 'Membre à rejeter',
-		silentOptionDescription = 'Envoyer un message à l\'utilisateur rejeté ?'
+		silentOptionDescription = 'Envoyer un message à l\'utilisateur rejeté ?',
+		userOptionDescription = 'Membre à rejeter'
 	}
 
 	export enum resetStatus {
@@ -131,24 +132,24 @@ export namespace Commands {
 
 	export enum showInscriptionButton {
 		description = 'Envoie un message avec un bouton permettant de s\'inscrire.',
-		instructions = 'Pour t\'inscrire, clique sur le bouton. Le bot va t\'envoyer un message privé pour compléter l\'inscription.\n**Si tu as entré un nom d\'utilisateur erroné lors de la configuration initiale, clique sur le bouton à nouveau.**',
-		done = 'Fait\u00a0!'
+		done = 'Fait !',
+		instructions = 'Pour t\'inscrire, clique sur le bouton. Le bot va t\'envoyer un message privé pour compléter l\'inscription.\n**Si tu as entré un nom d\'utilisateur erroné lors de la configuration initiale, clique sur le bouton à nouveau.**'
 	}
 }
 
 export namespace Components {
 	export enum buttons {
-		cancel = 'Annuler',
 		approve = 'Approuver',
-		reject = 'Rejeter',
-		yes = 'Oui',
-		no = 'Non',
-		ignore = 'Ignorer',
+		cancel = 'Annuler',
 		endSeason = 'Oui, terminer la saison',
-		register = 'S\'inscrire',
 		doNotUpdate = 'Ne pas mettre à jour',
+		ignore = 'Ignorer',
 		manuallyAddedToWhitelist = 'Ajout manuel effectué',
-		manuallyEditedWhitelist = 'Modifications manuelles effectuées'
+		manuallyEditedWhitelist = 'Modifications manuelles effectuées',
+		no = 'Non',
+		register = 'S\'inscrire',
+		reject = 'Rejeter',
+		yes = 'Oui'
 	}
 
 	export enum descriptions {
@@ -170,22 +171,22 @@ export namespace Components {
 }
 
 export namespace Errors {
+	export const missingDataOrExecute = 'Le ${itemType} ${filePath} n\'a pas les propriétés « data » ou « execute ».';
 	export const usernameUsedWithAnotherAccount = '⚠️ Un autre joueur est déjà inscrit avec ce nom d\'utilisateur Minecraft. S\'il s\'agit bien de ton nom d\'utilisateur, contacte un administrateur. ⚠️';
 	export const userResponseTimeout = 'Temps de réponse maximum dépassé, réessaye en cliqant le bouton `S\'inscrire` à nouveau.';
-	export const missingDataOrExecute = 'Le ${itemType} ${filePath} n\'a pas les propriétés « data » ou « execute ».';
 
 	export enum interaction {
-		commandExecution = 'Une erreur s\'est produite lors de l\'exécution de cette commande !',
-		commandNotFound = 'Aucune commande ne corresponsant à ${command} n\'a été trouvée.',
 		buttonExecution = 'Une erreur inconnue s\'est produite !',
 		buttonNotFound = 'Aucun bouton ne corresponsant à ${button} n\'a été trouvée.',
+		commandExecution = 'Une erreur s\'est produite lors de l\'exécution de cette commande !',
+		commandNotFound = 'Aucune commande ne corresponsant à ${command} n\'a été trouvée.',
 		unauthorized = 'Tu n\'as pas les permissions requises pour effectuer ceci.'
 	}
 
 	export enum discord {
+		cantReadLogs = 'Le bot n\'a pas la permission de lire les logs.',
 		noDiscordUserWithThisUuid = 'Cet utilisateur Discord n\'est pas membre du serveur.',
-		notRepliable = 'Impossible de répondre à cette interaction.',
-		cantReadLogs = 'Le bot n\'a pas la permission de lire les logs.'
+		notRepliable = 'Impossible de répondre à cette interaction.'
 	}
 
 	export enum api {
@@ -195,11 +196,11 @@ export namespace Errors {
 	}
 
 	export enum database {
-		userDoesNotExist = 'Cet utilisateur n\'est pas inscrit !',
+		invalidStatus = 'Statut invalide',
 		notUnique = 'Ce UUID Minecraft ou Discord existe déjà dans la base de données.',
 		notUniqueMinecraft = 'Un autre joueur s\'est inscrit avec ce compte Minecraft.',
 		unknownError = 'Une erreur inconnue est survenue lors de l\'écriture dans la base de données.',
-		invalidStatus = 'Statut invalide'
+		userDoesNotExist = 'Cet utilisateur n\'est pas inscrit !'
 	}
 
 	export enum rcon {
@@ -221,9 +222,9 @@ export namespace Services {
 	}
 
 	export enum userStatus {
+		cantSendDm = 'Attention : Impossible d\'envoyer un message à cet utilisateur en raison de ses paramètres de confidentialité !',
 		dmAddedToWhitelist = 'Tu a été ajouté à la whitelist de SpiceCraft.',
 		dmRemovedFromWhitelist = 'Tu a été retiré de la whitelist de SpiceCraft. Contacte les administrateurs pour plus de détails.',
-		cantSendDm = 'Attention : Impossible d\'envoyer un message à cet utilisateur en raison de ses paramètres de confidentialité !',
 		statusChanged = 'Le statut de <@${discordUuid}> à été changé pour « ${status} ».'
 	}
 }

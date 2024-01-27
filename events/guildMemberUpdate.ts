@@ -2,6 +2,7 @@ import { playerRoleName } from '../bot-constants';
 import { clientId } from '../config';
 import { deleteEntry } from '../services/database';
 import { AuditLogEvent, Events, GuildMember } from 'discord.js';
+import { error } from '../services/logger';
 import { Errors } from '../strings';
 
 module.exports = {
@@ -20,8 +21,8 @@ module.exports = {
 					await deleteEntry(newMember.user.id);
 			}
 			catch (e) {
-				if (e.code === 50013) console.error(Errors.discord.cantReadLogs);
-				else console.error(e);
+				if (e.code === 50013) error(Errors.discord.cantReadLogs);
+				else error(e);
 			}
 		}
 	}
