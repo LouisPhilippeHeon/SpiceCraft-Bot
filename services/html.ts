@@ -19,5 +19,5 @@ export function buildHtml(users: UserFromDb[]) {
 		});
 	});
 
-	return template(Services.html.template, {tableRows: rows});
+	return template(Services.html.template, {nbJoueurs: users.length, tableRows: rows});
 }
