@@ -25,7 +25,9 @@ for (const file of eventFiles) {
 		client.on(event.name, (...args) => event.execute(...args));
 }
 
-client.login(token);
+(async () =>
+	await client.login(token)
+)();
 
 function loadItems(itemType: string, folderName: string, collection: Collection<string, any>) {
 	const itemPath = path.join(__dirname, folderName);

@@ -1,25 +1,22 @@
 import { getUserByDiscordUuid } from '../../services/database';
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { getUsernameFromUuid } from '../../services/http';
-import { UserFromDb } from '../../models';
 import { Commands } from '../../strings';
 
 export const data = new SlashCommandBuilder()
-	.setName('afficher-username')
-	.setDescription(Commands.displayUsername.description)
+	.setName('afficher-username-minecraft')
+	.setDescription(Commands.findMinecraftMember.description)
 	.addUserOption(option =>
 		option.setName('membre')
-			  .setDescription(Commands.displayUsername.userOptionDescription)
+			  .setDescription(Commands.findMinecraftMember.userOptionDescription)
 			  .setRequired(true));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
 	const discordUuid = interaction.options.getUser('membre').id;
-	let user: UserFromDb;
-	let usernameMinecraft: string;
 
 	try {
-		user = await getUserByDiscordUuid(discordUuid);
-		usernameMinecraft = await getUsernameFromUuid(user.minecraft_uuid);
+		const user = await getUserByDiscordUuid(discordUuid);
+		const usernameMinecraft = await getUsernameFromUuid(user.minecraft_uuid);
 		await interaction.reply(usernameMinecraft);
 	}
 	catch (e) {

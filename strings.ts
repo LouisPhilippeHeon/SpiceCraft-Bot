@@ -80,8 +80,13 @@ export namespace Commands {
 		removeFromWhitelistOption = 'Retirer le joueur de la whitelist (par défaut: Oui) ?'
 	}
 
-	export enum displayUsername {
-		description = 'Affiche le nom d\'utilisateur Minecraft d\'un membre.',
+	export enum findDiscordMember {
+		description = 'Afficher un membre du serveur Discord associé à un username Minecraft.',
+		usernameOptionDescription = 'Username Minecraft'
+	}
+
+	export enum findMinecraftMember {
+		description = 'Affiche le nom d\'utilisateur Minecraft d\'un membre du serveur Discord.',
 		userOptionDescription = 'Membre dont il faut afficher le nom d\'utilisateur Minecraft.'
 	}
 
@@ -190,7 +195,7 @@ export namespace Errors {
 	}
 
 	export enum database {
-		userDoesNotExist = 'Cet utilisateur n\'est pas inscrit.',
+		userDoesNotExist = 'Cet utilisateur n\'est pas inscrit !',
 		notUnique = 'Ce UUID Minecraft ou Discord existe déjà dans la base de données.',
 		notUniqueMinecraft = 'Un autre joueur s\'est inscrit avec ce compte Minecraft.',
 		unknownError = 'Une erreur inconnue est survenue lors de l\'écriture dans la base de données.',

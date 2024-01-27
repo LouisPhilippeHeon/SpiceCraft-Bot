@@ -91,10 +91,10 @@ export async function getUserByDiscordUuid(discordUuid: string): Promise<UserFro
 export async function getUserByMinecraftUuid(minecraftUuid: string): Promise<UserFromDb | null> {
 	const tag = await tags.findOne({ where: { minecraft_uuid: minecraftUuid }});
 
-	if (tag)
-		return Object.assign(new UserFromDb(), tag.get({ plain: true }));
+	if (!tag)
+		return null;
 
-	return null;
+	return Object.assign(new UserFromDb(), tag.get({ plain: true }));
 }
 
 export async function getUsers(status?: number): Promise<UserFromDb[]> {
