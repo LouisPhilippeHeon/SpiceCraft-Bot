@@ -43,7 +43,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 			await sendAsJson(interaction, usersFromDb, status);
 			break;
 		case 'html':
-			await sendAsHtml(interaction, usersFromDb);
+			await sendAsHtml(interaction, usersFromDb, status);
 			break;
 		default:
 			await sendMessages(interaction, createMessages(usersFromDb), status);
@@ -62,11 +62,13 @@ async function sendAsJson(interaction: ChatInputCommandInteraction, usersFromDb:
 	});
 }
 
-async function sendAsHtml(interaction: ChatInputCommandInteraction, usersFromDb: UserFromDb[]) {
+async function sendAsHtml(interaction: ChatInputCommandInteraction, usersFromDb: UserFromDb[], status?: number) {
 	await interaction.reply({
 		files: [{
-			attachment: Buffer.from(buildHtml(usersFromDb)),
-			name: Commands.displayUsers.filenameHtml
+			attachment: Buffer.from(buildHtml(usersFromDb, status)),
+			name: (status !== undefined)
+				? template(Commands.displayUsers.filenameHtmlWithStatus, {status: getStatusName(status)})
+				: Commands.displayUsers.filenameHtml
 		}]
 	});
 }
