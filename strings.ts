@@ -98,6 +98,7 @@ export namespace Commands {
 		filenameJson = 'utilisateurs.json',
 		filenameJsonWithStatus = 'utilisateurs_${status}.json',
 		filenameHtml = 'utilisateurs.html',
+		filenameHtmlWithStatus = 'utilisateurs_${status}.html',
 		description = 'Affiche les utilisateurs inscrit selon leur statut (optionnel).',
 		statusOptionDescription = 'Rechercher les utilisateur avec un statut particulier.',
 		formatOptionDescription = 'Afficher les données avec quel format?'
@@ -216,8 +217,12 @@ export namespace Logs {
 
 export namespace Services {
 	export enum html {
-		template = '<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Membres de SpiceCraft</title><style>h1,h2,h3,h4,h5,h6,p,table{font-family:arial, sans-serif;color:#d4dfe4;}p{text-align:right;}html{background-color:#141414;padding:0 40px;}table{border-collapse:collapse; width:100%;border-spacing:0;}td,th{border:1px solid #4d4d4d;padding:8px;}tr:nth-child(even){background-color:#303030;}.user{display:flex;align-items:center;height:auto;}td:nth-child(3){text-align:center;}img{height:50px;border-radius:5px;margin-right:10px;}.date:first-letter{text-transform: capitalize;}</style></head><body><h1>Membres de SpiceCraft</h1><table><tr><th>Membre</th><th>Nom d\'utilisateur Minecraft</th><th>Statut</th><th>Date d\'inscription</th><th>Dernière modification</th></tr>${tableRows}</table><p>${nbJoueurs} joueurs</p></body><script>async function fetchUsername (minecraftUuid) { const apiUrl = \'https://api.mojang.com/user/profile/\' + minecraftUuid; const response = await fetch("https://corsproxy.io/?" + apiUrl, {}); const user = await response.json(); document.getElementById(minecraftUuid).innerText = user.name;}</script></html>',
-		rowTemplate = '<tr><td><div class="user"><img src="${imgUrl}" alt="Photo de profil de ${username}">${username}</div></td><td id="${minecraftUuid}"><button onclick="fetchUsername(\'${minecraftUuid}\')">Afficher</button></td><td>${status}</td><td class="date">${createdAt}</td><td class="date">${updatedAt}</td></tr>'
+		style = '<style>h1,h2,h3,h4,h5,h6,p,table{font-family:arial, sans-serif;color:#d4dfe4;}p{text-align:right;}html{background-color:#141414;padding:0 40px;}table{border-collapse:collapse; width:100%;border-spacing:0;}td,th{border:1px solid #4d4d4d;padding:8px;}tr:nth-child(even){background-color:#303030;}.user{display:flex;align-items:center;height:auto;}.center{text-align:center;}img{height:50px;border-radius:5px;margin-right:10px;}.date:first-letter{text-transform: capitalize;}</style>',
+		script = '<script>async function fetchUsername (minecraftUuid) { const apiUrl = \'https://api.mojang.com/user/profile/\' + minecraftUuid; const response = await fetch("https://corsproxy.io/?" + apiUrl, {}); const user = await response.json(); document.getElementById(minecraftUuid).innerText = user.name;}</script>',
+		template = '<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Membres de SpiceCraft</title>'+style+'</head><body><h1>Membres de SpiceCraft</h1><table><tr><th>Membre</th><th>Nom d\'utilisateur Minecraft</th><th>Statut</th><th>Date d\'inscription</th><th>Dernière modification</th></tr>${table}</table><p>Joueurs inscrits : ${nbJoueurs}</p></body>'+script+'</html>',
+		templateWithStatus = '<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Membres de SpiceCraft</title>'+style+'</head><body><h1>Membres de SpiceCraft avec le statut « ${status} »</h1><table><tr><th>Membre</th><th>Nom d\'utilisateur Minecraft</th><th>Date d\'inscription</th><th>Dernière modification</th></tr>${table}</table><p>Membres ayant le statut « ${status} » : ${nbJoueurs}</p></body>'+script+'</html>',
+		rowTemplate = '<tr><td><div class="user"><img src="${imgUrl}" alt="Photo de profil de ${username}">${username}</div></td><td id="${minecraftUuid}"><button onclick="fetchUsername(\'${minecraftUuid}\')">Afficher</button></td><td class="center">${status}</td><td class="date">${createdAt}</td><td class="date">${updatedAt}</td></tr>',
+		rowTemplateWithStatus = '<tr><td><div class="user"><img src="${imgUrl}" alt="Photo de profil de ${username}">${username}</div></td><td id="${minecraftUuid}"><button onclick="fetchUsername(\'${minecraftUuid}\')">Afficher</button></td><td class="date">${createdAt}</td><td class="date">${updatedAt}</td></tr>'
 	}
 
 	export enum userStatus {
