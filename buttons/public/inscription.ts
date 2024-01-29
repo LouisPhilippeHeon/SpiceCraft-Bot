@@ -4,8 +4,9 @@ import { changeMinecraftUuid, getUserByDiscordUuid, getUserByMinecraftUuid } fro
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, DMChannel, Message } from 'discord.js';
 import { ephemeralInteractions } from '../../ephemeral-interactions';
 import { getMojangUser } from '../../services/http';
+import { info } from '../../services/logger';
 import { ButtonData, UserFromDb, UserFromMojangApi } from '../../models';
-import { ButtonEvents, Components, Errors } from '../../strings';
+import { ButtonEvents, Components, Errors, Logs } from '../../strings';
 import { fetchBotChannel, template } from '../../utils';
 
 export const data = new ButtonData('inscription');
@@ -16,6 +17,8 @@ let interaction: ButtonInteraction;
 
 export async function execute(buttonInteraction: ButtonInteraction) {
 	interaction = buttonInteraction;
+	info(template(Logs. userClickedRegisterButton, {username: interaction.user.username}));
+
 	await getUserByDiscordUuid(interaction.user.id).then(async (user) => {
 		if (user.inscription_status === inscriptionStatus.rejected)
 			await interaction.reply({ content: ButtonEvents.enrolling.adminsAlreadyDeniedRequest, ephemeral: true });
@@ -104,7 +107,7 @@ async function updateExistingUser(userFromDb: UserFromDb) {
 async function updateAdminApprovalRequest() {
 	const whitelistChannel = await fetchBotChannel(interaction.guild);
 	// Find approval request for the user in the whitelist channel
-	const approvalRequest = await findApprovalRequestOfMember(interaction.guild, interaction.user.id);
+	const approvalRequest = await findApprovalRequestOfMember(interaction.guild, interaction.user);
 	// If message is too old to be updated
 	if (approvalRequest) {
 		const description = template(ButtonEvents.enrolling.embedDescription, {

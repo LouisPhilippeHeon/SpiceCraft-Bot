@@ -58,9 +58,9 @@ export async function createUsernameChangeRequest(user: User, guild: Guild, user
 	await (await fetchBotChannel(guild)).send({ embeds: [approvalRequestEmbed], components: [row] });
 }
 
-export async function findApprovalRequestOfMember(guild: Guild, memberUuid: string): Promise<Message> {
+export async function findApprovalRequestOfMember(guild: Guild, user: User): Promise<Message> {
 	const whitelistChannel = await fetchBotChannel(guild);
-	return Array.from((await whitelistChannel.messages.fetch({ limit: 100 })).values()).find(message => message.embeds[0]?.description.includes(memberUuid));
+	return Array.from((await whitelistChannel.messages.fetch({ limit: 100 })).values()).find(message => message.embeds[0]?.description.includes(user.id));
 }
 
 export async function editApprovalRequest(message: Message, content?: string | null, embedDescription?: string | null, components?: ActionRowBuilder<ButtonBuilder>[], color?: number) {

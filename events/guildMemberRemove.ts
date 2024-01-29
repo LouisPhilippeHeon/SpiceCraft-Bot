@@ -19,7 +19,7 @@ module.exports = {
 
 			// If user leaves server or was banned before his request was approved
 			if (userFromDb.inscription_status === inscriptionStatus.awaitingApproval) {
-				await (await findApprovalRequestOfMember(member.guild, member.user.id)).delete();
+				await (await findApprovalRequestOfMember(member.guild, member.user)).delete();
 				await deleteEntry(member.user.id);
 				return;
 			}
