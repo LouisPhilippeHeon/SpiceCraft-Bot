@@ -31,7 +31,7 @@ export function buildHtml(users: UserFromDb[], status?: number) {
 	});
 
 	if (status === undefined)
-		return template(Services.html.template, {table: rows, nbJoueurs: users.length});
+		return template(Services.html.template, {table: rows, memberCount: users.length});
 	else
-		return template(Services.html.templateWithStatus, {status: getStatusName(status), table: rows, nbJoueurs: users.length});
+		return template(Services.html.templateWithStatus, {status: getStatusName(status), table: rows, memberCount: users.length});
 }

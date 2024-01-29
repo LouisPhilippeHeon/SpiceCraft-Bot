@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 import { Events } from 'discord.js';
+import { error } from '../services/logger';
 import { InteractionWithCommands } from '../models';
 import { Errors } from '../strings';
 import { replyOrFollowUp, template } from '../utils';
@@ -24,7 +25,7 @@ async function handleButtonInteraction(interaction: InteractionWithCommands) {
 	const button = interaction.client.buttons.get(buttonName);
 
 	if (!button) {
-		console.error(template(Errors.interaction.buttonNotFound, {button: interaction.customId}));
+		error(template(Errors.interaction.buttonNotFound, {button: interaction.customId}));
 		return;
 	}
 
@@ -38,8 +39,8 @@ async function handleButtonInteraction(interaction: InteractionWithCommands) {
 	catch (e) {
 		if (e.code === 'ERR_ASSERTION') await replyOrFollowUp({ content: Errors.interaction.unauthorized, ephemeral: true }, interaction);
 		else {
-			console.error(e);
-			await replyOrFollowUp({content: Errors.interaction.buttonExecution, ephemeral: true}, interaction);
+			error(e);
+			await replyOrFollowUp({ content: Errors.interaction.buttonExecution, ephemeral: true }, interaction);
 		}
 	}
 }
@@ -50,15 +51,15 @@ async function handleChatInputCommand(interaction: InteractionWithCommands) {
 	const command = interaction.client.commands.get(interaction.commandName);
 
 	if (!command) {
-		console.error(template(Errors.interaction.commandNotFound, {command: interaction.commandName}));
+		error(template(Errors.interaction.commandNotFound, {command: interaction.commandName}));
 		return;
 	}
 
 	try {
 		await command.execute(interaction);
 	}
-	catch (error) {
-		console.error(error);
+	catch (e) {
+		error(e);
 		await replyOrFollowUp({content: Errors.interaction.commandExecution, ephemeral: true}, interaction);
 	}
 }

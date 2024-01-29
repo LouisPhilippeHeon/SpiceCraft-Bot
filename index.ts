@@ -1,6 +1,7 @@
 import { client } from './bot-constants';
 import { token } from './config';
 import { Collection } from 'discord.js';
+import { warn } from './services/logger';
 import fs = require('node:fs');
 import path = require('node:path');
 import { Errors } from './strings';
@@ -44,7 +45,7 @@ function loadItems(itemType: string, folderName: string, collection: Collection<
 			if ('data' in item && 'execute' in item)
 				collection.set(item.data.name, item);
 			else
-				console.log(template(Errors.missingDataOrExecute, {itemType: itemType, filePath: filePath}));
+				warn(template(Errors.missingDataOrExecute, {itemType: itemType, filePath: filePath}));
 		}
 	}
 }

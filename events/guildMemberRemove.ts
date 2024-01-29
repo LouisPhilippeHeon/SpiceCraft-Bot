@@ -2,6 +2,7 @@ import { findApprovalRequestOfMember } from '../services/admin-approval';
 import { inscriptionStatus } from '../bot-constants';
 import { changeStatus, deleteEntry, getUserByDiscordUuid } from '../services/database';
 import { ActionRowBuilder, AuditLogEvent, ButtonBuilder, ButtonStyle, EmbedBuilder, Events, GuildMember, MessageCreateOptions } from 'discord.js';
+import { error } from '../services/logger';
 import { UserFromDb } from '../models';
 import { Components, Errors } from '../strings';
 import { fetchBotChannel, template } from '../utils';
@@ -18,7 +19,7 @@ module.exports = {
 
 			// If user leaves server or was banned before his request was approved
 			if (userFromDb.inscription_status === inscriptionStatus.awaitingApproval) {
-				await (await findApprovalRequestOfMember(member.guild, member.user.id)).delete();
+				await (await findApprovalRequestOfMember(member.guild, member.user)).delete();
 				await deleteEntry(member.user.id);
 				return;
 			}
@@ -34,8 +35,8 @@ module.exports = {
 				await handleUserLeft(member);
 		}
 		catch (e) {
-			if (e.code === 50013) console.error(Errors.discord.cantReadLogs);
-			else console.error(e);
+			if (e.code === 50013) error(Errors.discord.cantReadLogs);
+			else error(e);
 		}
 	}
 }

@@ -1,5 +1,6 @@
 import { mojangApiUrl } from '../bot-constants';
 import http = require('https');
+import { error } from './logger';
 import { MojangApiError, UserFromMojangApi } from '../models';
 import { Errors } from '../strings';
 
@@ -22,7 +23,8 @@ export function getMojangUser(username: string): Promise<UserFromMojangApi> {
 				resolve(body as UserFromMojangApi);
 			});
 		});
-		req.on('error', () => {
+		req.on('error', (e) => {
+			error(e.stack);
 			reject(new Error(Errors.api.couldNotConnectToApi));
 		});
 		req.end();
@@ -48,7 +50,8 @@ export function getUsernameFromUuid(uuid: string): Promise<string> {
 				resolve(body.name);
 			});
 		});
-		req.on('error', () => {
+		req.on('error', (e) => {
+			error(e.stack);
 			reject(new Error(Errors.api.couldNotConnectToApi));
 		});
 		req.end();
