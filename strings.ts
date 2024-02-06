@@ -215,6 +215,7 @@ export namespace Errors {
 export namespace Logs {
 	export const ready = 'Prêt ! Connecté en tant que ${username}.';
 	export const userClickedRegisterButton = '${username} a cliqué sur le bouton d\'inscription.';
+	export const userLeft = '${username} a quitté le serveur Discord.';
 }
 
 export namespace Services {

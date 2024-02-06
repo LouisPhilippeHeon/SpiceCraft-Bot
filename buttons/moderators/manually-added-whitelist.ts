@@ -8,10 +8,10 @@ import { addPlayerRole, fetchGuildMember, sendMessageToMember, template } from '
 
 export const data = new ButtonData('manually-added-whitelist', PermissionFlagsBits.BanMembers);
 
-let member: GuildMember;
 
 export async function execute(interaction: ButtonInteraction) {
 	const discordUuid = interaction.customId.split('_')[1];
+	let member: GuildMember;
 
 	try {
 		member = await fetchGuildMember(interaction.guild, discordUuid);

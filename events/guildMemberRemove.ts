@@ -2,19 +2,18 @@ import { findApprovalRequestOfMember } from '../services/admin-approval';
 import { inscriptionStatus } from '../bot-constants';
 import { changeStatus, deleteEntry, getUserByDiscordUuid } from '../services/database';
 import { ActionRowBuilder, AuditLogEvent, ButtonBuilder, ButtonStyle, EmbedBuilder, Events, GuildMember, MessageCreateOptions } from 'discord.js';
-import { error } from '../services/logger';
+import { error, info } from '../services/logger';
 import { UserFromDb } from '../models';
-import { Components, Errors } from '../strings';
+import { Components, Errors, Logs } from '../strings';
 import { fetchBotChannel, template } from '../utils';
-
-let userFromDb: UserFromDb;
 
 module.exports = {
 	name: Events.GuildMemberRemove,
 	once: false,
 	async execute(member: GuildMember) {
 		try {
-			userFromDb = await getUserByDiscordUuid(member.user.id).catch(() => userFromDb = null);
+			info(template(Logs.userLeft, {username: member.user.username}));
+			let userFromDb: UserFromDb = await getUserByDiscordUuid(member.user.id).catch(() => userFromDb = null);
 			if (!userFromDb) return;
 
 			// If user leaves server or was banned before his request was approved
@@ -25,11 +24,11 @@ module.exports = {
 			}
 
 			const auditLog = await member.guild.fetchAuditLogs({
-				type: AuditLogEvent.MemberBanRemove,
+				type: AuditLogEvent.MemberBanAdd,
 				limit: 1
 			});
 
-			if (auditLog.entries.size > 0)
+			if (auditLog.entries.size > 0 && auditLog.entries.first().createdTimestamp > (Date.now() - 5000))
 				await handleBan(userFromDb, member);
 			else
 				await handleUserLeft(member);

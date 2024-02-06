@@ -7,11 +7,11 @@ import { fetchGuildMember, sendMessageToMember, template } from '../../utils';
 
 export const data = new ButtonData('manually-modified-whitelist', PermissionFlagsBits.BanMembers);
 
-let member: GuildMember;
 
 export async function execute(interaction: ButtonInteraction) {
 	const discordUuid = interaction.customId.split('_')[1];
 	const minecraftUuid = interaction.customId.split('_')[2];
+	let member: GuildMember;
 
 	try {
 		member = await fetchGuildMember(interaction.guild, discordUuid);

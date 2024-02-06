@@ -26,13 +26,11 @@ export async function execute(buttonInteraction: ButtonInteraction) {
 
 async function sendBackupToInteractionAuthor() {
 	const users = await getUsers();
-	if (users.length > 0) {
-		await interaction.user.send({
-			files: [{
-				attachment: Buffer.from(JSON.stringify(users)),
-				name: Commands.endSeason.saveFilename
-			}]
-		}).catch();
-		info(JSON.stringify(users))
-	}
+
+	if (users.length < 0) return;
+
+	const json = JSON.stringify(users);
+	const file = { attachment: Buffer.from(json), name: Commands.endSeason.saveFilename };
+	await interaction.user.send({ files: [file] }).catch();
+	info(json);
 }

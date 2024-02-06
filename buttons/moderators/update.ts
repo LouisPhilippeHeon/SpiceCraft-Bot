@@ -7,17 +7,16 @@ import { sendMessageToMember, template } from '../../utils';
 
 export const data = new ButtonData('update', PermissionFlagsBits.BanMembers);
 
-let member: GuildMember;
-let user: UserFromDb;
 let interaction: ButtonInteraction;
 
 export async function execute(buttonInteraction: ButtonInteraction) {
 	interaction = buttonInteraction;
 	const discordUuid = interaction.customId.split('_')[1];
 	const minecraftUuid = interaction.customId.split('_')[2];
+	let member: GuildMember;
 
 	try {
-		user = await getUserByDiscordUuid(discordUuid);
+		let user = await getUserByDiscordUuid(discordUuid);
 		member = await user.fetchGuildMember(interaction.guild);
 		await modifyWhitelist(user, minecraftUuid, discordUuid);
 		await user.editMinecraftUuid(minecraftUuid);

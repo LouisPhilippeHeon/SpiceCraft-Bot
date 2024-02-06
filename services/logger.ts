@@ -28,11 +28,11 @@ export function error(message: string) {
 }
 
 function formatConsole(message: string): string {
-	return `[${new Date().toLocaleString('FR', {dateStyle: 'short', timeStyle: 'short'})}] ${message}`;
+	return `[${formatedDate()}] ${message}`;
 }
 
 function formatLog(message: string, type: string): string {
-	return `[${type}] ${new Date().toLocaleString('FR', {dateStyle: 'short', timeStyle: 'short'})} ${message}`;
+	return `[${type}] [${formatedDate()}] ${message}`;
 }
 
 function addToFile(message: string) {
@@ -46,4 +46,8 @@ function addToFile(message: string) {
 	catch (e) {
 		logger.error(message);
 	}
+}
+
+function formatedDate(): string {
+	return new Date().toLocaleString('FR', {dateStyle: 'short', timeStyle: 'short'});
 }

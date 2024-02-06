@@ -8,12 +8,12 @@ import { fetchBotChannel, fetchGuildMember, sendMessageToMember, template } from
 
 export const data = new ButtonData('confirm-reject', PermissionFlagsBits.BanMembers);
 
-let member: GuildMember;
-let statusChanged = false;
-
 export async function execute(interaction: ButtonInteraction) {
 	const discordUuid = interaction.customId.split('_')[1];
 	const messageUuid = interaction.customId.split('_')[2];
+
+	let member: GuildMember;
+	let statusChanged = false;
 
 	const whitelistChannel = await fetchBotChannel(interaction.guild);
 	let approvalRequest: Message = await whitelistChannel.messages.fetch(messageUuid).catch(() => approvalRequest = undefined);
