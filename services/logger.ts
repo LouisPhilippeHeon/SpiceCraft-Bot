@@ -14,28 +14,28 @@ const logger = class {
 
 export function info(message: string) {
 	logger.info(formatConsole(message));
-	addToFile(formatLog(message, 'INFO'));
+	addToLogFile(formatLog(message, 'INFO'));
 }
 
 export function warn(message: string) {
 	logger.warn(formatConsole(message));
-	addToFile(formatLog(message, 'WARN'));
+	addToLogFile(formatLog(message, 'WARN'));
 }
 
 export function error(message: string) {
 	logger.error(formatConsole(message));
-	addToFile(formatLog(message, 'ERROR'));
+	addToLogFile(formatLog(message, 'ERROR'));
 }
 
 function formatConsole(message: string): string {
-	return `[${formatedDate()}] ${message}`;
+	return `[${getFormatedDate()}] ${message}`;
 }
 
 function formatLog(message: string, type: string): string {
-	return `[${type}] [${formatedDate()}] ${message}`;
+	return `[${type}] [${getFormatedDate()}] ${message}`;
 }
 
-function addToFile(message: string) {
+function addToLogFile(message: string) {
 	const filePath = './logs.log';
 	
 	try {
@@ -48,6 +48,6 @@ function addToFile(message: string) {
 	}
 }
 
-function formatedDate(): string {
-	return new Date().toLocaleString('FR', {dateStyle: 'short', timeStyle: 'short'});
+function getFormatedDate(): string {
+	return new Date().toLocaleString('FR', { dateStyle: 'short', timeStyle: 'short' });
 }
