@@ -83,14 +83,17 @@ function createMessages(usersFromDb: UserFromDb[]): string[] {
 			messages.push(currentMessage);
 			currentMessage = '';
 		}
-		currentMessage += template(Commands.displayUsers.databaseEntryLine, {
+
+		const row = template(Commands.displayUsers.databaseEntryLine, {
 			discordUuid: user.discord_uuid,
 			minecraftUuid: user.minecraft_uuid,
 			statusEmoji: statusToEmoji(user.inscription_status)
 		});
+		
+		currentMessage = currentMessage.concat(row);
 	});
-	messages.push(currentMessage);
 
+	messages.push(currentMessage);
 	return messages;
 }
 
