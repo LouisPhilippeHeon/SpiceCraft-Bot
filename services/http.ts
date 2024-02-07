@@ -33,7 +33,7 @@ export function getMojangUser(username: string): Promise<UserFromMojangApi> {
 
 export function getUsernameFromUuid(uuid: string): Promise<string> {
 	return new Promise((resolve, reject) => {
-		const req = http.get(`${mojangApiUrl}/user/profile/${uuid}`, (res) => {
+		const req = http.get(`https://sessionserver.mojang.com/session/minecraft/profile/${uuid}`, (res) => {
 			let body: any = [];
 			res.on('data', function (chunk) {
 				body.push(chunk);
