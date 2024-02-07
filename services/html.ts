@@ -8,26 +8,16 @@ export function buildHtml(users: UserFromDb[], status?: number) {
 
 	users.forEach(userFromDb => {
 		const user = client.users.cache.find(user => user.id === userFromDb.discord_uuid);
-
-		if (status === undefined) {
-			rows += template(Services.html.rowTemplate, {
-				username: user.username,
-				imgUrl: user.displayAvatarURL({ size: 128 }),
-				minecraftUuid: userFromDb.minecraft_uuid,
-				status: statusToEmoji(userFromDb.inscription_status),
-				createdAt: formatDate(userFromDb.createdAt),
-				updatedAt: formatDate(userFromDb.updatedAt)
-			});
-		}
-		else {
-			rows += template(Services.html.rowTemplateWithStatus, {
-				username: user.username,
-				imgUrl: user.displayAvatarURL({ size: 128 }),
-				minecraftUuid: userFromDb.minecraft_uuid,
-				createdAt: formatDate(userFromDb.createdAt),
-				updatedAt: formatDate(userFromDb.updatedAt)
-			});
-		}
+		const rowTemplate = status === undefined ? Services.html.rowTemplate : Services.html.rowTemplateWithStatus;
+		const row = template(rowTemplate, {
+			username: user ? user.username : userFromDb.discord_uuid,
+			imgUrl: user? user.displayAvatarURL({ size: 128 }) : null,
+			minecraftUuid: userFromDb.minecraft_uuid,
+			status: status === undefined ? statusToEmoji(userFromDb.inscription_status) : undefined,
+			createdAt: formatDate(userFromDb.createdAt),
+			updatedAt: formatDate(userFromDb.updatedAt)
+		});
+		rows = rows.concat(row);
 	});
 
 	if (status === undefined)

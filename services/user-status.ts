@@ -4,11 +4,11 @@ import { ChatInputCommandInteraction, GuildMember } from 'discord.js';
 import { Services, getStatusName } from '../strings';
 import { addPlayerRole, fetchGuildMember, removePlayerRole, template } from '../utils';
 
-let member: GuildMember;
-
 export async function editUserStatus(interaction: ChatInputCommandInteraction, status: number) {
 	const idToEdit = interaction.options.getUser('membre').id;
 	const silent = interaction.options.getBoolean('silencieux');
+
+	let member: GuildMember;
 
 	try {
 		member = await fetchGuildMember(interaction.guild, idToEdit);
