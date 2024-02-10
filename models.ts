@@ -12,15 +12,9 @@ export type InteractionWithCommands = Interaction & {
 	client: ClientWithCommands;
 }
 
-export interface UserFromMojangApi {
+export class UserFromMojangApi {
 	id: string;
 	name: string;
-}
-
-export interface MojangApiError {
-	path: string;
-	error: string;
-	errorMessage: string;
 }
 
 export class ButtonData {

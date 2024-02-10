@@ -5,6 +5,7 @@ export const whitelistChannelName = 'whitelist';
 export const playerRoleName = 'Joueur';
 export const timeToWaitForUserInputBeforeTimeout = 240000;
 export const mojangApiUrl = 'https://api.mojang.com';
+export const sessionServer = 'https://sessionserver.mojang.com/session';
 
 export const client = new Client({
 	intents: [

@@ -1,26 +1,28 @@
 {
-  "name": "spicecraft-bot",
-  "version": "1.0.0",
-  "description": "Manage whitelist of a Minecraft server",
-  "main": "index.ts",
-  "scripts": {
-    "debug": "ts-node index.ts",
-    "start": "node index.js",
-    "build": "npx tsc",
-	"deploy-commands": "ts-node deploy-commands.ts"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "discord.js": "^14.11.0",
-    "dotenv": "^16.3.1",
-    "es6-template-strings": "^2.0.1",
-    "rcon-client": "^4.2.4",
-    "sequelize": "^6.32.1",
-    "sqlite3": "^5.1.6"
-  },
-  "devDependencies": {
-    "eslint": "^8.45.0",
-    "ts-node": "^10.9.1"
-  }
+	"name": "spicecraft-bot",
+	"version": "1.0.0",
+	"description": "Manage the whitelist of a Minecraft server",
+	"main": "index.ts",
+	"scripts": {
+		"build": "npx tsc",
+		"debug": "ts-node index.ts",
+		"deploy-commands": "ts-node deploy-commands.ts",
+		"start": "node index.js"
+	},
+	"author": "Louis-Philippe Héon",
+	"license": "ISC",
+	"dependencies": {
+		"axios": "^1.6.7",
+		"axios-cache-interceptor": "^1.5.1",
+		"discord.js": "^14.11.0",
+		"dotenv": "^16.3.1",
+		"es6-template-strings": "^2.0.1",
+		"rcon-client": "^4.2.4",
+		"sequelize": "^6.32.1",
+		"sqlite3": "^5.1.6"
+	},
+	"devDependencies": {
+		"eslint": "^8.45.0",
+		"ts-node": "^10.9.1"
+	}
 }

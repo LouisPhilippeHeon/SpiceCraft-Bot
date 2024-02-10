@@ -1,59 +1,37 @@
-import { mojangApiUrl } from '../bot-constants';
-import http = require('https');
+import Axios from 'axios';
+import { setupCache } from 'axios-cache-interceptor';
+import { mojangApiUrl, sessionServer } from '../bot-constants';
 import { error } from './logger';
-import { MojangApiError, UserFromMojangApi } from '../models';
+import { UserFromMojangApi } from '../models';
 import { Errors } from '../strings';
 
-export function getMojangUser(username: string): Promise<UserFromMojangApi> {
-	return new Promise((resolve, reject) => {
-		const req = http.get(`${mojangApiUrl}/users/profiles/minecraft/${username}`, (res) => {
-			let body: any = [];
-			res.on('data', function (chunk) {
-				body.push(chunk);
-			});
-			res.on('end', function () {
-				try {
-					body = JSON.parse(Buffer.concat(body).toString());
-				}
-				catch (e) {
-					reject(e);
-				}
-				if ((body as MojangApiError).errorMessage)
-					reject(new Error(Errors.api.noMojangAccountWithThatUsername));
-				resolve(body as UserFromMojangApi);
-			});
-		});
-		req.on('error', (e) => {
-			error(e.stack);
-			reject(new Error(Errors.api.couldNotConnectToApi));
-		});
-		req.end();
-	});
+const instance = Axios.create();
+const axios = setupCache(instance);
+
+export async function getMojangUser(username: string): Promise<UserFromMojangApi> {
+	try {
+		const response = await axios.get(`${mojangApiUrl}/users/profiles/minecraft/${username}`);
+		return response.data;
+	}
+	catch (e) {
+		const apiError = e.response.data;
+		error(JSON.stringify(apiError));
+
+		if (apiError.error)
+			throw new Error(Errors.api.couldNotConnectToApi);
+		throw new Error(Errors.api.noMojangAccountWithThatUsername);
+	}
 }
 
-export function getUsernameFromUuid(uuid: string): Promise<string> {
-	return new Promise((resolve, reject) => {
-		const req = http.get(`${mojangApiUrl}/user/profile/${uuid}`, (res) => {
-			let body: any = [];
-			res.on('data', function (chunk) {
-				body.push(chunk);
-			});
-			res.on('end', function () {
-				try {
-					body = JSON.parse(Buffer.concat(body).toString());
-				}
-				catch (e) {
-					reject(e);
-				}
-				if (!body.name)
-					reject(new Error(Errors.api.noMojangAccountWithThatUuid));
-				resolve(body.name);
-			});
-		});
-		req.on('error', (e) => {
-			error(e.stack);
-			reject(new Error(Errors.api.couldNotConnectToApi));
-		});
-		req.end();
-	});
+export async function getUsernameFromUuid(uuid: string): Promise<string> {
+	try {
+		const response = await axios.get(`${sessionServer}/minecraft/profile/${uuid}`);
+		return response.data.name;
+	} catch (e) {
+		error(JSON.stringify(e.response.data));
+
+		if (e.response.status === 400)
+			throw new Error(Errors.api.noMojangAccountWithThatUuid);
+		throw new Error(Errors.api.couldNotConnectToApi);
+	}
 }
