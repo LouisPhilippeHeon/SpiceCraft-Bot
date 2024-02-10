@@ -2,8 +2,9 @@ import { playerRoleName } from '../bot-constants';
 import { clientId } from '../config';
 import { deleteEntry } from '../services/database';
 import { AuditLogEvent, Events, GuildMember } from 'discord.js';
-import { error } from '../services/logger';
-import { Errors } from '../strings';
+import { error, info } from '../services/logger';
+import { Errors, Logs } from '../strings';
+import { template } from '../utils';
 
 module.exports = {
 	name: Events.GuildMemberUpdate,
@@ -13,6 +14,8 @@ module.exports = {
 		const newMemberIsPlayer = newMember.roles.cache.some(role => role.name === playerRoleName);
 
 		if (oldMemberWasPlayer && !newMemberIsPlayer) {
+			info(template(Logs.playerRoleWasRemoved, {username: newMember.user.username}));
+
 			try {
 				const latestMemberRoleUpdateLog = await newMember.guild.fetchAuditLogs({ type: AuditLogEvent.MemberRoleUpdate, limit: 1 });
 				const executor = latestMemberRoleUpdateLog.entries.first().executor;

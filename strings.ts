@@ -214,8 +214,9 @@ export namespace Errors {
 
 export namespace Logs {
 	export const ready = 'Prêt ! Connecté en tant que ${username}.';
-	export const userClickedRegisterButton = '${username} a cliqué sur le bouton d\'inscription.';
-	export const userLeft = '${username} a quitté le serveur Discord.';
+	export const memberClickedRegisterButton = '${username} a cliqué sur le bouton d\'inscription.';
+	export const memberLeft = '${username} a quitté le serveur Discord.';
+	export const playerRoleWasRemoved = 'Le rôle « ' + playerRoleName + ' » de ${username} est retiré.';
 }
 
 export namespace Services {

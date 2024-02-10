@@ -12,7 +12,7 @@ module.exports = {
 	once: false,
 	async execute(member: GuildMember) {
 		try {
-			info(template(Logs.userLeft, {username: member.user.username}));
+			info(template(Logs.memberLeft, {username: member.user.username}));
 			let userFromDb: UserFromDb = await getUserByDiscordUuid(member.user.id).catch(() => userFromDb = null);
 			if (!userFromDb) return;
 

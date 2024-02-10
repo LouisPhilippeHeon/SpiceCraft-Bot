@@ -17,7 +17,7 @@ let interaction: ButtonInteraction;
 
 export async function execute(buttonInteraction: ButtonInteraction) {
 	interaction = buttonInteraction;
-	info(template(Logs. userClickedRegisterButton, {username: interaction.user.username}));
+	info(template(Logs. memberClickedRegisterButton, {username: interaction.user.username}));
 
 	await getUserByDiscordUuid(interaction.user.id).then(async (user) => {
 		if (user.inscription_status === inscriptionStatus.rejected)
