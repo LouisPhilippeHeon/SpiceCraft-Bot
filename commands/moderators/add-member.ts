@@ -11,7 +11,7 @@ export const data = new SlashCommandBuilder()
 	.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
 	.addUserOption(option =>
 		option.setName('membre')
-			  .setDescription(Commands.addMember.memberOptionDescription)
+			  .setDescription(Commands.addMember.membreOptionDescription)
 			  .setRequired(true))
 	.addStringOption(option =>
 		option.setName('username-minecraft')
