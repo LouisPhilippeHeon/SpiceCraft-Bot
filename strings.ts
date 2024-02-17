@@ -230,18 +230,11 @@ export namespace Services {
 	}
 
 	export enum userStatus {
-		cantSendDm = 'Attention : Impossible d\'envoyer un message à cet utilisateur en raison de ses paramètres de confidentialité !',
-		dmAddedToWhitelist = 'Tu a été ajouté à la whitelist de SpiceCraft.',
-		dmRemovedFromWhitelist = 'Tu a été retiré de la whitelist de SpiceCraft. Contacte les administrateurs pour plus de détails.',
-		statusChanged = 'Le statut de <@${discordUuid}> à été changé pour « ${status} ».'
+		cantSendDm = 'Warning: Unable to send a message to this user due to their privacy settings!',
+		dmAddedToWhitelist = 'You have been added to the SpiceCraft whitelist.',
+		dmRemovedFromWhitelist = 'You have been removed from the SpiceCraft whitelist. Contact the administrators for more details.',
+		statusChanged = 'The status of <@${discordUuid}> has been changed to "${status}".'
 	}
-}
-
-export enum userStatus {
-	cantSendDm = 'Warning: Unable to send a message to this user due to their privacy settings!',
-	dmAddedToWhitelist = 'You have been added to the SpiceCraft whitelist.',
-	dmRemovedFromWhitelist = 'You have been removed from the SpiceCraft whitelist. Contact the administrators for more details.',
-	statusChanged = 'The status of <@${discordUuid}> has been changed to "${status}".'
 }
 
 export namespace Utils {
