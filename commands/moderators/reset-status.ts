@@ -1,6 +1,6 @@
 import { inscriptionStatus } from '../../bot-constants';
 import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
-import { strings } from '../../strings/strings';
+import { strings, Commands } from '../../strings/strings';
 import { editUserStatus } from '../../services/user-status';
 
 export const data = new SlashCommandBuilder()
@@ -9,7 +9,7 @@ export const data = new SlashCommandBuilder()
 	.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
 	.addUserOption(option =>
 		option.setName('membre')
-			  .setDescription(strings.Commands.resetStatus.userOptionDescription)
+			  .setDescription(Commands.resetStatus.userOptionDescription)
 			  .setRequired(true));
 
 export async function execute(interaction: ChatInputCommandInteraction) {

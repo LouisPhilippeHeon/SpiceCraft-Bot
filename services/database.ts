@@ -83,7 +83,7 @@ export async function getUserByDiscordUuid(discordUuid: string): Promise<UserFro
 	const tag = await tags.findOne({ where: { discord_uuid: discordUuid }});
 
 	if (!tag)
-		throw new Error(strings.strings.Errors.database.userDoesNotExist);
+		throw new Error(strings.Errors.database.userDoesNotExist);
 
 	return Object.assign(new UserFromDb(), tag.get({ plain: true }));
 }

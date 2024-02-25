@@ -1,7 +1,7 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import { ClientWithCommands } from './models';
 
-export const lang = 'en';
+export const lang = 'fr';
 export const whitelistChannelName = 'whitelist';
 export const playerRoleName = 'Joueur';
 export const timeToWaitForUserInputBeforeTimeout = 240000;

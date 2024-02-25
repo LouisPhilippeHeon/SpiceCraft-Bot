@@ -19,7 +19,7 @@ export async function getMojangUser(username: string): Promise<UserFromMojangApi
 
 		if (apiError.error)
 			throw new Error(strings.Errors.api.couldNotConnectToApi);
-		throw new Error(strings.api.noMojangAccountWithThatUsername);
+		throw new Error(strings.Errors.api.noMojangAccountWithThatUsername);
 	}
 }
 
