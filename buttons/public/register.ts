@@ -5,15 +5,15 @@ import { ActionRowBuilder, ButtonBuilder, ButtonComponent, ButtonInteraction, Bu
 import { ephemeralInteractions } from '../../ephemeral-interactions';
 import { getMojangUser } from '../../services/http';
 import { ButtonData, UserFromMojangApi } from '../../models';
-import { ButtonEvents, Components, Errors } from '../../strings';
+import { strings } from '../../strings/strings';
 import { template } from '../../utils';
 
 export const data = new ButtonData('register');
 
 const rulesEmbed = new EmbedBuilder({
 	color: 0x0099FF,
-	title: Components.titles.rules,
-	description: Components.descriptions.rules
+	title: strings.Components.titles.rules,
+	description: strings.Components.descriptions.rules
 });
 
 let userFromMojangApi: UserFromMojangApi;
@@ -58,17 +58,17 @@ async function disableButtons() {
 
 async function registerUser(isFirstTimeMember: boolean) {
 	try {
-		const usernameMessage = await interaction.user.send(ButtonEvents.enrolling.askWhatIsMinecraftUsername);
+		const usernameMessage = await interaction.user.send(strings.ButtonEvents.enrolling.askWhatIsMinecraftUsername);
 		dmChannel = usernameMessage.channel as DMChannel;
 	}
 	catch (e) {
-		await interaction.reply({ content: ButtonEvents.enrolling.dmsAreClosed, ephemeral: true });
+		await interaction.reply({ content: strings.ButtonEvents.enrolling.dmsAreClosed, ephemeral: true });
 		return;
 	}
 
 	const replyMessage = isFirstTimeMember
-		? ButtonEvents.enrolling.messageSentInDmsNewUser
-		: ButtonEvents.enrolling.messageSentInDms;
+		? strings.ButtonEvents.enrolling.messageSentInDmsNewUser
+		: strings.ButtonEvents.enrolling.messageSentInDms;
 
 	await interaction.reply({ content: replyMessage, ephemeral: true });
 
@@ -76,7 +76,7 @@ async function registerUser(isFirstTimeMember: boolean) {
 	const collectorFilter = (message: Message) => message.author.id === interaction.user.id;
 	const usernameCollected = await dmChannel.awaitMessages({ filter: collectorFilter, max: 1, time: timeToWaitForUserInputBeforeTimeout });
 	if (usernameCollected.size === 0) {
-		await dmChannel.send(Errors.userResponseTimeout);
+		await dmChannel.send(strings.Errors.userResponseTimeout);
 		return;
 	}
 
@@ -93,44 +93,44 @@ async function registerUser(isFirstTimeMember: boolean) {
 		await saveNewUserToDb();
 	}
 	catch (e) {
-		if (e.message === Errors.api.noMojangAccountWithThatUsername)
-			await dmChannel.send(template(ButtonEvents.enrolling.minecraftAccountDoesNotExist, {minecraftUsername: usernameSentByUser}));
+		if (e.message === strings.Errors.api.noMojangAccountWithThatUsername)
+			await dmChannel.send(template(strings.ButtonEvents.enrolling.minecraftAccountDoesNotExist, {minecraftUsername: usernameSentByUser}));
 		else
 			await dmChannel.send(e.message);
 	}
 }
 
 async function askWhoInvited() {
-	await dmChannel.send(ButtonEvents.enrolling.askWhoInvitedNewPlayer);
+	await dmChannel.send(strings.ButtonEvents.enrolling.askWhoInvitedNewPlayer);
 
 	// Collect answer
 	const collectorFilter = (message: Message) => message.author.id === interaction.user.id;
 	const collected = await dmChannel.awaitMessages({ filter: collectorFilter, max: 1, time: timeToWaitForUserInputBeforeTimeout });
-	if (collected.size === 0) throw new Error(Errors.userResponseTimeout);
+	if (collected.size === 0) throw new Error(strings.Errors.userResponseTimeout);
 
 	userThatInvited = collected.first().content;
 }
 
 async function getRulesAcknowledgment() {
-	const rulesMessage = await dmChannel.send({ content: ButtonEvents.enrolling.reactToAcceptRules, embeds: [rulesEmbed] });
+	const rulesMessage = await dmChannel.send({ content: strings.ButtonEvents.enrolling.reactToAcceptRules, embeds: [rulesEmbed] });
 	await rulesMessage.react('✅');
 
 	// Collect emoji reactions
 	const collectorFilter = (reaction: MessageReaction, user: User) => (reaction.emoji.name === '✅') && (user.id === interaction.user.id);
 	const emojisCollected = await rulesMessage.awaitReactions({ filter: collectorFilter, max: 1, time: timeToWaitForUserInputBeforeTimeout });
 	if (emojisCollected.size === 0)
-		throw new Error(Errors.userResponseTimeout);
+		throw new Error(strings.Errors.userResponseTimeout);
 }
 
 async function saveNewUserToDb() {
 	try {
 		await createUser(interaction.user.id, userFromMojangApi.id);
 		await createApprovalRequest(interaction.user, interaction.guild, userFromMojangApi.name, userThatInvited);
-		await dmChannel.send(ButtonEvents.enrolling.waitForAdminApprobation);
+		await dmChannel.send(strings.ButtonEvents.enrolling.waitForAdminApprobation);
 	}
 	catch (e) {
-		if (e.message === Errors.database.notUnique)
-			await dmChannel.send(Errors.usernameUsedWithAnotherAccount);
+		if (e.message === strings.Errors.database.notUnique)
+			await dmChannel.send(strings.Errors.usernameUsedWithAnotherAccount);
 		else
 			await dmChannel.send(e.message);
 	}

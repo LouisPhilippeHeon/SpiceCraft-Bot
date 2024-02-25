@@ -2,7 +2,7 @@ import * as assert from 'assert';
 import { Events } from 'discord.js';
 import { error } from '../services/logger';
 import { InteractionWithCommands } from '../models';
-import { Errors } from '../strings';
+import { strings } from '../strings/strings';
 import { replyOrFollowUp, template } from '../utils';
 
 module.exports = {
@@ -25,7 +25,7 @@ async function handleButtonInteraction(interaction: InteractionWithCommands) {
 	const button = interaction.client.buttons.get(buttonName);
 
 	if (!button) {
-		error(template(Errors.interaction.buttonNotFound, {button: interaction.customId}));
+		error(template(strings.Errors.interaction.buttonNotFound, {button: interaction.customId}));
 		return;
 	}
 
@@ -37,10 +37,10 @@ async function handleButtonInteraction(interaction: InteractionWithCommands) {
 		await button.execute(interaction);
 	}
 	catch (e) {
-		if (e.code === 'ERR_ASSERTION') await replyOrFollowUp({ content: Errors.interaction.unauthorized, ephemeral: true }, interaction);
+		if (e.code === 'ERR_ASSERTION') await replyOrFollowUp({ content: strings.Errors.interaction.unauthorized, ephemeral: true }, interaction);
 		else {
 			error(e);
-			await replyOrFollowUp({ content: Errors.interaction.buttonExecution, ephemeral: true }, interaction);
+			await replyOrFollowUp({ content: strings.Errors.interaction.buttonExecution, ephemeral: true }, interaction);
 		}
 	}
 }
@@ -51,7 +51,7 @@ async function handleChatInputCommand(interaction: InteractionWithCommands) {
 	const command = interaction.client.commands.get(interaction.commandName);
 
 	if (!command) {
-		error(template(Errors.interaction.commandNotFound, {command: interaction.commandName}));
+		error(template(strings.Errors.interaction.commandNotFound, {command: interaction.commandName}));
 		return;
 	}
 
@@ -60,6 +60,6 @@ async function handleChatInputCommand(interaction: InteractionWithCommands) {
 	}
 	catch (e) {
 		error(e);
-		await replyOrFollowUp({content: Errors.interaction.commandExecution, ephemeral: true}, interaction);
+		await replyOrFollowUp({content: strings.Errors.interaction.commandExecution, ephemeral: true}, interaction);
 	}
 }

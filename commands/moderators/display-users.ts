@@ -3,16 +3,16 @@ import { getUsers } from '../../services/database';
 import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { buildHtml } from '../../services/html';
 import { UserFromDb } from '../../models';
-import { Commands, getStatusName, statusToEmoji } from '../../strings';
+import { strings } from '../../strings/strings';
 import { template } from '../../utils';
 
 export const data = new SlashCommandBuilder()
 	.setName('afficher-membres')
-	.setDescription(Commands.displayUsers.description)
+	.setDescription(strings.Commands.displayUsers.description)
 	.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
 	.addStringOption(option =>
 		option.setName('statut')
-			  .setDescription(Commands.displayUsers.statusOptionDescription)
+			  .setDescription(strings.Commands.displayUsers.statusOptionDescription)
 			  .addChoices(
 				  { name: 'Approuvé', value: inscriptionStatus.approved.toString() },
 				  { name: 'Rejeté', value: inscriptionStatus.rejected.toString() },
@@ -20,7 +20,7 @@ export const data = new SlashCommandBuilder()
 			  ))
 	.addStringOption(option =>
 		option.setName('format')
-			  .setDescription(Commands.displayUsers.formatOptionDescription)
+			  .setDescription(strings.Commands.displayUsers.formatOptionDescription)
 			  .addChoices(
 				  { name: 'HTML', value: 'html' },
 				  { name: 'JSON', value: 'json' },
@@ -34,7 +34,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 	const usersFromDb = await getUsers(status);
 
 	if (usersFromDb.length === 0) {
-		await interaction.reply(Commands.displayUsers.noUserFound);
+		await interaction.reply(strings.Commands.displayUsers.noUserFound);
 		return;
 	}
 
@@ -56,8 +56,8 @@ async function sendAsJson(interaction: ChatInputCommandInteraction, usersFromDb:
 		files: [{
 			attachment: Buffer.from(JSON.stringify(usersFromDb)),
 			name: (status !== undefined)
-				? template(Commands.displayUsers.filenameJsonWithStatus, {status: getStatusName(status)})
-				: Commands.displayUsers.filenameJson
+				? template(strings.Commands.displayUsers.filenameJsonWithStatus, {status: strings.getStatusName(status)})
+				: strings.Commands.displayUsers.filenameJson
 		}]
 	});
 }
@@ -67,8 +67,8 @@ async function sendAsHtml(interaction: ChatInputCommandInteraction, usersFromDb:
 		files: [{
 			attachment: Buffer.from(buildHtml(usersFromDb, status)),
 			name: (status !== undefined)
-				? template(Commands.displayUsers.filenameHtmlWithStatus, {status: getStatusName(status)})
-				: Commands.displayUsers.filenameHtml
+				? template(strings.Commands.displayUsers.filenameHtmlWithStatus, {status: strings.getStatusName(status)})
+				: strings.Commands.displayUsers.filenameHtml
 		}]
 	});
 }
@@ -84,10 +84,10 @@ function createMessages(usersFromDb: UserFromDb[]): string[] {
 			currentMessage = '';
 		}
 
-		const row = template(Commands.displayUsers.databaseEntryLine, {
+		const row = template(strings.Commands.displayUsers.databaseEntryLine, {
 			discordUuid: user.discord_uuid,
 			minecraftUuid: user.minecraft_uuid,
-			statusEmoji: statusToEmoji(user.inscription_status)
+			statusEmoji: strings.statusToEmoji(user.inscription_status)
 		});
 		
 		currentMessage = currentMessage.concat(row);
@@ -100,8 +100,8 @@ function createMessages(usersFromDb: UserFromDb[]): string[] {
 async function sendMessages(interaction: ChatInputCommandInteraction, messages: string[], status?: number) {
 	await interaction.reply({
 		content: (status === undefined)
-			? Commands.displayUsers.displayingAllUsers
-			: template(Commands.displayUsers.displayingUsersWithStatus, {status: getStatusName(status)})
+			? strings.Commands.displayUsers.displayingAllUsers
+			: template(strings.Commands.displayUsers.displayingUsersWithStatus, {status: strings.getStatusName(status)})
 	});
 
 	messages.forEach(async message => {

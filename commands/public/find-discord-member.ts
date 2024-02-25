@@ -1,14 +1,14 @@
 import { getUserByMinecraftUuid } from '../../services/database';
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { getMojangUser } from '../../services/http';
-import { Commands, Errors } from '../../strings';
+import { strings } from '../../strings/strings';
 
 export const data = new SlashCommandBuilder()
 	.setName('trouver-membre-discord')
-	.setDescription(Commands.findDiscordMember.description)
+	.setDescription(strings.Commands.findDiscordMember.description)
 	.addStringOption(option =>
 		option.setName('username')
-			  .setDescription(Commands.findDiscordMember.usernameOptionDescription)
+			  .setDescription(strings.Commands.findDiscordMember.usernameOptionDescription)
 			  .setRequired(true));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -20,7 +20,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 		if (user)
 			await interaction.reply(`<@${user.discord_uuid}>`);
 		else
-			await interaction.reply(Errors.database.userDoesNotExist);
+			await interaction.reply(strings.Errors.database.userDoesNotExist);
 	}
 	catch (e) {
 		await interaction.reply(e.message);

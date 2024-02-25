@@ -1,7 +1,7 @@
 import { inscriptionStatus } from '../bot-constants';
 import { changeStatus, getUserByDiscordUuid } from './database';
 import { ChatInputCommandInteraction, GuildMember } from 'discord.js';
-import { Services, getStatusName } from '../strings';
+import { strings } from '../strings/strings';
 import { addPlayerRole, fetchGuildMember, removePlayerRole, template } from '../utils';
 
 export async function editUserStatus(interaction: ChatInputCommandInteraction, status: number) {
@@ -29,9 +29,9 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
 		return;
 	}
 
-	const interactionReplyMessage = template(Services.userStatus.statusChanged, {
+	const interactionReplyMessage = template(strings.Services.userStatus.statusChanged, {
 		discordUuid: idToEdit,
-		status: getStatusName(status)
+		status: strings.getStatusName(status)
 	});
 
 	if (!silent && status !== inscriptionStatus.awaitingApproval) {
@@ -39,7 +39,7 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
 			await member.send(getMessageToSendToUser(status));
 		}
 		catch {
-			await interaction.reply(interactionReplyMessage + '\n' + Services.userStatus.cantSendDm);
+			await interaction.reply(interactionReplyMessage + '\n' + strings.Services.userStatus.cantSendDm);
 			return;
 		}
 	}
@@ -49,7 +49,7 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
 
 function getMessageToSendToUser(status: number): string {
 	if (status === inscriptionStatus.approved)
-		return Services.userStatus.dmAddedToWhitelist;
+		return strings.Services.userStatus.dmAddedToWhitelist;
 	if (status === inscriptionStatus.rejected)
-		return Services.userStatus.dmRemovedFromWhitelist;
+		return strings.Services.userStatus.dmRemovedFromWhitelist;
 }

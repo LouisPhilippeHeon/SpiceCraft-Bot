@@ -2,26 +2,26 @@ import { inscriptionStatus } from '../../bot-constants';
 import { createUser, getUserByDiscordUuid } from '../../services/database';
 import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { getMojangUser } from '../../services/http';
-import { Commands } from '../../strings';
+import { strings } from '../../strings/strings';
 import { addPlayerRole, fetchGuildMember, sendMessageToMember, template } from '../../utils';
 
 export const data = new SlashCommandBuilder()
 	.setName('ajouter-membre')
-	.setDescription(Commands.approve.description)
+	.setDescription(strings.Commands.approve.description)
 	.setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
 	.addUserOption(option =>
 		option.setName('membre')
-			  .setDescription(Commands.addMember.memberOptionDescription)
+			  .setDescription(strings.Commands.addMember.memberOptionDescription)
 			  .setRequired(true))
 	.addStringOption(option =>
 		option.setName('username-minecraft')
-			  .setDescription(Commands.addMember.usernameMinecraftOptionDescription)
+			  .setDescription(strings.Commands.addMember.usernameMinecraftOptionDescription)
 			  .setMinLength(3)
 			  .setMaxLength(16)
 			  .setRequired(true))
 	.addStringOption(option =>
 		option.setName('statut')
-			  .setDescription(Commands.addMember.statusOptionDescription)
+			  .setDescription(strings.Commands.addMember.statusOptionDescription)
 			  .addChoices(
 				  { name: 'Approuvé', value: inscriptionStatus.approved.toString() },
 				  { name: 'Rejeté', value: inscriptionStatus.rejected.toString() },
@@ -29,7 +29,7 @@ export const data = new SlashCommandBuilder()
 			  ))
 	.addBooleanOption(option =>
 		option.setName('silencieux')
-			  .setDescription(Commands.addMember.silentOptionDescription));
+			  .setDescription(strings.Commands.addMember.silentOptionDescription));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
 	const discordUuid = interaction.options.getUser('membre').id;
@@ -39,7 +39,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 	
 	try {
 		await getUserByDiscordUuid(discordUuid);
-		await interaction.reply(Commands.addMember.alreadyInDatabase);
+		await interaction.reply(strings.Commands.addMember.alreadyInDatabase);
 	}
 	catch {
 		await saveNewUser(interaction, discordUuid, usernameMinecraft, status, silent);
@@ -62,9 +62,9 @@ async function saveNewUser(interaction: ChatInputCommandInteraction, discordUuid
 
 		const sendDm = !silent && status !== inscriptionStatus.awaitingApproval;
 		if (sendDm && !rconFailure)
-			await sendMessageToMember(getMessageToSendToUser(status), member, interaction, undefined, template(Commands.addMember.successNoDm, {discordUuid: discordUuid}));
+			await sendMessageToMember(getMessageToSendToUser(status), member, interaction, undefined, template(strings.Commands.addMember.successNoDm, {discordUuid: discordUuid}));
 		
-		const replyMessage = template((sendDm && rconFailure) ? Commands.addMember.successNoDm : Commands.addMember.success, {discordUuid: discordUuid});
+		const replyMessage = template((sendDm && rconFailure) ? strings.Commands.addMember.successNoDm : strings.Commands.addMember.success, {discordUuid: discordUuid});
 		await interaction.reply({ content: replyMessage, ephemeral: true });
 	}
 	catch (e) {
@@ -74,7 +74,7 @@ async function saveNewUser(interaction: ChatInputCommandInteraction, discordUuid
 
 function getMessageToSendToUser(status: number): string {
 	if (status === inscriptionStatus.approved)
-		return Commands.addMember.dmApproved;
+		return strings.Commands.addMember.dmApproved;
 	if (status === inscriptionStatus.rejected)
-		return Commands.addMember.dmRejected;
+		return strings.Commands.addMember.dmRejected;
 }

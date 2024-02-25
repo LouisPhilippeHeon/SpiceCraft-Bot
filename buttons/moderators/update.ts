@@ -2,7 +2,7 @@ import { editApprovalRequest } from '../../services/admin-approval';
 import { getUserByDiscordUuid } from '../../services/database';
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, GuildMember, PermissionFlagsBits } from 'discord.js';
 import { ButtonData, UserFromDb } from '../../models';
-import { ButtonEvents, Components } from '../../strings';
+import { strings } from '../../strings/strings';
 import { sendMessageToMember, template } from '../../utils';
 
 export const data = new ButtonData('update', PermissionFlagsBits.BanMembers);
@@ -29,14 +29,14 @@ export async function execute(buttonInteraction: ButtonInteraction) {
 		return;
 	}
 
-	await editApprovalRequest(interaction.message, template(ButtonEvents.usernameChangeConfirmation.messageUpdate, {discordUuid: interaction.user.id}), undefined, [], Colors.Green);
+	await editApprovalRequest(interaction.message, template(strings.ButtonEvents.usernameChangeConfirmation.messageUpdate, {discordUuid: interaction.user.id}), undefined, [], Colors.Green);
 
 	await sendMessageToMember(
-		ButtonEvents.usernameChangeConfirmation.messageSentToConfirmUsernameChange,
+		strings.ButtonEvents.usernameChangeConfirmation.messageSentToConfirmUsernameChange,
 		member,
 		interaction,
-		template(ButtonEvents.usernameChangeConfirmation.success, {discordUuid: discordUuid}),
-		template(ButtonEvents.usernameChangeConfirmation.successNoDm, {discordUuid: discordUuid})
+		template(strings.ButtonEvents.usernameChangeConfirmation.success, {discordUuid: discordUuid}),
+		template(strings.ButtonEvents.usernameChangeConfirmation.successNoDm, {discordUuid: discordUuid})
 	);
 }
 
@@ -53,18 +53,18 @@ async function modifyWhitelist(user: UserFromDb, minecraftUuid: string, discordU
 async function rconFailed(discordUuid: string, minecraftUuid: string, e: Error) {
 	const confirmManualModificationOfWhitelist = new ButtonBuilder({
 		customId: `manually-modified-whitelist_${discordUuid}_${minecraftUuid}`,
-		label: Components.buttons.manuallyEditedWhitelist,
+		label: strings.Components.buttons.manuallyEditedWhitelist,
 		style: ButtonStyle.Success
 	});
 
 	const cancel = new ButtonBuilder({
 		customId: 'dissmiss',
-		label: Components.buttons.cancel,
+		label: strings.Components.buttons.cancel,
 		style: ButtonStyle.Secondary
 	});
 
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmManualModificationOfWhitelist, cancel);
-	await editApprovalRequest(interaction.message, `${e.message} ${template(ButtonEvents.clickToConfirmChangesToWhitelist, {discordUuid: discordUuid})}`, undefined, [row], Colors.Yellow);
+	await editApprovalRequest(interaction.message, `${e.message} ${template(strings.ButtonEvents.clickToConfirmChangesToWhitelist, {discordUuid: discordUuid})}`, undefined, [row], Colors.Yellow);
 
-	await interaction.reply({ content: ButtonEvents.usernameChangeConfirmation.changeWhitelistBeforeCliking, ephemeral: true });
+	await interaction.reply({ content: strings.ButtonEvents.usernameChangeConfirmation.changeWhitelistBeforeCliking, ephemeral: true });
 }

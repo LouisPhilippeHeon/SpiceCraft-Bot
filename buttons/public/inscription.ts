@@ -6,7 +6,7 @@ import { ephemeralInteractions } from '../../ephemeral-interactions';
 import { getMojangUser } from '../../services/http';
 import { info } from '../../services/logger';
 import { ButtonData, UserFromDb, UserFromMojangApi } from '../../models';
-import { ButtonEvents, Components, Errors, Logs } from '../../strings';
+import { strings } from '../../strings/strings';
 import { fetchBotChannel, template } from '../../utils';
 
 export const data = new ButtonData('inscription');
@@ -17,11 +17,11 @@ let interaction: ButtonInteraction;
 
 export async function execute(buttonInteraction: ButtonInteraction) {
 	interaction = buttonInteraction;
-	info(template(Logs. memberClickedRegisterButton, {username: interaction.user.username}));
+	info(template(strings.Logs. memberClickedRegisterButton, {username: interaction.user.username}));
 
 	await getUserByDiscordUuid(interaction.user.id).then(async (user) => {
 		if (user.inscription_status === inscriptionStatus.rejected)
-			await interaction.reply({ content: ButtonEvents.enrolling.adminsAlreadyDeniedRequest, ephemeral: true });
+			await interaction.reply({ content: strings.ButtonEvents.enrolling.adminsAlreadyDeniedRequest, ephemeral: true });
 		else
 			await updateExistingUser(user);
 	}).catch(async () => await askIfFistTimeUser());
@@ -36,38 +36,38 @@ async function askIfFistTimeUser() {
 
 	const firstTime = new ButtonBuilder({
 		customId: 'register_true',
-		label: Components.buttons.yes,
+		label: strings.Components.buttons.yes,
 		style: ButtonStyle.Secondary
 	});
 
 	const notFirstTime = new ButtonBuilder({
 		customId: 'register_false',
-		label: Components.buttons.no,
+		label: strings.Components.buttons.no,
 		style: ButtonStyle.Secondary
 	});
 
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(firstTime, notFirstTime);
-	await interaction.reply({ content: ButtonEvents.enrolling.askIfFirstTimePlaying,	components: [row], ephemeral: true });
+	await interaction.reply({ content: strings.ButtonEvents.enrolling.askIfFirstTimePlaying,	components: [row], ephemeral: true });
 
 	ephemeralInteractions.set(interaction.user.id, interaction);
 }
 
 async function updateExistingUser(userFromDb: UserFromDb) {
 	try {
-		const usernameMessage = await interaction.user.send(ButtonEvents.enrolling.askWhatIsNewMinecraftUsername);
+		const usernameMessage = await interaction.user.send(strings.ButtonEvents.enrolling.askWhatIsNewMinecraftUsername);
 		dmChannel = usernameMessage.channel as DMChannel;
 	}
 	catch (e) {
-		await interaction.reply({ content: ButtonEvents.enrolling.dmsAreClosed, ephemeral: true });
+		await interaction.reply({ content: strings.ButtonEvents.enrolling.dmsAreClosed, ephemeral: true });
 		return;
 	}
 
-	await interaction.reply({content: ButtonEvents.enrolling.messageSentInDms, ephemeral: true});
+	await interaction.reply({content: strings.ButtonEvents.enrolling.messageSentInDms, ephemeral: true});
 
 	const collectorFilter = (message: Message) => message.author.id === interaction.user.id;
 	const usernameCollected = await dmChannel.awaitMessages({ filter: collectorFilter, max: 1, time: timeToWaitForUserInputBeforeTimeout });
 	if (usernameCollected.size === 0) {
-		await dmChannel.send(Errors.userResponseTimeout);
+		await dmChannel.send(strings.Errors.userResponseTimeout);
 		return;
 	}
 
@@ -77,7 +77,7 @@ async function updateExistingUser(userFromDb: UserFromDb) {
 		userFromMojangApi = await getMojangUser(usernameSentByUser);
 
 		if (userFromDb.minecraft_uuid == userFromMojangApi.id) {
-			await dmChannel.send(ButtonEvents.enrolling.sameMinecraftAccountAsBefore);
+			await dmChannel.send(strings.ButtonEvents.enrolling.sameMinecraftAccountAsBefore);
 			return;
 		}
 
@@ -90,15 +90,15 @@ async function updateExistingUser(userFromDb: UserFromDb) {
 
 		// Looks for another user with the same Minecraft UUID
 		if (await getUserByMinecraftUuid(userFromMojangApi.id))
-			await dmChannel.send(Errors.usernameUsedWithAnotherAccount);
+			await dmChannel.send(strings.Errors.usernameUsedWithAnotherAccount);
 		else {
 			await createUsernameChangeRequest(interaction.user, interaction.guild, userFromMojangApi);
-			await dmChannel.send(ButtonEvents.enrolling.usernameUpdated);
+			await dmChannel.send(strings.ButtonEvents.enrolling.usernameUpdated);
 		}
 	}
 	catch (e) {
-		if (e.message === Errors.api.noMojangAccountWithThatUsername)
-			await dmChannel.send(template(ButtonEvents.enrolling.minecraftAccountDoesNotExist, {minecraftUsername: usernameSentByUser}));
+		if (e.message === strings.Errors.api.noMojangAccountWithThatUsername)
+			await dmChannel.send(template(strings.ButtonEvents.enrolling.minecraftAccountDoesNotExist, {minecraftUsername: usernameSentByUser}));
 		else
 			await dmChannel.send(e.message);
 	}
@@ -110,7 +110,7 @@ async function updateAdminApprovalRequest() {
 	const approvalRequest = await findApprovalRequestOfMember(interaction.guild, interaction.user);
 	// If message is too old to be updated
 	if (approvalRequest) {
-		const description = template(ButtonEvents.enrolling.embedDescription, {
+		const description = template(strings.ButtonEvents.enrolling.embedDescription, {
 			discordUuid: interaction.user.id,
 			minecraftUsername: userFromMojangApi.name
 		});
@@ -118,7 +118,7 @@ async function updateAdminApprovalRequest() {
 		await editApprovalRequest(approvalRequest, undefined, description, undefined, undefined);
 	}
 	else {
-		const message = template(ButtonEvents.enrolling.awaitingApprovalUserChangedMinecraftUsername, {
+		const message = template(strings.ButtonEvents.enrolling.awaitingApprovalUserChangedMinecraftUsername, {
 			discordUuid: interaction.user.id,
 			minecraftUsername: userFromMojangApi.name
 		});
@@ -126,5 +126,5 @@ async function updateAdminApprovalRequest() {
 		await whitelistChannel.send(message);
 	}
 
-	await dmChannel.send(ButtonEvents.enrolling.requestSucessfullyUpdated);
+	await dmChannel.send(strings.ButtonEvents.enrolling.requestSucessfullyUpdated);
 }

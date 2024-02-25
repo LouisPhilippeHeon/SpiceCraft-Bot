@@ -1,30 +1,30 @@
 import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, Message, Guild, User, APIEmbed } from 'discord.js';
 import { UserFromMojangApi } from '../models';
-import { Components } from '../strings';
+import { strings } from '../strings/strings';
 import { deepCloneWithJson, fetchBotChannel, template } from '../utils';
 
 export async function createApprovalRequest(user: User, guild: Guild, username: string, inviter?: string) {
 	const approve = new ButtonBuilder({
 		customId: `approve_${user.id}`,
-		label: Components.buttons.approve,
+		label: strings.Components.buttons.approve,
 		style: ButtonStyle.Success
 	});
 
 	const reject = new ButtonBuilder({
 		customId: `reject_${user.id}`,
-		label: Components.buttons.reject,
+		label: strings.Components.buttons.reject,
 		style: ButtonStyle.Danger
 	});
 
 	let description: string;
 
 	if (inviter)
-		description = template(Components.descriptions.approvalRequestNewUser, {discordUuid: user.id, username: username, inviter: inviter.substring(0, 32)});
+		description = template(strings.Components.descriptions.approvalRequestNewUser, {discordUuid: user.id, username: username, inviter: inviter.substring(0, 32)});
 	else
-		description = template(Components.descriptions.approvalRequest, {discordUuid: user.id, username: username});
+		description = template(strings.Components.descriptions.approvalRequest, {discordUuid: user.id, username: username});
 
 	const approvalRequestEmbed = new EmbedBuilder({
-		title: template(Components.titles.approvalRequest, {discordUsername: user.username}),
+		title: template(strings.Components.titles.approvalRequest, {discordUsername: user.username}),
 		description: description,
 		thumbnail: { url: user.displayAvatarURL({size: 256}) }
 	});
@@ -37,19 +37,19 @@ export async function createApprovalRequest(user: User, guild: Guild, username: 
 export async function createUsernameChangeRequest(user: User, guild: Guild, userFromMojangApi: UserFromMojangApi) {
 	const approve = new ButtonBuilder({
 		customId: `update_${user.id}_${userFromMojangApi.id}`,
-		label: Components.buttons.approve,
+		label: strings.Components.buttons.approve,
 		style: ButtonStyle.Success
 	});
 
 	const ignore = new ButtonBuilder({
 		customId: 'dissmiss',
-		label: Components.buttons.doNotUpdate,
+		label: strings.Components.buttons.doNotUpdate,
 		style: ButtonStyle.Secondary
 	});
 
 	const approvalRequestEmbed = new EmbedBuilder({
-		title: template(Components.titles.usernameChangeRequest, {discordUsername: user.username}),
-		description: template(Components.descriptions.usernameChangeRequest, { discordUuid: user.id, username: userFromMojangApi.name }),
+		title: template(strings.Components.titles.usernameChangeRequest, {discordUsername: user.username}),
+		description: template(strings.Components.descriptions.usernameChangeRequest, { discordUuid: user.id, username: userFromMojangApi.name }),
 		thumbnail: { url: user.displayAvatarURL({ size: 256 }) }
 	});
 

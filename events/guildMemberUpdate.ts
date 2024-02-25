@@ -3,7 +3,7 @@ import { clientId } from '../config';
 import { deleteEntry } from '../services/database';
 import { AuditLogEvent, Events, GuildMember } from 'discord.js';
 import { error, info } from '../services/logger';
-import { Errors, Logs } from '../strings';
+import { strings } from '../strings/strings';
 import { template } from '../utils';
 
 module.exports = {
@@ -14,7 +14,7 @@ module.exports = {
 		const newMemberIsPlayer = newMember.roles.cache.some(role => role.name === playerRoleName);
 
 		if (oldMemberWasPlayer && !newMemberIsPlayer) {
-			info(template(Logs.playerRoleWasRemoved, {username: newMember.user.username}));
+			info(template(strings.Logs.playerRoleWasRemoved, {username: newMember.user.username}));
 
 			try {
 				const latestMemberRoleUpdateLog = await newMember.guild.fetchAuditLogs({ type: AuditLogEvent.MemberRoleUpdate, limit: 1 });
@@ -24,7 +24,7 @@ module.exports = {
 					await deleteEntry(newMember.user.id);
 			}
 			catch (e) {
-				if (e.code === 50013) error(Errors.discord.cantReadLogs);
+				if (e.code === 50013) error(strings.Errors.discord.cantReadLogs);
 				else error(e);
 			}
 		}

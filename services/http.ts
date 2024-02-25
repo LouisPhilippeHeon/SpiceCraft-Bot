@@ -3,7 +3,7 @@ import { setupCache } from 'axios-cache-interceptor';
 import { mojangApiUrl, sessionServer } from '../bot-constants';
 import { error } from './logger';
 import { UserFromMojangApi } from '../models';
-import { Errors } from '../strings';
+import { strings } from '../strings/strings';
 
 const instance = Axios.create();
 const axios = setupCache(instance);
@@ -18,8 +18,8 @@ export async function getMojangUser(username: string): Promise<UserFromMojangApi
 		error(JSON.stringify(apiError));
 
 		if (apiError.error)
-			throw new Error(Errors.api.couldNotConnectToApi);
-		throw new Error(Errors.api.noMojangAccountWithThatUsername);
+			throw new Error(strings.Errors.api.couldNotConnectToApi);
+		throw new Error(strings.api.noMojangAccountWithThatUsername);
 	}
 }
 
@@ -31,7 +31,7 @@ export async function getUsernameFromUuid(uuid: string): Promise<string> {
 		error(JSON.stringify(e.response.data));
 
 		if (e.response.status === 400)
-			throw new Error(Errors.api.noMojangAccountWithThatUuid);
-		throw new Error(Errors.api.couldNotConnectToApi);
+			throw new Error(strings.Errors.api.noMojangAccountWithThatUuid);
+		throw new Error(strings.Errors.api.couldNotConnectToApi);
 	}
 }

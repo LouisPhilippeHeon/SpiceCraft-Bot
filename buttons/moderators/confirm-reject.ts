@@ -3,7 +3,7 @@ import { changeStatus } from '../../services/database';
 import { inscriptionStatus } from '../../bot-constants';
 import { ButtonInteraction, Colors, GuildMember, Message, PermissionFlagsBits } from 'discord.js';
 import { ButtonData } from '../../models';
-import { ButtonEvents } from '../../strings';
+import { strings } from '../../strings/strings';
 import { fetchBotChannel, fetchGuildMember, sendMessageToMember, template } from '../../utils';
 
 export const data = new ButtonData('confirm-reject', PermissionFlagsBits.BanMembers);
@@ -27,7 +27,7 @@ export async function execute(interaction: ButtonInteraction) {
 	}
 	catch (e) {
 		if (statusChanged)
-			await interaction.reply(e.message + '\n' + template(ButtonEvents.rejection.userStillInBdExplanation, {discordUuid: discordUuid}));
+			await interaction.reply(e.message + '\n' + template(strings.ButtonEvents.rejection.userStillInBdExplanation, {discordUuid: discordUuid}));
 		else
 			await interaction.reply({ content: e.message, ephemeral: true });
 
@@ -36,13 +36,13 @@ export async function execute(interaction: ButtonInteraction) {
 	}
 
 	if (approvalRequest)
-		await editApprovalRequest(approvalRequest, template(ButtonEvents.rejection.requestDenied, {discordUuid: interaction.user.id}), undefined, [], Colors.Red);
+		await editApprovalRequest(approvalRequest, template(strings.ButtonEvents.rejection.requestDenied, {discordUuid: interaction.user.id}), undefined, [], Colors.Red);
 
 	await sendMessageToMember(
-		ButtonEvents.rejection.messageSentToUserToInformRejection,
+		strings.ButtonEvents.rejection.messageSentToUserToInformRejection,
 		member,
 		interaction,
-		template(ButtonEvents.rejection.success, {discordUuid: discordUuid}),
-		template(ButtonEvents.rejection.successNoDm, {discordUuid: discordUuid})
+		template(strings.ButtonEvents.rejection.success, {discordUuid: discordUuid}),
+		template(strings.ButtonEvents.rejection.successNoDm, {discordUuid: discordUuid})
 	);
 }

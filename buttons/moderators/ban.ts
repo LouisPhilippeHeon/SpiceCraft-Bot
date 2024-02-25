@@ -3,7 +3,7 @@ import { inscriptionStatus } from '../../bot-constants';
 import { getUserByDiscordUuid } from '../../services/database';
 import { ButtonInteraction, Colors, PermissionFlagsBits } from 'discord.js';
 import { ButtonData } from '../../models';
-import { ButtonEvents } from '../../strings';
+import { strings } from '../../strings/strings';
 import { template } from '../../utils';
 
 export const data = new ButtonData('ban', PermissionFlagsBits.BanMembers);
@@ -22,6 +22,6 @@ export async function execute(interaction: ButtonInteraction) {
 		return;
 	}
 
-	await editApprovalRequest(interaction.message, template(ButtonEvents.ban.messageUpdate, {discordUuid: interaction.user.id}), undefined, [], Colors.Green);
-	await interaction.reply({content: template(ButtonEvents.ban.reply, {discordUuid: discordUuid}), ephemeral: true});
+	await editApprovalRequest(interaction.message, template(strings.ButtonEvents.ban.messageUpdate, {discordUuid: interaction.user.id}), undefined, [], Colors.Green);
+	await interaction.reply({content: template(strings.ButtonEvents.ban.reply, {discordUuid: discordUuid}), ephemeral: true});
 }

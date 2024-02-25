@@ -3,7 +3,7 @@ import { inscriptionStatus } from '../../bot-constants';
 import { changeStatus } from '../../services/database';
 import { ButtonInteraction, Colors, GuildMember, PermissionFlagsBits } from 'discord.js';
 import { ButtonData } from '../../models';
-import { ButtonEvents } from '../../strings';
+import { strings } from '../../strings/strings';
 import { addPlayerRole, fetchGuildMember, sendMessageToMember, template } from '../../utils';
 
 export const data = new ButtonData('manually-added-whitelist', PermissionFlagsBits.BanMembers);
@@ -23,13 +23,13 @@ export async function execute(interaction: ButtonInteraction) {
 	}
 
 	await addPlayerRole(member);
-	await editApprovalRequest(interaction.message, template(ButtonEvents.approbation.requestGranted, {discordUuid: interaction.user.id}), undefined, [], Colors.Green);
+	await editApprovalRequest(interaction.message, template(strings.ButtonEvents.approbation.requestGranted, {discordUuid: interaction.user.id}), undefined, [], Colors.Green);
 
 	await sendMessageToMember(
-		ButtonEvents.approbation.messageSentToPlayerToConfirmInscription,
+		strings.ButtonEvents.approbation.messageSentToPlayerToConfirmInscription,
 		member,
 		interaction,
-		template(ButtonEvents.approbation.success, {discordUuid: discordUuid}),
-		template(ButtonEvents.approbation.successNoDm, {discordUuid: discordUuid})
+		template(strings.ButtonEvents.approbation.success, {discordUuid: discordUuid}),
+		template(strings.ButtonEvents.approbation.successNoDm, {discordUuid: discordUuid})
 	);
 }

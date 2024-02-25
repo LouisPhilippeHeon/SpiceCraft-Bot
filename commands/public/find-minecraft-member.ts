@@ -1,14 +1,14 @@
 import { getUserByDiscordUuid } from '../../services/database';
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { getUsernameFromUuid } from '../../services/http';
-import { Commands } from '../../strings';
+import { strings } from '../../strings/strings';
 
 export const data = new SlashCommandBuilder()
 	.setName('afficher-username-minecraft')
-	.setDescription(Commands.findMinecraftMember.description)
+	.setDescription(strings.Commands.findMinecraftMember.description)
 	.addUserOption(option =>
 		option.setName('membre')
-			  .setDescription(Commands.findMinecraftMember.userOptionDescription)
+			  .setDescription(strings.Commands.findMinecraftMember.userOptionDescription)
 			  .setRequired(true));
 
 export async function execute(interaction: ChatInputCommandInteraction) {

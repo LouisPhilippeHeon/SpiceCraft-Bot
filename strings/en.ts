@@ -1,4 +1,4 @@
-import { inscriptionStatus, playerRoleName, sessionServer, whitelistChannelName } from './bot-constants';
+import { inscriptionStatus, playerRoleName, sessionServer, whitelistChannelName } from '../bot-constants';
 
 export namespace ButtonEvents {
 	export const clickToConfirmChangesToWhitelist = 'Click on the button when it\'s done, so that <@${discordUuid}> is informed of the change related to his request.';

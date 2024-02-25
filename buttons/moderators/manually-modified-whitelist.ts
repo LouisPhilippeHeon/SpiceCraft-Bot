@@ -2,7 +2,7 @@ import { editApprovalRequest } from '../../services/admin-approval';
 import { changeMinecraftUuid } from '../../services/database';
 import { ButtonInteraction, Colors, GuildMember, PermissionFlagsBits } from 'discord.js';
 import { ButtonData } from '../../models';
-import { ButtonEvents } from '../../strings';
+import { strings } from '../../strings/strings';
 import { fetchGuildMember, sendMessageToMember, template } from '../../utils';
 
 export const data = new ButtonData('manually-modified-whitelist', PermissionFlagsBits.BanMembers);
@@ -22,13 +22,13 @@ export async function execute(interaction: ButtonInteraction) {
 		return;
 	}
 
-	await editApprovalRequest(interaction.message, template(ButtonEvents.usernameChangeConfirmation.messageUpdate, {discordUuid: discordUuid}), undefined, [], Colors.Green);
+	await editApprovalRequest(interaction.message, template(strings.ButtonEvents.usernameChangeConfirmation.messageUpdate, {discordUuid: discordUuid}), undefined, [], Colors.Green);
 
 	await sendMessageToMember(
-		ButtonEvents.usernameChangeConfirmation.messageSentToConfirmUsernameChange,
+		strings.ButtonEvents.usernameChangeConfirmation.messageSentToConfirmUsernameChange,
 		member,
 		interaction,
-		template(ButtonEvents.usernameChangeConfirmation.success, {discordUuid: discordUuid}),
-		template(ButtonEvents.usernameChangeConfirmation.successNoDm, {discordUuid: discordUuid})
+		template(strings.ButtonEvents.usernameChangeConfirmation.success, {discordUuid: discordUuid}),
+		template(strings.ButtonEvents.usernameChangeConfirmation.successNoDm, {discordUuid: discordUuid})
 	);
 }

@@ -2,7 +2,7 @@ import { editApprovalRequest } from '../../services/admin-approval';
 import { getUserByDiscordUuid } from '../../services/database';
 import { ButtonInteraction, Colors, PermissionFlagsBits } from 'discord.js';
 import { ButtonData } from '../../models';
-import { Commands } from '../../strings';
+import { strings } from '../../strings/strings';
 import { template } from '../../utils';
 
 export const data = new ButtonData('delete', PermissionFlagsBits.Administrator);
@@ -20,6 +20,6 @@ export async function execute(interaction: ButtonInteraction) {
 		return;
 	}
 
-	await editApprovalRequest( interaction.message, Commands.deleteEntry.messageUpdate, undefined, [], Colors.Red );
-	await interaction.reply({ content: template(Commands.deleteEntry.reply, {discordUuid: discordUuid}), ephemeral: true });
+	await editApprovalRequest( interaction.message, strings.Commands.deleteEntry.messageUpdate, undefined, [], Colors.Red );
+	await interaction.reply({ content: template(strings.Commands.deleteEntry.reply, {discordUuid: discordUuid}), ephemeral: true });
 }
