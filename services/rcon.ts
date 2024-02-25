@@ -15,7 +15,7 @@ export async function whitelistAdd(uuid: string) {
 		}
 	}
 	catch (e) {
-		error(e);
+		error(e, 'RCN_ADD');
 		throw new Error(template(Errors.rcon.add, { username: username }));
 	}
 }
@@ -31,7 +31,7 @@ export async function whitelistRemove(uuid: string) {
 		}
 	}
 	catch (e) {
-		error(e);
+		error(e, 'RCN_RMV');
 		throw new Error(template(Errors.rcon.remove, { username: username }));
 	}
 }
@@ -49,7 +49,7 @@ export async function whitelistReplaceUsername(newUuid: string, oldUuid: string)
 		}
 	}
 	catch (e) {
-		error(e);
+		error(e, 'RCN_EDT');
 		throw new Error(template(Errors.rcon.edit, { oldUsername: oldUsername, newUsername: newUsername }));
 	}
 }

@@ -22,17 +22,17 @@ export function warn(message: string) {
 	addToLogFile(formatLog(message, 'WARN'));
 }
 
-export function error(message: string) {
-	logger.error(formatConsole(message));
-	addToLogFile(formatLog(message, 'ERROR'));
+export function error(message: string, code: string) {
+	logger.error(formatConsole(message, code));
+	addToLogFile(formatLog(message, 'ERROR', code));
 }
 
-function formatConsole(message: string): string {
-	return `[${getFormatedDate()}] ${message}`;
+function formatConsole(message: string, code?: string): string {
+	return code ? `[${getFormatedDate()}] [${code}] ${message}` : `[${getFormatedDate()}] ${message}`;
 }
 
-function formatLog(message: string, type: string): string {
-	return `[${type}] [${getFormatedDate()}] ${message}`;
+function formatLog(message: string, type: string, code?: string): string {
+	return code ? `[${type} ${code}] [${getFormatedDate()}] ${message}` : `[${type}] [${getFormatedDate()}] ${message}`;
 }
 
 function addToLogFile(message: string) {

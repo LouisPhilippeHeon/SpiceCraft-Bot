@@ -15,7 +15,7 @@ export async function getMojangUser(username: string): Promise<UserFromMojangApi
 	}
 	catch (e) {
 		const apiError = e.response.data;
-		error(JSON.stringify(apiError));
+		error(JSON.stringify(apiError), 'HTP_FUN');
 
 		if (apiError.error)
 			throw new Error(Errors.api.couldNotConnectToApi);
@@ -28,7 +28,7 @@ export async function getUsernameFromUuid(uuid: string): Promise<string> {
 		const response = await axios.get(`${mojangApiUrl}/user/profile/${uuid}`);
 		return response.data.name;
 	} catch (e) {
-		error(JSON.stringify(e.response.data));
+		error(JSON.stringify(e.response.data), 'HTP_FID');
 
 		if (e.response.status === 400)
 			throw new Error(Errors.api.noMojangAccountWithThatUuid);

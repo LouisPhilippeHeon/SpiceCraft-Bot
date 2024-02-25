@@ -40,6 +40,6 @@ const rest = new REST().setToken(token);
 		info(`Rafraichissement réussi de ${data.length} commandes slash.`);
 	}
 	catch (e) {
-		error(e);
+		error(e, 'DPL_REL');
 	}
 })();

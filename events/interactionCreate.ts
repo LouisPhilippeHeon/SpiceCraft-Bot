@@ -25,7 +25,7 @@ async function handleButtonInteraction(interaction: InteractionWithCommands) {
 	const button = interaction.client.buttons.get(buttonName);
 
 	if (!button) {
-		error(template(Errors.interaction.buttonNotFound, {button: interaction.customId}));
+		error(template(Errors.interaction.buttonNotFound, {button: interaction.customId}), 'BTN_NOR');
 		return;
 	}
 
@@ -39,7 +39,7 @@ async function handleButtonInteraction(interaction: InteractionWithCommands) {
 	catch (e) {
 		if (e.code === 'ERR_ASSERTION') await replyOrFollowUp({ content: Errors.interaction.unauthorized, ephemeral: true }, interaction);
 		else {
-			error(e);
+			error(e, 'BTN_UKN');
 			await replyOrFollowUp({ content: Errors.interaction.buttonExecution, ephemeral: true }, interaction);
 		}
 	}
@@ -51,7 +51,7 @@ async function handleChatInputCommand(interaction: InteractionWithCommands) {
 	const command = interaction.client.commands.get(interaction.commandName);
 
 	if (!command) {
-		error(template(Errors.interaction.commandNotFound, {command: interaction.commandName}));
+		error(template(Errors.interaction.commandNotFound, {command: interaction.commandName}), 'CMD_NOR');
 		return;
 	}
 
@@ -59,7 +59,7 @@ async function handleChatInputCommand(interaction: InteractionWithCommands) {
 		await command.execute(interaction);
 	}
 	catch (e) {
-		error(e);
+		error(e, 'CMD_UKN');
 		await replyOrFollowUp({content: Errors.interaction.commandExecution, ephemeral: true}, interaction);
 	}
 }
