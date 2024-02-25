@@ -1,6 +1,6 @@
 import Axios from 'axios';
 import { setupCache } from 'axios-cache-interceptor';
-import { mojangApiUrl, sessionServer } from '../bot-constants';
+import { mojangApiUrl } from '../bot-constants';
 import { error } from './logger';
 import { UserFromMojangApi } from '../models';
 import { Errors } from '../strings';
@@ -25,7 +25,7 @@ export async function getMojangUser(username: string): Promise<UserFromMojangApi
 
 export async function getUsernameFromUuid(uuid: string): Promise<string> {
 	try {
-		const response = await axios.get(`${sessionServer}/minecraft/profile/${uuid}`);
+		const response = await axios.get(`${mojangApiUrl}/user/profile/${uuid}`);
 		return response.data.name;
 	} catch (e) {
 		error(JSON.stringify(e.response.data));
