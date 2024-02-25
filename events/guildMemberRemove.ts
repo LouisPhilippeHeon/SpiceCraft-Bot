@@ -13,7 +13,7 @@ module.exports = {
 	async execute(member: GuildMember) {
 		try {
 			info(template(Logs.memberLeft, {username: member.user.username}));
-			let userFromDb: UserFromDb = await getUserByDiscordUuid(member.user.id).catch(() => userFromDb = null);
+			let userFromDb: UserFromDb | null = await getUserByDiscordUuid(member.user.id).catch(() => null);
 			if (!userFromDb) return;
 
 			// If user leaves server or was banned before his request was approved

@@ -13,6 +13,7 @@ export async function execute(interaction: ButtonInteraction) {
 
 	try {
 		let user = await getUserByDiscordUuid(discordUuid);
+		await user.delete();
 		await user.removeFromWhitelist();
 	}
 	catch (e) {

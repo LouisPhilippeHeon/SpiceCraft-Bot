@@ -16,7 +16,7 @@ export async function execute(interaction: ButtonInteraction) {
 	let statusChanged = false;
 
 	const whitelistChannel = await fetchBotChannel(interaction.guild);
-	let approvalRequest: Message = await whitelistChannel.messages.fetch(messageUuid).catch(() => approvalRequest = undefined);
+	let approvalRequest: Message | null = await whitelistChannel.messages.fetch(messageUuid).catch(() => null);
 
 	await interaction.message.delete();
 
