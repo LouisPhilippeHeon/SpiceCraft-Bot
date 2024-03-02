@@ -1,5 +1,6 @@
 import { client, playerRoleName, whitelistChannelName } from './bot-constants';
 import { ChannelType, Colors, Guild, GuildMember, Interaction, InteractionReplyOptions, MessagePayload, PermissionsBitField, Role, TextChannel } from 'discord.js';
+import { error } from './services/logger';
 import { Errors, Utils } from './strings';
 
 // structuredClone dosen't work in some circumstances
@@ -61,10 +62,15 @@ export async function fetchGuildMember(guild: Guild, id: string): Promise<GuildM
 export async function replyOrFollowUp(message: string | MessagePayload | InteractionReplyOptions, interaction: Interaction) {
 	if (!interaction.isRepliable()) return;
 
-	if (interaction.replied || interaction.deferred)
-		await interaction.followUp(message);
-	else
-		await interaction.reply(message);
+	try {
+		if (interaction.replied || interaction.deferred)
+			await interaction.followUp(message);
+		else
+			await interaction.reply(message);
+	}
+	catch (e) {
+		error(e, 'UTL_ROF');
+	}
 }
 
 export async function sendMessageToMember(message: string, member: GuildMember, interaction: Interaction, replyOnSuccess?: string, replyOnFailure?: string) {
