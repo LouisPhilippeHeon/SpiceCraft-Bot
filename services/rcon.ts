@@ -10,8 +10,8 @@ export async function whitelistAdd(uuid: string) {
 	try {
 		for (const rcon of rconConnexions) {
 			await rcon.connect();
-			await rcon.send('whitelist add ' + username);
-			await rcon.end();
+			await rcon.sendCommand('whitelist add ' + username);
+			rcon.disconnect();
 		}
 	}
 	catch (e) {
@@ -26,8 +26,8 @@ export async function whitelistRemove(uuid: string) {
 	try {
 		for (const rcon of rconConnexions) {
 			await rcon.connect();
-			await rcon.send('whitelist remove ' + username);
-			await rcon.end();
+			await rcon.sendCommand('whitelist remove ' + username);
+			rcon.disconnect();
 		}
 	}
 	catch (e) {
@@ -43,9 +43,9 @@ export async function whitelistReplaceUsername(newUuid: string, oldUuid: string)
 	try {
 		for (const rcon of rconConnexions) {
 			await rcon.connect();
-			await rcon.send('whitelist add ' + newUsername);
-			await rcon.send('whitelist remove ' + oldUsername);
-			await rcon.end();
+			await rcon.sendCommand('whitelist add ' + newUsername);
+			await rcon.sendCommand('whitelist remove ' + oldUsername);
+			rcon.disconnect();
 		}
 	}
 	catch (e) {
