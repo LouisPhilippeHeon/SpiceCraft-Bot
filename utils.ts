@@ -1,4 +1,5 @@
-import { client, playerRoleName, whitelistChannelName } from './bot-constants';
+import { client } from './bot-constants';
+import { playerRoleName, whitelistChannelName } from './config';
 import { ChannelType, Colors, Guild, GuildMember, Interaction, InteractionReplyOptions, MessagePayload, PermissionsBitField, Role, TextChannel } from 'discord.js';
 import { error } from './services/logger';
 import { Errors, Utils } from './strings';

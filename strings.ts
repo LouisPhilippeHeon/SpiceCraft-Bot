@@ -1,4 +1,6 @@
-import { inscriptionStatus, mojangApiUrl, playerRoleName, whitelistChannelName } from './bot-constants';
+import { inscriptionStatus, mojangApiUrl } from './bot-constants';
+import { minecraftServerName, playerRoleName, whitelistChannelName } from './config';
+
 
 export namespace ButtonEvents {
 	export const clickToConfirmChangesToWhitelist = 'Clique sur le bouton lorsque c\'est fait, afin que <@${discordUuid}> soit informé du changement lié à sa demande.';
@@ -18,10 +20,10 @@ export namespace ButtonEvents {
 
 	export enum enrolling {
 		adminsAlreadyDeniedRequest = '🚫 Les administrateurs ont déjà refusé ta demande ! 🚫',
-		askIfFirstTimePlaying = 'As-tu déjà joué sur SpiceCraft ?',
+		askIfFirstTimePlaying = `As-tu déjà joué sur ${minecraftServerName} ?`,
 		askWhatIsMinecraftUsername = 'Quel est ton nom d\'utilisateur sur Minecraft ?',
 		askWhatIsNewMinecraftUsername = 'Quel est le bon nom d\'utilisateur ?',
-		askWhoInvitedNewPlayer = 'Qui t\'a invité sur SpiceCraft ? Inscrit son nom d\'utilisateur Discord.',
+		askWhoInvitedNewPlayer = `Qui t\'a invité sur ${minecraftServerName} ? Inscrit son nom d\'utilisateur Discord.`,
 		awaitingApprovalUserChangedMinecraftUsername = '<@${discordUuid}> a changé son username Minecraft pour \`${minecraftUsername}\` dans sa demande d\'ajout à la whitelist.',
 		dmsAreClosed = 'Tes paramètres de confidentialité m\'empêchent de t\'envoyer des messages. Change ces paramètres pour continuer.',
 		embedDescription = 'Compte Discord : <@${discordUuid}>.\nUsername Minecraft : \`${minecraftUsername}\`.',
@@ -226,16 +228,16 @@ export namespace Services {
 	export enum html {
 		style = '<style>h1,h2,h3,h4,h5,h6,p,table{font-family:arial, sans-serif;color:#d4dfe4;}p{text-align:right;}html{background-color:#141414;padding:0 40px;}table{border-collapse:collapse; width:100%;border-spacing:0;}td,th{border:1px solid #4d4d4d;padding:8px;}tr:nth-child(even){background-color:#303030;}.user{display:flex;align-items:center;height:auto;}.center{text-align:center;}img{height:50px;border-radius:5px;margin-right:10px;}.date:first-letter{text-transform: capitalize;}</style>',
 		script = '<script>async function fetchUsername (minecraftUuid) { const apiUrl = \''+ mojangApiUrl + '/user/profile/\' + minecraftUuid; const response = await fetch("https://corsproxy.io/?" + apiUrl, {}); const user = await response.json(); document.getElementById(minecraftUuid).innerText = user.name;}</script>',
-		template = '<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Membres de SpiceCraft</title>'+style+'</head><body><h1>Membres de SpiceCraft</h1><table><tr><th>Membre</th><th>Nom d\'utilisateur Minecraft</th><th>Statut</th><th>Date d\'inscription</th><th>Dernière modification</th></tr>${table}</table><p>Joueurs inscrits : ${memberCount}</p></body>'+script+'</html>',
-		templateWithStatus = '<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Membres de SpiceCraft</title>'+style+'</head><body><h1>Membres de SpiceCraft avec le statut « ${status} »</h1><table><tr><th>Membre</th><th>Nom d\'utilisateur Minecraft</th><th>Date d\'inscription</th><th>Dernière modification</th></tr>${table}</table><p>Membres ayant le statut « ${status} » : ${memberCount}</p></body>'+script+'</html>',
+		template = '<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Membres de ${minecraftServerName}</title>'+style+'</head><body><h1>Membres de ' + minecraftServerName + '</h1><table><tr><th>Membre</th><th>Nom d\'utilisateur Minecraft</th><th>Statut</th><th>Date d\'inscription</th><th>Dernière modification</th></tr>${table}</table><p>Joueurs inscrits : ${memberCount}</p></body>'+script+'</html>',
+		templateWithStatus = `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Membres de ${minecraftServerName}</title>`+style+'</head><body><h1>Membres de ' + minecraftServerName + 'avec le statut « ${status} »</h1><table><tr><th>Membre</th><th>Nom d\'utilisateur Minecraft</th><th>Date d\'inscription</th><th>Dernière modification</th></tr>${table}</table><p>Membres ayant le statut « ${status} » : ${memberCount}</p></body>'+script+'</html>',
 		rowTemplate = '<tr><td><div class="user"><img src="${imgUrl}" alt="Photo de profil de ${username}">${username}</div></td><td id="${minecraftUuid}"><button onclick="fetchUsername(\'${minecraftUuid}\')">Afficher</button></td><td class="center">${status}</td><td class="date">${createdAt}</td><td class="date">${updatedAt}</td></tr>',
 		rowTemplateWithStatus = '<tr><td><div class="user"><img src="${imgUrl}" alt="Photo de profil de ${username}">${username}</div></td><td id="${minecraftUuid}"><button onclick="fetchUsername(\'${minecraftUuid}\')">Afficher</button></td><td class="date">${createdAt}</td><td class="date">${updatedAt}</td></tr>'
 	}
 
 	export enum userStatus {
 		cantSendDm = 'Attention : Impossible d\'envoyer un message à cet utilisateur en raison de ses paramètres de confidentialité !',
-		dmAddedToWhitelist = 'Tu a été ajouté à la whitelist de SpiceCraft.',
-		dmRemovedFromWhitelist = 'Tu a été retiré de la whitelist de SpiceCraft. Contacte les administrateurs pour plus de détails.',
+		dmAddedToWhitelist = `Tu a été ajouté à la whitelist de ${minecraftServerName}.`,
+		dmRemovedFromWhitelist = `Tu a été retiré de la whitelist de ${minecraftServerName}. Contacte les administrateurs pour plus de détails.`,
 		statusChanged = 'Le statut de <@${discordUuid}> à été changé pour « ${status} ».'
 	}
 }

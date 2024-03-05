@@ -1,8 +1,6 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import { ClientWithCommands } from './models';
 
-export const whitelistChannelName = 'whitelist';
-export const playerRoleName = 'Joueur';
 export const timeToWaitForUserInputBeforeTimeout = 240000;
 export const mojangApiUrl = 'https://api.mojang.com';
 

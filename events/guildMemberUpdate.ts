@@ -1,5 +1,4 @@
-import { playerRoleName } from '../bot-constants';
-import { clientId } from '../config';
+import { clientId, playerRoleName } from '../config';
 import { deleteEntry } from '../services/database';
 import { AuditLogEvent, Events, GuildMember } from 'discord.js';
 import { error, info } from '../services/logger';
