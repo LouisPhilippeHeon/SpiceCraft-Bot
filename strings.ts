@@ -213,10 +213,13 @@ export namespace Errors {
 }
 
 export namespace Logs {
-	export const ready = 'Prêt ! Connecté en tant que ${username}.';
+	export const commandMissingProperties = 'La commande ${filePath} n\'a pas les propriétés "data" ou "execute".';
 	export const memberClickedRegisterButton = '${username} a cliqué sur le bouton d\'inscription.';
 	export const memberLeft = '${username} a quitté le serveur Discord.';
 	export const playerRoleWasRemoved = 'Le rôle « ' + playerRoleName + ' » de ${username} est retiré.';
+	export const ready = 'Prêt ! Connecté en tant que ${username}.';
+	export const refreshingCommands = 'Début du rafraichissement de ${numberOfCommands} commandes slash.';
+	export const successfullyRefreshed = 'Rafraichissement réussi de ${numberOfCommands} commandes slash.';
 }
 
 export namespace Services {

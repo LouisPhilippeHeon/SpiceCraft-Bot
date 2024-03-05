@@ -1,8 +1,10 @@
 import { clientId, guildId, token } from './config';
-import { REST, Routes } from 'discord.js';
+import { ApplicationCommand, REST, Routes } from 'discord.js';
 import { error, info, warn } from './services/logger';
 import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { Logs } from './strings';
+import { template } from './utils';
 
 const commands = [];
 // Grab all the command files from the commands directory
@@ -19,27 +21,18 @@ for (const folder of commandFolders) {
 		if ('data' in command && 'execute' in command)
 			commands.push(command.data.toJSON());
 		else
-			warn(`La commande ${filePath} n'a pas les propriétés "data" ou "execute".`);
+			warn(template(Logs.commandMissingProperties, {filePath: filePath}));
 	}
 }
 
 // Construct and prepare an instance of the REST module
 const rest = new REST().setToken(token);
 
-// Deploy commands
-(async () => {
-	try {
-		info(`Début du rafraichissement de ${commands.length} commandes slash.`);
+info(template(Logs.refreshingCommands, {numberOfCommands: commands.length}));
 
-		// Refresh all commands in the guild with the current set
-		const data: any = await rest.put(
-			Routes.applicationGuildCommands(clientId, guildId),
-			{ body: commands },
-		);
-
-		info(`Rafraichissement réussi de ${data.length} commandes slash.`);
-	}
-	catch (e) {
-		error(e, 'DPL_REL');
-	}
-})();
+// Refresh all commands in the guild with the current set
+rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commands }).catch((e) =>
+	error(e, 'DPL_REL')
+).then((data: ApplicationCommand[]) =>
+	info(template(Logs.successfullyRefreshed, {numberOfCommands: data.length}))
+)
