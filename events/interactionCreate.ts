@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { Events } from 'discord.js';
+import { ButtonInteraction, Events } from 'discord.js';
 import { error } from '../services/logger';
 import { InteractionWithCommands } from '../models';
 import { Errors } from '../strings';
@@ -18,11 +18,11 @@ module.exports = {
 }
 
 async function handleButtonInteraction(interaction: InteractionWithCommands) {
-	if (!interaction.isButton()) return;
+	if (!interaction.isButton() || !(interaction as ButtonInteraction).inGuild()) return;
 
 	const buttonName = interaction.customId.split('_')[0];
-	const member = interaction.guild.members.resolve(interaction.user);
 	const button = interaction.client.buttons.get(buttonName);
+	const member = interaction.guild.members.resolve(interaction.user);
 
 	if (!button) {
 		error(template(Errors.interaction.buttonNotFound, {button: interaction.customId}), 'BTN_NOR');
