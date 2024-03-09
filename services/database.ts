@@ -1,7 +1,7 @@
+import { inscriptionStatus } from '../bot-constants';
 import { UserFromDb } from '../models';
 const Sequelize = require('sequelize');
 import { Errors } from '../strings';
-import { inscriptionStatus } from "../bot-constants";
 
 const sequelize = new Sequelize('database', 'user', 'password', {
 	host: 'localhost',

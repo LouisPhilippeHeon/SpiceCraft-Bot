@@ -1,34 +1,66 @@
-import { createApprovalRequest, createUsernameChangeRequest, editApprovalRequest, findApprovalRequestOfMember } from '../../services/admin-approval';
-import { inscriptionStatus, timeToWaitForUserInputBeforeTimeout } from '../../bot-constants';
+import { createApprovalRequest, createUsernameChangeRequest, editApprovalRequestOfUser } from '../../services/admin-approval';
+import { inscriptionStatus, timeoutUserInput } from '../../bot-constants';
 import { changeMinecraftUuid, createUser, getUserByDiscordUuid, getUserByMinecraftUuid } from '../../services/database';
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, DMChannel, EmbedBuilder, Message, MessageReaction, User } from 'discord.js';
 import { getMojangUser } from '../../services/http';
-import { error, info } from '../../services/logger';
+import { info } from '../../services/logger';
 import { ButtonData, UserFromDb, UserFromMojangApi } from '../../models';
 import { ButtonEvents, Components, Errors, Logs } from '../../strings';
-import { fetchBotChannel, template } from '../../utils';
+import { template } from '../../utils';
 
 export const data = new ButtonData('inscription');
 
-let userFromMojangApi: UserFromMojangApi;
-let interaction: ButtonInteraction;
-let dmChannel: DMChannel;
+let userFromMojangApi: UserFromMojangApi = null;
+let interaction: ButtonInteraction = null;
+let dmChannel: DMChannel = null;
 let userThatInvited: string = null;
+let isFirstTimeMember: boolean = null;
 
 export async function execute(buttonInteraction: ButtonInteraction) {
 	interaction = buttonInteraction;
 
 	info(template(Logs. memberClickedRegisterButton, {username: interaction.user.username}));
 
-	getUserByDiscordUuid(interaction.user.id).then(async (user) => {
+	try {
+		const user = await getUserByDiscordUuid(interaction.user.id)
 		if (user.inscription_status === inscriptionStatus.rejected)
 			await interaction.reply({ content: ButtonEvents.enrolling.adminsAlreadyDeniedRequest, ephemeral: true });
 		else
 			await updateExistingUser(user);
-	}).catch(async () => await registerUser());
+	}
+	catch (e) {
+		await registerUser();
+	}
 }
 
 async function registerUser() {
+	let minecraftUsernameSentByUser;
+
+	try {
+		await askIfFirstTimeMember();
+		minecraftUsernameSentByUser = await askWhatIsMinecraftUsername()
+		userFromMojangApi = await getMojangUser(minecraftUsernameSentByUser);
+
+		if (isFirstTimeMember) {
+			await askWhoInvited();
+			await getRulesAcknowledgment();
+		}
+
+		await createUser(interaction.user.id, userFromMojangApi.id);
+		await createApprovalRequest(interaction.user, interaction.guild, userFromMojangApi.name, userThatInvited);
+		await dmChannel.send(ButtonEvents.enrolling.waitForAdminApprobation);
+	}
+	catch (e) {
+		if (e.message === Errors.api.noMojangAccountWithThatUsername)
+			await dmChannel.send(template(ButtonEvents.enrolling.minecraftAccountDoesNotExist, {minecraftUsername: minecraftUsernameSentByUser}));
+		else if (e.message === Errors.database.notUnique)
+			await dmChannel.send(Errors.usernameUsedWithAnotherAccount);
+		else if (e.message)
+			await dmChannel.send(e.message);
+	}
+}
+
+async function askIfFirstTimeMember() {
 	const firstTime = new ButtonBuilder({
 		customId: 'not-first-time-member',
 		label: Components.buttons.yes,
@@ -41,73 +73,49 @@ async function registerUser() {
 	});
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(firstTime, notFirstTime);
 
-	let askIfFirstTimeMember;
+	let askIfFirstTimeMemberMessage;
 
 	try {
-		askIfFirstTimeMember = await interaction.user.send({ content: ButtonEvents.enrolling.askIfFirstTimePlaying, components: [row] });
-		dmChannel = askIfFirstTimeMember.channel as DMChannel;
+		askIfFirstTimeMemberMessage = await interaction.user.send({ content: ButtonEvents.enrolling.askIfFirstTimePlaying, components: [row] });
+		dmChannel = askIfFirstTimeMemberMessage.channel as DMChannel;
 	}
 	catch (e) {
 		await interaction.reply({ content: ButtonEvents.enrolling.dmsAreClosed, ephemeral: true });
-		return;
+		throw new Error();
 	}
 
 	await interaction.reply({ content: ButtonEvents.enrolling.messageSentInDms, ephemeral: true });
-	let isFirstTimeMemberReply;
+	let buttonClicked;
 
 	try {
 		const collectorFilter = (i: ButtonInteraction) => i.user.id === interaction.user.id;
-		isFirstTimeMemberReply = await askIfFirstTimeMember.awaitMessageComponent({ filter: collectorFilter, time: timeToWaitForUserInputBeforeTimeout });
+		buttonClicked = await askIfFirstTimeMemberMessage.awaitMessageComponent({ filter: collectorFilter, time: timeoutUserInput });
 	}
 	catch (e) {
-		await dmChannel.send(Errors.userResponseTimeout);
-		return;
+		throw new Error(Errors.userResponseTimeout);
 	}
 
-	let isFirstTimeMember;
 	// TODO disable buttons
-	if (isFirstTimeMemberReply.customId === 'first-time-member') {
-//		askIfFirstTimeMember.components = [];
+	if (buttonClicked.customId === 'first-time-member') {
+		await buttonClicked.reply(ButtonEvents.enrolling.welcome);
 		isFirstTimeMember = true;
 	}
-	else if (isFirstTimeMemberReply.customId === 'not-first-time-member') {
-//		askIfFirstTimeMember.components = [];
+	else if (buttonClicked.customId === 'not-first-time-member') {
+		await buttonClicked.reply(ButtonEvents.enrolling.welcomeBack);
 		isFirstTimeMember = false;
 	}
-	else {
-		error('TODO, add to strings.ts', 'REG_BTN');
-		return;
-	}
+}
 
-	await isFirstTimeMemberReply.reply(ButtonEvents.enrolling.askWhatIsMinecraftUsername);
-
+async function askWhatIsMinecraftUsername(): Promise<string> {
+	await dmChannel.send(ButtonEvents.enrolling.askWhatIsMinecraftUsername);
 	// Collect message sent by user
 	const collectorFilter = (message: Message) => message.author.id === interaction.user.id;
-	const usernameCollected = await dmChannel.awaitMessages({ filter: collectorFilter, max: 1, time: timeToWaitForUserInputBeforeTimeout });
+	const usernameCollected = await dmChannel.awaitMessages({ filter: collectorFilter, max: 1, time: timeoutUserInput });
 	if (usernameCollected.size === 0) {
 		// TODO envoyer un bouton pour recommencer
-		await dmChannel.send(Errors.userResponseTimeout);
-		return;
+		throw new Error(Errors.userResponseTimeout);
 	}
-
-	const usernameSentByUser = usernameCollected.first().content;
-
-	try {
-		userFromMojangApi = await getMojangUser(usernameSentByUser);
-
-		if (isFirstTimeMember) {
-			await askWhoInvited();
-			await getRulesAcknowledgment();
-		}
-
-		await saveNewUserToDb();
-	}
-	catch (e) {
-		if (e.message === Errors.api.noMojangAccountWithThatUsername)
-			await dmChannel.send(template(ButtonEvents.enrolling.minecraftAccountDoesNotExist, {minecraftUsername: usernameSentByUser}));
-		else
-			await dmChannel.send(e.message);
-	}
+	return usernameCollected.first().content;
 }
 
 async function askWhoInvited() {
@@ -115,7 +123,7 @@ async function askWhoInvited() {
 
 	// Collect answer
 	const collectorFilter = (message: Message) => message.author.id === interaction.user.id;
-	const collected = await dmChannel.awaitMessages({ filter: collectorFilter, max: 1, time: timeToWaitForUserInputBeforeTimeout });
+	const collected = await dmChannel.awaitMessages({ filter: collectorFilter, max: 1, time: timeoutUserInput });
 	if (collected.size === 0) throw new Error(Errors.userResponseTimeout);
 
 	userThatInvited = collected.first().content;
@@ -133,23 +141,9 @@ async function getRulesAcknowledgment() {
 
 	// Collect emoji reactions
 	const collectorFilter = (reaction: MessageReaction, user: User) => (reaction.emoji.name === '✅') && (user.id === interaction.user.id);
-	const emojisCollected = await rulesMessage.awaitReactions({ filter: collectorFilter, max: 1, time: timeToWaitForUserInputBeforeTimeout });
+	const emojisCollected = await rulesMessage.awaitReactions({ filter: collectorFilter, max: 1, time: timeoutUserInput });
 	if (emojisCollected.size === 0)
 		throw new Error(Errors.userResponseTimeout);
-}
-
-async function saveNewUserToDb() {
-	try {
-		await createUser(interaction.user.id, userFromMojangApi.id);
-		await createApprovalRequest(interaction.user, interaction.guild, userFromMojangApi.name, userThatInvited);
-		await dmChannel.send(ButtonEvents.enrolling.waitForAdminApprobation);
-	}
-	catch (e) {
-		if (e.message === Errors.database.notUnique)
-			await dmChannel.send(Errors.usernameUsedWithAnotherAccount);
-		else
-			await dmChannel.send(e.message);
-	}
 }
 
 async function updateExistingUser(userFromDb: UserFromDb) {
@@ -165,7 +159,7 @@ async function updateExistingUser(userFromDb: UserFromDb) {
 	await interaction.reply({content: ButtonEvents.enrolling.messageSentInDms, ephemeral: true});
 
 	const collectorFilter = (message: Message) => message.author.id === interaction.user.id;
-	const usernameCollected = await dmChannel.awaitMessages({ filter: collectorFilter, max: 1, time: timeToWaitForUserInputBeforeTimeout });
+	const usernameCollected = await dmChannel.awaitMessages({ filter: collectorFilter, max: 1, time: timeoutUserInput });
 	if (usernameCollected.size === 0) {
 		await dmChannel.send(Errors.userResponseTimeout);
 		return;
@@ -185,6 +179,7 @@ async function updateExistingUser(userFromDb: UserFromDb) {
 		if (userFromDb.inscription_status === inscriptionStatus.awaitingApproval) {
 			await changeMinecraftUuid(interaction.user.id, userFromMojangApi.id);
 			await updateAdminApprovalRequest();
+			await dmChannel.send(ButtonEvents.enrolling.requestSucessfullyUpdated);
 			return;
 		}
 
@@ -205,18 +200,7 @@ async function updateExistingUser(userFromDb: UserFromDb) {
 }
 
 async function updateAdminApprovalRequest() {
-	const whitelistChannel = await fetchBotChannel(interaction.guild);
-	// Find approval request for the user in the whitelist channel
-	const approvalRequest = await findApprovalRequestOfMember(interaction.guild, interaction.user);
-	if (approvalRequest) {
-		const description = template(ButtonEvents.enrolling.embedDescription, {discordUuid: interaction.user.id, minecraftUsername: userFromMojangApi.name});
-		await editApprovalRequest(approvalRequest, undefined, description, undefined, undefined);
-	}
-	// In case it cannot be updated
-	else {
-		const message = template(ButtonEvents.enrolling.awaitingApprovalUserChangedMinecraftUsername, {discordUuid: interaction.user.id,minecraftUsername: userFromMojangApi.name});
-		await whitelistChannel.send(message);
-	}
-
-	await dmChannel.send(ButtonEvents.enrolling.requestSucessfullyUpdated);
+	const description = template(ButtonEvents.enrolling.embedDescription, {discordUuid: interaction.user.id, minecraftUsername: userFromMojangApi.name});
+	const messageToSendInCaseOfFailure = template(ButtonEvents.enrolling.awaitingApprovalUserChangedMinecraftUsername, {discordUuid: interaction.user.id, minecraftUsername: userFromMojangApi.name});
+	await editApprovalRequestOfUser(interaction.user, interaction.guild, description, messageToSendInCaseOfFailure);
 }

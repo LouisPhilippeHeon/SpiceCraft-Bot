@@ -75,3 +75,15 @@ export async function editApprovalRequest(message: Message, content?: string | n
 		...components && {components}
 	});
 }
+
+export async function editApprovalRequestOfUser(user: User, guild: Guild, description: string, messageToSendInCaseOfFailure: string) {
+	const whitelistChannel = await fetchBotChannel(guild);
+	// Find approval request for the user in the whitelist channel
+	const approvalRequest = await findApprovalRequestOfMember(guild, user);
+
+	// If it can be fetched, update it, otherwise, send a message in the channel
+	if (approvalRequest)
+		await editApprovalRequest(approvalRequest, undefined, description);
+	else
+		await whitelistChannel.send(messageToSendInCaseOfFailure);
+}

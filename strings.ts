@@ -28,13 +28,14 @@ export namespace ButtonEvents {
 		dmsAreClosed = 'Tes paramètres de confidentialité m\'empêchent de t\'envoyer des messages. Change ces paramètres pour continuer.',
 		embedDescription = 'Compte Discord : <@${discordUuid}>.\nUsername Minecraft : \`${minecraftUsername}\`.',
 		messageSentInDms = 'Merci de répondre au bot qui t\'a a envoyé un message en privé !',
-		messageSentInDmsNewUser = 'Bienvenue, nous sommes heureux de t\'accueillir ! Merci de répondre au bot qui t\'a envoyé un message en privé !',
 		minecraftAccountDoesNotExist = '❌ Le compte Minecraft « ${minecraftUsername} » n\'existe pas! Tu peux cliquer à nouveau le bouton \\`S\'inscrire\\` pour réessayer. ❌',
 		reactToAcceptRules = 'Réagit avec ✅ pour indiquer que tu a lu et accepté les règles.',
 		requestSucessfullyUpdated = 'Ta demande à été mise à jour avec succès !',
 		sameMinecraftAccountAsBefore = 'Pas besoin de mettre à jour ton nom d\'utilisateur, car il est identique à celui associé au compte Minecraft dans la whitelist.',
 		usernameUpdated = 'Ton nom d\'utilisateur a été changé avec succès, je t\'envoie un message lorsque le nom d\'utilisateur sera mis à jour dans la whitelist.',
-		waitForAdminApprobation = 'Ton inscription est en attente d\'approbation par les administrateurs, je t\'enverrais un message quand elle sera acceptée!'
+		waitForAdminApprobation = 'Ton inscription est en attente d\'approbation par les administrateurs, je t\'enverrais un message quand elle sera acceptée!',
+		welcome = `Bienvenue sur ${minecraftServerName} !`,
+		welcomeBack = 'Bienvenue à nouveau !'
 	}
 
 	export enum rejection {
@@ -215,7 +216,7 @@ export namespace Errors {
 }
 
 export namespace Logs {
-	export const commandMissingProperties = 'La commande ${filePath} n\'a pas les propriétés "data" ou "execute".';
+	export const commandMissingProperties = 'La commande ${filePath} n\'a pas les propriétés « data » ou « execute ».';
 	export const memberClickedRegisterButton = '${username} a cliqué sur le bouton d\'inscription.';
 	export const memberLeft = '${username} a quitté le serveur Discord.';
 	export const playerRoleWasRemoved = 'Le rôle « ' + playerRoleName + ' » de ${username} est retiré.';
