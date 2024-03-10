@@ -1,7 +1,6 @@
 import { inscriptionStatus, mojangApiUrl } from './bot-constants';
 import { minecraftServerName, playerRoleName, whitelistChannelName } from './config';
 
-
 export namespace ButtonEvents {
 	export const clickToConfirmChangesToWhitelist = 'Clique sur le bouton lorsque c\'est fait, afin que <@${discordUuid}> soit informé du changement lié à sa demande.';
 
@@ -35,7 +34,7 @@ export namespace ButtonEvents {
 		usernameUpdated = 'Ton nom d\'utilisateur a été changé avec succès, je t\'envoie un message lorsque le nom d\'utilisateur sera mis à jour dans la whitelist.',
 		waitForAdminApprobation = 'Ton inscription est en attente d\'approbation par les administrateurs, je t\'enverrais un message quand elle sera acceptée!',
 		welcome = `Bienvenue sur ${minecraftServerName} !`,
-		welcomeBack = 'Bienvenue à nouveau !'
+		welcomeBack = `Bienvenue à nouveau sur ${minecraftServerName} !`
 	}
 
 	export enum rejection {
@@ -201,8 +200,7 @@ export namespace Errors {
 
 	export enum database {
 		invalidStatus = 'Statut invalide',
-		notUnique = 'Ce UUID Minecraft ou Discord existe déjà dans la base de données.',
-		notUniqueMinecraft = 'Un autre joueur s\'est inscrit avec ce compte Minecraft.',
+		notUnique = 'Un autre joueur s\'est inscrit avec ce compte Minecraft.',
 		unknownError = 'Une erreur inconnue est survenue lors de l\'écriture dans la base de données.',
 		userDoesNotExist = 'Cet utilisateur n\'est pas inscrit !'
 	}
@@ -217,18 +215,20 @@ export namespace Errors {
 
 export namespace Logs {
 	export const commandMissingProperties = 'La commande ${filePath} n\'a pas les propriétés « data » ou « execute ».';
+	export const interactionIsNotRepliable = 'Impossible de répondre à l\'interaction ${interaction}.'
 	export const memberClickedRegisterButton = '${username} a cliqué sur le bouton d\'inscription.';
 	export const memberLeft = '${username} a quitté le serveur Discord.';
 	export const playerRoleWasRemoved = 'Le rôle « ' + playerRoleName + ' » de ${username} est retiré.';
 	export const ready = 'Prêt ! Connecté en tant que ${username}.';
 	export const refreshingCommands = 'Début du rafraichissement de ${numberOfCommands} commandes slash.';
 	export const successfullyRefreshed = 'Rafraichissement réussi de ${numberOfCommands} commandes slash.';
+	export const usernameAlreadyTaken = '${discordUsername} a voulu s\'inscire avec le username Minecraft « ${minecraftUsername} » mais ce dernier est déjà utilisé par un autre joueur.';
 }
 
 export namespace Services {
 	export enum html {
 		style = '<style>h1,h2,h3,h4,h5,h6,p,table{font-family:arial, sans-serif;color:#d4dfe4;}p{text-align:right;}html{background-color:#141414;padding:0 40px;}table{border-collapse:collapse; width:100%;border-spacing:0;}td,th{border:1px solid #4d4d4d;padding:8px;}tr:nth-child(even){background-color:#303030;}.user{display:flex;align-items:center;height:auto;}.center{text-align:center;}img{height:50px;border-radius:5px;margin-right:10px;}.date:first-letter{text-transform: capitalize;}</style>',
-		script = '<script>async function fetchUsername (minecraftUuid) { const apiUrl = \''+ mojangApiUrl + '/user/profile/\' + minecraftUuid; const response = await fetch("https://corsproxy.io/?" + apiUrl, {}); const user = await response.json(); document.getElementById(minecraftUuid).innerText = user.name;}</script>',
+		script = `<script>async function fetchUsername (minecraftUuid) { const apiUrl = \'${mojangApiUrl}/user/profile/\' + minecraftUuid; const response = await fetch("https://corsproxy.io/?" + apiUrl, {}); const user = await response.json(); document.getElementById(minecraftUuid).innerText = user.name;}</script>`,
 		template = '<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Membres de ${minecraftServerName}</title>'+style+'</head><body><h1>Membres de ' + minecraftServerName + '</h1><table><tr><th>Membre</th><th>Nom d\'utilisateur Minecraft</th><th>Statut</th><th>Date d\'inscription</th><th>Dernière modification</th></tr>${table}</table><p>Joueurs inscrits : ${memberCount}</p></body>'+script+'</html>',
 		templateWithStatus = `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Membres de ${minecraftServerName}</title>`+style+'</head><body><h1>Membres de ' + minecraftServerName + 'avec le statut « ${status} »</h1><table><tr><th>Membre</th><th>Nom d\'utilisateur Minecraft</th><th>Date d\'inscription</th><th>Dernière modification</th></tr>${table}</table><p>Membres ayant le statut « ${status} » : ${memberCount}</p></body>'+script+'</html>',
 		rowTemplate = '<tr><td><div class="user"><img src="${imgUrl}" alt="Photo de profil de ${username}">${username}</div></td><td id="${minecraftUuid}"><button onclick="fetchUsername(\'${minecraftUuid}\')">Afficher</button></td><td class="center">${status}</td><td class="date">${createdAt}</td><td class="date">${updatedAt}</td></tr>',

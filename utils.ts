@@ -1,8 +1,8 @@
 import { client } from './bot-constants';
 import { playerRoleName, whitelistChannelName } from './config';
 import { ChannelType, Colors, Guild, GuildMember, Interaction, InteractionReplyOptions, MessagePayload, PermissionsBitField, Role, TextChannel } from 'discord.js';
-import { error } from './services/logger';
-import { Errors, Utils } from './strings';
+import { error, warn } from './services/logger';
+import { Errors, Logs, Utils } from './strings';
 
 // structuredClone dosen't work in some circumstances
 export function deepCloneWithJson(objectToClone: any): any {
@@ -61,7 +61,10 @@ export async function fetchGuildMember(guild: Guild, id: string): Promise<GuildM
 }
 
 export async function replyOrFollowUp(message: string | MessagePayload | InteractionReplyOptions, interaction: Interaction) {
-	if (!interaction.isRepliable()) return;
+	if (!interaction.isRepliable()) {
+		warn(template(Logs.interactionIsNotRepliable, {interaction: interaction.toJSON()}));
+		return;
+	}
 
 	try {
 		if (interaction.replied || interaction.deferred)

@@ -71,7 +71,7 @@ export async function changeMinecraftUuid(discordUuid: string, minecraftUuid: st
 	}
 	catch (e) {
 		if (e.name === 'SequelizeUniqueConstraintError')
-			throw new Error(Errors.database.notUniqueMinecraft);
+			throw new Error(Errors.database.notUnique);
 
 		throw new Error(Errors.database.unknownError);
 	}
