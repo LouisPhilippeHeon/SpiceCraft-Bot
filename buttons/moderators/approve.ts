@@ -67,5 +67,5 @@ async function rconFailed(discordUuid: string, e: Error) {
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmManualAdditionToWhitelist, reject);
 	await editApprovalRequest(interaction.message, `${e.message} ${template(ButtonEvents.clickToConfirmChangesToWhitelist, {discordUuid: discordUuid})}`, undefined, [row], Colors.Yellow);
 
-	await interaction.reply({content: ButtonEvents.approbation.changeWhitelistBeforeCliking, ephemeral: true});
+	await interaction.reply({ content: ButtonEvents.approbation.changeWhitelistBeforeCliking, ephemeral: true });
 }

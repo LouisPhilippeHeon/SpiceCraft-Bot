@@ -1,7 +1,7 @@
+import { inscriptionStatus } from '../bot-constants';
 import { UserFromDb } from '../models';
 const Sequelize = require('sequelize');
 import { Errors } from '../strings';
-import { inscriptionStatus } from "../bot-constants";
 
 const sequelize = new Sequelize('database', 'user', 'password', {
 	host: 'localhost',
@@ -71,7 +71,7 @@ export async function changeMinecraftUuid(discordUuid: string, minecraftUuid: st
 	}
 	catch (e) {
 		if (e.name === 'SequelizeUniqueConstraintError')
-			throw new Error(Errors.database.notUniqueMinecraft);
+			throw new Error(Errors.database.notUnique);
 
 		throw new Error(Errors.database.unknownError);
 	}
