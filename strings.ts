@@ -17,24 +17,24 @@ export namespace ButtonEvents {
 		reply = '<@${discordUuid}> a été retiré du serveur Minecraft avec succès.'
 	}
 
-	export enum enrolling {
+	export enum register {
 		adminsAlreadyDeniedRequest = '🚫 Les administrateurs ont déjà refusé ta demande ! 🚫',
 		askIfFirstTimePlaying = `As-tu déjà joué sur ${minecraftServerName} ?`,
 		askWhatIsMinecraftUsername = 'Quel est ton nom d\'utilisateur sur Minecraft ?',
 		askWhatIsNewMinecraftUsername = 'Quel est le bon nom d\'utilisateur ?',
 		askWhoInvitedNewPlayer = `Qui t\'a invité sur ${minecraftServerName} ? Inscrit son nom d\'utilisateur Discord.`,
 		awaitingApprovalUserChangedMinecraftUsername = '<@${discordUuid}> a changé son username Minecraft pour \`${minecraftUsername}\` dans sa demande d\'ajout à la whitelist.',
-		dmsAreClosed = 'Tes paramètres de confidentialité m\'empêchent de t\'envoyer des messages. Change ces paramètres pour continuer.',
+		dmsAreClosed = '❌ Tes paramètres de confidentialité m\'empêchent de t\'envoyer des messages. Change ces paramètres pour continuer. ❌',
 		embedDescription = 'Compte Discord : <@${discordUuid}>.\nUsername Minecraft : \`${minecraftUsername}\`.',
 		messageSentInDms = 'Merci de répondre au bot qui t\'a a envoyé un message en privé !',
-		minecraftAccountDoesNotExist = '❌ Le compte Minecraft « ${minecraftUsername} » n\'existe pas! Tu peux cliquer à nouveau le bouton \\`S\'inscrire\\` pour réessayer. ❌',
+		minecraftAccountDoesNotExist = '❌ Le compte Minecraft « ${minecraftUsername} » n\'existe pas! ❌',
 		reactToAcceptRules = 'Réagit avec ✅ pour indiquer que tu a lu et accepté les règles.',
 		requestSucessfullyUpdated = 'Ta demande à été mise à jour avec succès !',
-		sameMinecraftAccountAsBefore = 'Pas besoin de mettre à jour ton nom d\'utilisateur, car il est identique à celui associé au compte Minecraft dans la whitelist.',
+		sameMinecraftAccountAsBefore = '⚠️ Pas besoin de mettre à jour ton nom d\'utilisateur, car il est identique à celui associé au compte Minecraft dans la whitelist. ⚠️',
 		usernameUpdated = 'Ton nom d\'utilisateur a été changé avec succès, je t\'envoie un message lorsque le nom d\'utilisateur sera mis à jour dans la whitelist.',
 		waitForAdminApprobation = 'Ton inscription est en attente d\'approbation par les administrateurs, je t\'enverrais un message quand elle sera acceptée!',
-		welcome = `Bienvenue sur ${minecraftServerName} !`,
-		welcomeBack = `Bienvenue à nouveau sur ${minecraftServerName} !`
+		welcome = `👋 Bienvenue sur ${minecraftServerName} !`,
+		welcomeBack = `👋 Bienvenue à nouveau sur ${minecraftServerName} !`
 	}
 
 	export enum rejection {
@@ -152,6 +152,7 @@ export namespace Components {
 		no = 'Non',
 		register = 'S\'inscrire',
 		reject = 'Rejeter',
+		retry = 'Réessayer',
 		yes = 'Oui'
 	}
 

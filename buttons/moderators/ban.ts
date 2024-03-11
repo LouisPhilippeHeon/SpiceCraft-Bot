@@ -23,5 +23,5 @@ export async function execute(interaction: ButtonInteraction) {
 	}
 
 	await editApprovalRequest(interaction.message, template(ButtonEvents.ban.messageUpdate, {discordUuid: interaction.user.id}), undefined, [], Colors.Green);
-	await interaction.reply({content: template(ButtonEvents.ban.reply, {discordUuid: discordUuid}), ephemeral: true});
+	await interaction.reply({ content: template(ButtonEvents.ban.reply, {discordUuid: discordUuid}), ephemeral: true });
 }
