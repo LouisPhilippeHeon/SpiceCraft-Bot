@@ -229,9 +229,9 @@ async function sendRetryMessage(message: string, newUser: boolean) {
 	const retryMessage = await dmChannel.send({ content: message, components: [row] });
 	const collectorFilter = (i: ButtonInteraction) => i.user.id === interaction.user.id && i.customId === 'retry';
 
+	let selectedButton;
 	try {
-		const selectedButton = await retryMessage.awaitMessageComponent({ filter: collectorFilter, time: timeoutUserInput }) as ButtonInteraction;
-		(newUser) ? await registerUser(selectedButton) : await updateExistingUser(user, selectedButton);
+		selectedButton = await retryMessage.awaitMessageComponent({ filter: collectorFilter, time: timeoutUserInput }) as ButtonInteraction;
 	}
 	catch {
 		const linkToRegister = new ButtonBuilder({
@@ -243,5 +243,10 @@ async function sendRetryMessage(message: string, newUser: boolean) {
 		row.addComponents(linkToRegister);
 
 		await retryMessage.edit({components: [row]});
+		return;
 	}
+
+	row.components[0].setDisabled(true);
+	retryMessage.edit({ components: [row] });
+	(newUser) ? await registerUser(selectedButton) : await updateExistingUser(user, selectedButton);
 }
