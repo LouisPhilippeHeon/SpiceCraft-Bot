@@ -22,7 +22,8 @@ export function warn(message: string) {
 	addToLogFile(formatLog(message, 'WARN'));
 }
 
-export function error(message: string, code: string) {
+export function error(error: string | Error, code: string) {
+	const message = (error instanceof Error) ? error.stack : error;
 	logger.error(formatConsole(message, code));
 	addToLogFile(formatLog(message, 'ERROR', code));
 }
