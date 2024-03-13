@@ -93,32 +93,4 @@ export async function sendMessageToMember(message: string, member: GuildMember, 
 	}
 }
 
-export function formatDate(dateToFormat: Date): string {
-	const parts = dateToFormat.toString().split(' ');
-	const datePart = parts[0];
-	const timePart = parts[1];
-
-	const dateParts = datePart.split('-');
-	const year = Number(dateParts[0]);
-	const month = Number(dateParts[1]);
-	const day = Number(dateParts[2]);
-
-	const timeParts = timePart.split(':');
-	const hours = Number(timeParts[0]);
-	const minutes = Number(timeParts[1]);
-
-	const date = new Date(year, month - 1, day, hours, minutes);
-
-	const options = {
-		weekday: 'long',
-		day: 'numeric',
-		month: 'long',
-		year: 'numeric',
-		hour: '2-digit',
-		minute: '2-digit'
-	} as Intl.DateTimeFormatOptions;
-
-	return date.toLocaleDateString('fr-FR', options);
-}
-
 export const template = require('es6-template-strings');

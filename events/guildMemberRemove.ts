@@ -7,36 +7,35 @@ import { UserFromDb } from '../models';
 import { Components, Errors, Logs } from '../strings';
 import { fetchBotChannel, template } from '../utils';
 
-module.exports = {
-	name: Events.GuildMemberRemove,
-	once: false,
-	async execute(member: GuildMember) {
-		try {
-			info(template(Logs.memberLeft, {username: member.user.username}));
-			let userFromDb: UserFromDb | null = await getUserByDiscordUuid(member.user.id).catch(() => null);
-			if (!userFromDb) return;
+export const name = Events.GuildMemberRemove;
+export const once = false;
 
-			// If user leaves server or was banned before his request was approved
-			if (userFromDb.inscription_status === inscriptionStatus.awaitingApproval) {
-				await (await findApprovalRequestOfMember(member.guild, member.user)).delete();
-				await deleteEntry(member.user.id);
-				return;
-			}
+export async function execute(member: GuildMember) {
+	try {
+		info(template(Logs.memberLeft, {username: member.user.username}));
+		let userFromDb: UserFromDb | null = await getUserByDiscordUuid(member.user.id).catch(() => null);
+		if (!userFromDb) return;
 
-			const auditLog = await member.guild.fetchAuditLogs({
-				type: AuditLogEvent.MemberBanAdd,
-				limit: 1
-			});
-
-			if (auditLog.entries.size > 0 && auditLog.entries.first().createdTimestamp > (Date.now() - 5000))
-				await handleBan(userFromDb, member);
-			else
-				await handleUserLeft(member);
+		// If user leaves server or was banned before his request was approved
+		if (userFromDb.inscription_status === inscriptionStatus.awaitingApproval) {
+			await (await findApprovalRequestOfMember(member.guild, member.user)).delete();
+			await deleteEntry(member.user.id);
+			return;
 		}
-		catch (e) {
-			if (e.code === 50013) error(Errors.discord.cantReadLogs, 'GMR_LOG');
-			else error(e, 'GMR_UKN');
-		}
+
+		const auditLog = await member.guild.fetchAuditLogs({
+			type: AuditLogEvent.MemberBanAdd,
+			limit: 1
+		});
+
+		if (auditLog.entries.size > 0 && auditLog.entries.first().createdTimestamp > (Date.now() - 5000))
+			await handleBan(userFromDb, member);
+		else
+			await handleUserLeft(member);
+	}
+	catch (e) {
+		if (e.code === 50013) error(Errors.discord.cantReadLogs, 'GMR_LOG');
+		else error(e, 'GMR_UKN');
 	}
 }
 

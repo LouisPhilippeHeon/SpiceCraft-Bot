@@ -4,11 +4,10 @@ import { info } from '../services/logger';
 import { Logs } from '../strings';
 import { template } from '../utils';
 
-module.exports = {
-	name: Events.ClientReady,
-	once: true,
-	async execute(client: Client) {
-		await syncTags();
-		info(template(Logs.ready, {username: client.user.username}));
-	}
+export const name = Events.ClientReady;
+export const once = true;
+
+export async function execute(client: Client) {
+	await syncTags();
+	info(template(Logs.ready, {username: client.user.username}));
 }

@@ -5,16 +5,15 @@ import { InteractionWithCommands } from '../models';
 import { Errors } from '../strings';
 import { replyOrFollowUp, template } from '../utils';
 
-module.exports = {
-	name: Events.InteractionCreate,
-	once: false,
-	async execute(interaction: InteractionWithCommands) {
-		if (interaction.isButton())
-			await handleButtonInteraction(interaction);
+export const name = Events.InteractionCreate;
+export const once = false;
 
-		else if (interaction.isChatInputCommand())
-			await handleChatInputCommand(interaction);
-	}
+export async function execute(interaction: InteractionWithCommands) {
+	if (interaction.isButton())
+		await handleButtonInteraction(interaction);
+
+	else if (interaction.isChatInputCommand())
+		await handleChatInputCommand(interaction);
 }
 
 async function handleButtonInteraction(interaction: InteractionWithCommands) {
