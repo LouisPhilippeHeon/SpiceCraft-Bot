@@ -132,3 +132,4 @@ dist
 config.ts
 *.DS_Store
 *.sqlite
+.idea
