@@ -29,11 +29,11 @@ export namespace ButtonEvents {
 		embedDescription = 'Compte Discord : <@${discordUuid}>.\nUsername Minecraft : \`${minecraftUsername}\`.',
 		messageSentInDms = 'Merci de répondre au bot qui t\'a a envoyé un message en privé !',
 		minecraftAccountDoesNotExist = '❌ Le compte Minecraft « ${minecraftUsername} » n\'existe pas! ❌',
-		reactToAcceptRules = 'Réagit avec ✅ pour indiquer que tu a lu et accepté les règles.',
+		clickToAcceptRules = 'Clique sur le bouton pour indiquer que tu accepte les règles.',
 		requestSucessfullyUpdated = 'Ta demande à été mise à jour avec succès !',
 		sameMinecraftAccountAsBefore = '⚠️ Pas besoin de mettre à jour ton nom d\'utilisateur, car il est identique à celui associé au compte Minecraft dans la whitelist. ⚠️',
 		usernameUpdated = 'Ton nom d\'utilisateur a été changé avec succès, je t\'envoie un message lorsque le nom d\'utilisateur sera mis à jour dans la whitelist.',
-		waitForAdminApprobation = 'Ton inscription est en attente d\'approbation par les administrateurs, je t\'enverrais un message quand elle sera acceptée!',
+		waitForAdminApprobation = 'Ton inscription est en attente d\'approbation par les administrateurs, je t\'enverrais un message quand elle sera acceptée !',
 		welcome = `👋 Bienvenue sur ${minecraftServerName} !`,
 		welcomeBack = `👋 Bienvenue à nouveau sur ${minecraftServerName} !`
 	}
