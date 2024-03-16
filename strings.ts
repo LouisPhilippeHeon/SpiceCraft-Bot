@@ -29,11 +29,11 @@ export namespace ButtonEvents {
 		embedDescription = 'Compte Discord : <@${discordUuid}>.\nUsername Minecraft : \`${minecraftUsername}\`.',
 		messageSentInDms = 'Merci de répondre au bot qui t\'a a envoyé un message en privé !',
 		minecraftAccountDoesNotExist = '❌ Le compte Minecraft « ${minecraftUsername} » n\'existe pas! ❌',
-		reactToAcceptRules = 'Réagit avec ✅ pour indiquer que tu a lu et accepté les règles.',
+		clickToAcceptRules = 'Clique sur le bouton pour indiquer que tu accepte les règles.',
 		requestSucessfullyUpdated = 'Ta demande à été mise à jour avec succès !',
 		sameMinecraftAccountAsBefore = '⚠️ Pas besoin de mettre à jour ton nom d\'utilisateur, car il est identique à celui associé au compte Minecraft dans la whitelist. ⚠️',
 		usernameUpdated = 'Ton nom d\'utilisateur a été changé avec succès, je t\'envoie un message lorsque le nom d\'utilisateur sera mis à jour dans la whitelist.',
-		waitForAdminApprobation = 'Ton inscription est en attente d\'approbation par les administrateurs, je t\'enverrais un message quand elle sera acceptée!',
+		waitForAdminApprobation = 'Ton inscription est en attente d\'approbation par les administrateurs, je t\'enverrais un message quand elle sera acceptée !',
 		welcome = `👋 Bienvenue sur ${minecraftServerName} !`,
 		welcomeBack = `👋 Bienvenue à nouveau sur ${minecraftServerName} !`
 	}
@@ -137,7 +137,7 @@ export namespace Commands {
 	export enum showInscriptionButton {
 		description = 'Envoie un message avec un bouton permettant de s\'inscrire.',
 		done = 'Fait !',
-		instructions = 'Pour t\'inscrire, clique sur le bouton. Le bot va t\'envoyer un message privé pour compléter l\'inscription.'
+		instructions = 'Pour t\'inscrire, clique sur le bouton. Le bot t\'enverra un message privé pour compléter l\'inscription.'
 	}
 }
 
@@ -180,7 +180,7 @@ export namespace Components {
 export namespace Errors {
 	export const missingDataOrExecute = 'Le ${itemType} ${filePath} n\'a pas les propriétés « data » ou « execute ».';
 	export const usernameUsedWithAnotherAccount = '⚠️ Un autre joueur est déjà inscrit avec ce nom d\'utilisateur Minecraft. S\'il s\'agit bien de ton nom d\'utilisateur, contacte un administrateur. ⚠️';
-	export const userResponseTimeout = 'Temps de réponse maximum dépassé, réessaye en cliqant le bouton `S\'inscrire` à nouveau.';
+	export const userResponseTimeout = '❌ Temps de réponse maximum dépassé, tu dois recommencer. ❌';
 
 	export enum interaction {
 		buttonExecution = 'Une erreur inconnue s\'est produite !',

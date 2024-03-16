@@ -1,7 +1,7 @@
 import { createApprovalRequest, createUsernameChangeRequest, editApprovalRequestOfUser } from '../../services/admin-approval';
 import { inscriptionStatus, timeoutUserInput } from '../../bot-constants';
 import { changeMinecraftUuid, createUser, getUserByDiscordUuid } from '../../services/database';
-import { ActionRowBuilder, ButtonBuilder, ButtonComponent, ButtonInteraction, ButtonStyle, DMChannel, EmbedBuilder, Message, MessageReaction, User } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonComponent, ButtonInteraction, ButtonStyle, DMChannel, EmbedBuilder, Message } from 'discord.js';
 import { getMojangUser } from '../../services/http';
 import { info, warn } from '../../services/logger';
 import { ButtonData, UserFromDb, UserFromMojangApi } from '../../models';
@@ -37,25 +37,26 @@ export async function execute(buttonInteraction: ButtonInteraction) {
 }
 
 async function registerUser(interactionToReplyFrom?: ButtonInteraction) {
-	let minecraftUsernameInteractionToReplyFrom;
+	let replyToThisButton = interactionToReplyFrom;
+
 	try {
-		const isFirstTimeMember = await askIfFirstTimeMember(interactionToReplyFrom);
-		minecraftUsernameInteractionToReplyFrom = await askWhatIsMinecraftUsername();
+		const isFirstTimeMember = await askIfFirstTimeMember(replyToThisButton);
+		replyToThisButton = await askWhatIsMinecraftUsername();
 
 		let userThatInvited;
 
 		if (isFirstTimeMember) {
-			userThatInvited = await askWhoInvited(minecraftUsernameInteractionToReplyFrom);
-			await getRulesAcknowledgment();
+			userThatInvited = await askWhoInvited(replyToThisButton);
+			replyToThisButton = await getRulesAcknowledgment();
 		}
 
 		await createUser(interaction.user.id, userFromMojangApi.id);
 		await createApprovalRequest(interaction.user, interaction.guild, userFromMojangApi.name, userThatInvited);
 
-		if (interactionToReplyFrom.replied)
-			await dmChannel.send(ButtonEvents.register.waitForAdminApprobation)
+		if (replyToThisButton && !replyToThisButton.replied)
+			await replyToThisButton.reply(ButtonEvents.register.waitForAdminApprobation);
 		else
-			await minecraftUsernameInteractionToReplyFrom.reply(ButtonEvents.register.waitForAdminApprobation);
+			await dmChannel.send(ButtonEvents.register.waitForAdminApprobation)
 	}
 	catch (e) {
 		let message = e.message;
@@ -64,10 +65,10 @@ async function registerUser(interactionToReplyFrom?: ButtonInteraction) {
 			warn(template(Logs.usernameAlreadyTaken, {discordUsername: interaction.user.username, minecraftUsername: userFromMojangApi.name}));
 		}
 
-		if (minecraftUsernameInteractionToReplyFrom.replied)
-			await sendRetryMessage(message, true);
+		if (replyToThisButton && !replyToThisButton.replied)
+			await sendRetryMessage(message, true, replyToThisButton);
 		else
-			await sendRetryMessage(message, true, minecraftUsernameInteractionToReplyFrom);
+			await sendRetryMessage(message, true);
 	}
 }
 
@@ -83,12 +84,11 @@ async function askIfFirstTimeMember(interactionToReplyFrom?: ButtonInteraction):
 	let buttonClicked: ButtonInteraction;
 
 	try {
-		const collectorFilter = (i: ButtonInteraction) => i.user.id === interaction.user.id;
-		buttonClicked = await askIfFirstTimeMemberMessage.awaitMessageComponent({ filter: collectorFilter, time: timeoutUserInput }) as ButtonInteraction;
+		buttonClicked = await collectMessageComponent(askIfFirstTimeMemberMessage);
 	}
 	catch (e) {
 		await disableButtonsOfMessage(askIfFirstTimeMemberMessage);
-		throw new Error(Errors.userResponseTimeout);
+		throw e;
 	}
 
 	await disableButtonsOfMessage(askIfFirstTimeMemberMessage, buttonClicked);
@@ -126,22 +126,12 @@ async function askWhatIsMinecraftUsername(interactionToReplyFrom?: ButtonInterac
 
 	const confirmUsernameSelection = await dmChannel.send({ content: template(ButtonEvents.register.confirmSelectedUsername, {minecraftUsername: userFromMojangApi.name}), components: [row] });
 
-	let selectedButton;
-	try {
-		const collectorFilter = (i: ButtonInteraction) => i.user.id === interaction.user.id;
-		selectedButton = await confirmUsernameSelection.awaitMessageComponent({ filter: collectorFilter, time: timeoutUserInput }) as ButtonInteraction;
-	}
-	catch (e) {
-		await disableButtonsOfMessage(confirmUsernameSelection);
-		throw new Error(Errors.userResponseTimeout);
-	}
+	const selectedButton = await collectMessageComponent(confirmUsernameSelection).finally(async () => await disableButtonsOfMessage(confirmUsernameSelection));
 
-	if (selectedButton.customId === 'confirm-username-selection') {
-		await disableButtonsOfMessage(confirmUsernameSelection);
-		return selectedButton;
-	}
+	if (selectedButton.customId === 'reject-username-selection')
+		return await askWhatIsMinecraftUsername(selectedButton);
 
-	await askWhatIsMinecraftUsername(selectedButton);
+	return selectedButton;
 }
 
 async function askWhoInvited(interactionToReplyFrom?: ButtonInteraction): Promise<string> {
@@ -151,13 +141,12 @@ async function askWhoInvited(interactionToReplyFrom?: ButtonInteraction): Promis
 
 async function getRulesAcknowledgment() {
 	const rulesEmbed = new EmbedBuilder({ color: 0x0099FF, title: Components.titles.rules, description: Components.descriptions.rules });
-	const rulesMessage = await dmChannel.send({ content: ButtonEvents.register.reactToAcceptRules, embeds: [rulesEmbed] });
-	await rulesMessage.react('✅');
+	const acceptRules = new ButtonBuilder({ customId: 'accept-rules', label: 'J\'accepte !', style: ButtonStyle.Success });
+	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(acceptRules);
 
-	// Collect emoji reactions
-	const collectorFilter = (reaction: MessageReaction, user: User) => (reaction.emoji.name === '✅') && (user.id === interaction.user.id);
-	const emojisCollected = await rulesMessage.awaitReactions({ filter: collectorFilter, max: 1, time: timeoutUserInput });
-	if (emojisCollected.size === 0) throw new Error(Errors.userResponseTimeout);
+	const rulesMessage = await dmChannel.send({ content: ButtonEvents.register.clickToAcceptRules, embeds: [rulesEmbed], components: [row] });
+
+	return await collectMessageComponent(rulesMessage, 'accept-rules').finally(async () => await disableButtonsOfMessage(rulesMessage));
 }
 
 async function updateExistingUser(userFromDb: UserFromDb, interactionToReplyFrom?: ButtonInteraction) {
@@ -202,28 +191,23 @@ async function updateExistingUser(userFromDb: UserFromDb, interactionToReplyFrom
 async function sendRetryMessage(message: string, isNewUser: boolean, interactionToReplyFrom?: ButtonInteraction) {
 	const retry = new ButtonBuilder({ customId: 'retry', label: Components.buttons.retry, style: ButtonStyle.Primary });
 
-	const row = new ActionRowBuilder<ButtonBuilder>();
-	row.addComponents(retry);
+	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(retry);
 
 	const retryMessageToSend = { content: message, components: [row] };
-	const retryMessage = (interactionToReplyFrom) ? await interactionToReplyFrom.reply(retryMessageToSend) : await dmChannel.send(retryMessageToSend);
-	const collectorFilter = (i: ButtonInteraction) => i.user.id === interaction.user.id && i.customId === 'retry';
+	const retryMessage = (interactionToReplyFrom) ? await (await interactionToReplyFrom.reply(retryMessageToSend)).fetch() : await dmChannel.send(retryMessageToSend);
 
 	let selectedButton;
 	try {
-		selectedButton = await retryMessage.awaitMessageComponent({ filter: collectorFilter, time: timeoutUserInput }) as ButtonInteraction;
+		selectedButton = await collectMessageComponent(retryMessage, 'retry');
 	}
 	catch {
 		const linkToRegister = new ButtonBuilder({ url: interaction.message.url, label: Components.buttons.retry, style: ButtonStyle.Link });
-		const row = new ActionRowBuilder<ButtonBuilder>();
-		row.addComponents(linkToRegister);
-
-		await retryMessage.edit({components: [row]});
+		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(linkToRegister);
+		await retryMessage.edit({ components: [row]} );
 		return;
 	}
 
-	row.components[0].setDisabled(true);
-	retryMessage.edit({ components: [row] });
+	await disableButtonsOfMessage(retryMessage);
 	(isNewUser) ? await registerUser(selectedButton) : await updateExistingUser(user, selectedButton);
 }
 
@@ -234,14 +218,22 @@ async function updateAdminApprovalRequest(minecraftUsername: string) {
 }
 
 async function collectMessage(): Promise<string> {
-	const collectorFilter = (message: Message) => message.author.id === interaction.user.id;
+	const collectorFilter = (m: Message) => m.author.id === interaction.user.id;
 	const collected = await dmChannel.awaitMessages({ filter: collectorFilter, max: 1, time: timeoutUserInput });
 	if (collected.size === 0) throw new Error(Errors.userResponseTimeout);
 	return collected.first().content;
 }
 
+async function collectMessageComponent(message: Message, customId?: string): Promise<ButtonInteraction> {
+	const collectorFilter = (i: ButtonInteraction) => i.user.id === interaction.user.id && (i.customId === customId || !customId);
+	const selectedButton = await message.awaitMessageComponent({ filter: collectorFilter, time: timeoutUserInput }).catch(() => {
+		throw new Error(Errors.userResponseTimeout)
+	});
+	return selectedButton as ButtonInteraction;
+}
+
 async function disableButtonsOfMessage(message: Message, buttonToHighlight?: ButtonInteraction) {
-	if (message.components.length === 0) {
+	if (message.components.length === 0 || message.components[0].components.length === 0) {
 		warn(template(Logs.noButtonsToDisable, {message: message.toJSON()}));
 		return;
 	}
