@@ -137,7 +137,7 @@ export namespace Commands {
 	export enum showInscriptionButton {
 		description = 'Envoie un message avec un bouton permettant de s\'inscrire.',
 		done = 'Fait !',
-		instructions = 'Pour t\'inscrire, clique sur le bouton. Le bot va t\'envoyer un message privé pour compléter l\'inscription.'
+		instructions = 'Pour t\'inscrire, clique sur le bouton. Le bot t\'enverra un message privé pour compléter l\'inscription.'
 	}
 }
 
@@ -180,7 +180,7 @@ export namespace Components {
 export namespace Errors {
 	export const missingDataOrExecute = 'Le ${itemType} ${filePath} n\'a pas les propriétés « data » ou « execute ».';
 	export const usernameUsedWithAnotherAccount = '⚠️ Un autre joueur est déjà inscrit avec ce nom d\'utilisateur Minecraft. S\'il s\'agit bien de ton nom d\'utilisateur, contacte un administrateur. ⚠️';
-	export const userResponseTimeout = 'Temps de réponse maximum dépassé, réessaye en cliqant le bouton `S\'inscrire` à nouveau.';
+	export const userResponseTimeout = 'Temps de réponse maximum dépassé, tu dois recommencer.';
 
 	export enum interaction {
 		buttonExecution = 'Une erreur inconnue s\'est produite !',
