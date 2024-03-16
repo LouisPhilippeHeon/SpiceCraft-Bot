@@ -180,7 +180,7 @@ export namespace Components {
 export namespace Errors {
 	export const missingDataOrExecute = 'Le ${itemType} ${filePath} n\'a pas les propriétés « data » ou « execute ».';
 	export const usernameUsedWithAnotherAccount = '⚠️ Un autre joueur est déjà inscrit avec ce nom d\'utilisateur Minecraft. S\'il s\'agit bien de ton nom d\'utilisateur, contacte un administrateur. ⚠️';
-	export const userResponseTimeout = 'Temps de réponse maximum dépassé, tu dois recommencer.';
+	export const userResponseTimeout = '❌ Temps de réponse maximum dépassé, tu dois recommencer. ❌';
 
 	export enum interaction {
 		buttonExecution = 'Une erreur inconnue s\'est produite !',
