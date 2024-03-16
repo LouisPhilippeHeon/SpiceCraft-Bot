@@ -24,6 +24,7 @@ export namespace ButtonEvents {
 		askWhatIsNewMinecraftUsername = 'Quel est le bon nom d\'utilisateur ?',
 		askWhoInvitedNewPlayer = `Qui t\'a invité sur ${minecraftServerName} ? Inscrit son nom d\'utilisateur Discord.`,
 		awaitingApprovalUserChangedMinecraftUsername = '<@${discordUuid}> a changé son username Minecraft pour \`${minecraftUsername}\` dans sa demande d\'ajout à la whitelist.',
+		confirmSelectedUsername = 'Est-tu bel et bien le propriétaire de compte Minecraft \`${minecraftUsername}\` ?',
 		dmsAreClosed = '❌ Tes paramètres de confidentialité m\'empêchent de t\'envoyer des messages. Change ces paramètres pour continuer. ❌',
 		embedDescription = 'Compte Discord : <@${discordUuid}>.\nUsername Minecraft : \`${minecraftUsername}\`.',
 		messageSentInDms = 'Merci de répondre au bot qui t\'a a envoyé un message en privé !',
@@ -136,7 +137,7 @@ export namespace Commands {
 	export enum showInscriptionButton {
 		description = 'Envoie un message avec un bouton permettant de s\'inscrire.',
 		done = 'Fait !',
-		instructions = 'Pour t\'inscrire, clique sur le bouton. Le bot va t\'envoyer un message privé pour compléter l\'inscription.\n**Si tu as entré un nom d\'utilisateur erroné lors de la configuration initiale, clique sur le bouton à nouveau.**'
+		instructions = 'Pour t\'inscrire, clique sur le bouton. Le bot va t\'envoyer un message privé pour compléter l\'inscription.'
 	}
 }
 
@@ -145,11 +146,13 @@ export namespace Components {
 		approve = 'Approuver',
 		cancel = 'Annuler',
 		endSeason = 'Oui, terminer la saison',
+		enthousiastYes = 'Oui !',
 		doNotUpdate = 'Ne pas mettre à jour',
 		ignore = 'Ignorer',
 		manuallyAddedToWhitelist = 'Ajout manuel effectué',
 		manuallyEditedWhitelist = 'Modifications manuelles effectuées',
 		no = 'Non',
+		noMadeAMistake = 'Non, je me suis trompé',
 		register = 'S\'inscrire',
 		reject = 'Rejeter',
 		retry = 'Réessayer',
@@ -219,6 +222,7 @@ export namespace Logs {
 	export const interactionIsNotRepliable = 'Impossible de répondre à l\'interaction ${interaction}.'
 	export const memberClickedRegisterButton = '${username} a cliqué sur le bouton d\'inscription.';
 	export const memberLeft = '${username} a quitté le serveur Discord.';
+	export const noButtonsToDisable = 'Aucun bouton à désactiver sur ce message : ${message}'
 	export const playerRoleWasRemoved = 'Le rôle « ' + playerRoleName + ' » de ${username} est retiré.';
 	export const ready = 'Prêt ! Connecté en tant que ${username}.';
 	export const refreshingCommands = 'Début du rafraichissement de ${numberOfCommands} commandes slash.';
