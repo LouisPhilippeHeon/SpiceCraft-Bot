@@ -19,18 +19,18 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction: ChatInputCommandInteraction) {
 	const discordUuid = interaction.options.getString('discord-uuid');
 	const removeFromWhitelistOption = interaction.options.getBoolean('remove-from-whitelist');
-	const removeFromWhitelist = removeFromWhitelistOption !== null ? removeFromWhitelistOption : true;
+	const removeFromWhitelist = removeFromWhitelistOption ?? true;
 
 	try {
-		const user = await getUserByDiscordUuid(discordUuid);
-		await user.delete();
+		const userFromDb = await getUserByDiscordUuid(discordUuid);
+		await userFromDb.delete();
 
 		await fetchGuildMember(interaction.guild, discordUuid).then(
 			async (member) => await removePlayerRole(member)
 		).catch();
 
 		if (removeFromWhitelist)
-			await user.removeFromWhitelist();
+			await userFromDb.removeFromWhitelist();
 		await interaction.reply({ content: template(Commands.deleteEntry.reply, {discordUuid: discordUuid}), ephemeral: true });
 	}
 	catch (e) {

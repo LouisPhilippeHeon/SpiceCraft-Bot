@@ -13,15 +13,15 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
 	try {
 		member = await fetchGuildMember(interaction.guild, idToEdit);
 		await changeStatus(idToEdit, status);
-		const user = await getUserByDiscordUuid(idToEdit);
+		const userFromDb = await getUserByDiscordUuid(idToEdit);
 
 		if (status === inscriptionStatus.approved) {
 			await addPlayerRole(member);
-			await user.addToWhitelist();
+			await userFromDb.addToWhitelist();
 		}
 		else {
 			await removePlayerRole(member);
-			await user.removeFromWhitelist();
+			await userFromDb.removeFromWhitelist();
 		}
 	}
 	catch (e) {

@@ -79,16 +79,18 @@ function createMessages(usersFromDb: UserFromDb[]): string[] {
 
 	// Cuts data in multiple messages in order to bypass the 2000 caracter limit of Discord messages
 	usersFromDb.forEach(user => {
-		if (currentMessage.length > 1844) {
-			messages.push(currentMessage);
-			currentMessage = '';
-		}
-
 		const row = template(Commands.displayUsers.databaseEntryLine, {
 			discordUuid: user.discord_uuid,
 			minecraftUuid: user.minecraft_uuid,
 			statusEmoji: statusToEmoji(user.inscription_status)
 		});
+
+		const totalLength = currentMessage.length + row.length;
+
+		if (totalLength > 2000) {
+			messages.push(currentMessage);
+			currentMessage = '';
+		}
 		
 		currentMessage = currentMessage.concat(row);
 	});

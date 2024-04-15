@@ -27,7 +27,7 @@ export async function execute(buttonInteraction: ButtonInteraction) {
 async function sendBackupToInteractionAuthor() {
 	const users = await getUsers();
 
-	if (users.length < 0) return;
+	if (users.length === 0) return;
 
 	const json = JSON.stringify(users);
 	const file = { attachment: Buffer.from(json), name: Commands.endSeason.saveFilename };

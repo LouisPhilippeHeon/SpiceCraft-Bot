@@ -25,11 +25,7 @@ export async function execute(interaction: ButtonInteraction) {
 	await addPlayerRole(member);
 	await editApprovalRequest(interaction.message, template(ButtonEvents.approbation.requestGranted, {discordUuid: interaction.user.id}), undefined, [], Colors.Green);
 
-	await sendMessageToMember(
-		ButtonEvents.approbation.messageSentToPlayerToConfirmInscription,
-		member,
-		interaction,
-		template(ButtonEvents.approbation.success, {discordUuid: discordUuid}),
-		template(ButtonEvents.approbation.successNoDm, {discordUuid: discordUuid})
-	);
+	const messageOnSuccess = template(ButtonEvents.approbation.success, {discordUuid: discordUuid});
+	const messageOnFailure = template(ButtonEvents.approbation.successNoDm, {discordUuid: discordUuid});
+	await sendMessageToMember(ButtonEvents.approbation.messageSentToPlayerToConfirmInscription, member, interaction, messageOnSuccess, messageOnFailure);
 }

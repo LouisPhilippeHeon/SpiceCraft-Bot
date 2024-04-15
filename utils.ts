@@ -56,7 +56,7 @@ export async function removePlayerRole(member: GuildMember) {
 
 export async function fetchGuildMember(guild: Guild, id: string): Promise<GuildMember> {
 	return await guild.members.fetch(id).catch(() => {
-		throw Error(Errors.discord.noDiscordUserWithThisUuid);
+		throw new Error(Errors.discord.noDiscordUserWithThisUuid);
 	});
 }
 
@@ -67,29 +67,26 @@ export async function replyOrFollowUp(message: string | MessagePayload | Interac
 	}
 
 	try {
-		if (interaction.replied || interaction.deferred)
-			await interaction.followUp(message);
-		else
-			await interaction.reply(message);
+		const interactionRepliedOrDeferred = interaction.replied || interaction.deferred;
+		interactionRepliedOrDeferred
+			? await interaction.followUp(message)
+			: await interaction.reply(message);
 	}
 	catch (e) {
 		error(e, 'UTL_ROF');
 	}
 }
 
-export async function sendMessageToMember(message: string, member: GuildMember, interaction: Interaction, replyOnSuccess?: string, replyOnFailure?: string) {
+export async function sendMessageToMember(message: string, member: GuildMember, interaction: Interaction, replyOnSuccess: string, replyOnFailure: string) {
 	if (!interaction.isRepliable())
 		throw new Error(Errors.discord.notRepliable);
 
 	try {
 		await member.send(message);
-
-		if (replyOnSuccess)
-			await interaction.reply({ content: replyOnSuccess, ephemeral: true });
+		await interaction.reply({ content: replyOnSuccess, ephemeral: true });
 	}
-	catch {
-		if (replyOnFailure)
-			await interaction.reply({ content: replyOnFailure, ephemeral: true });
+	catch (e) {
+		await interaction.reply({ content: replyOnFailure, ephemeral: true });
 	}
 }
 

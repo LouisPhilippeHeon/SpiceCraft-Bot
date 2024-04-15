@@ -15,7 +15,7 @@ export async function execute(interaction: ButtonInteraction) {
 	});
 
 	const cancel = new ButtonBuilder({
-		customId: 'dissmiss',
+		customId: 'dismiss',
 		label: Components.buttons.cancel,
 		style: ButtonStyle.Secondary
 	});

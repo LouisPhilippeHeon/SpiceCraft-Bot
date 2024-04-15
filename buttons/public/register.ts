@@ -1,5 +1,5 @@
 import { createApprovalRequest, createUsernameChangeRequest, editApprovalRequestOfUser } from '../../services/admin-approval';
-import { inscriptionStatus, timeoutUserInput } from '../../bot-constants';
+import { timeoutUserInput } from '../../bot-constants';
 import { changeMinecraftUuid, createUser, getUserByDiscordUuid } from '../../services/database';
 import { ActionRowBuilder, ButtonBuilder, ButtonComponent, ButtonInteraction, ButtonStyle, DMChannel, EmbedBuilder, Message } from 'discord.js';
 import { getMojangUser } from '../../services/http';
@@ -12,21 +12,23 @@ export const data = new ButtonData('inscription');
 
 let interaction: ButtonInteraction;
 let dmChannel: DMChannel;
-let user: UserFromDb;
+let userFromDb: UserFromDb;
 let userFromMojangApi: UserFromMojangApi;
 
 export async function execute(buttonInteraction: ButtonInteraction) {
 	interaction = buttonInteraction;
 	dmChannel = await interaction.user.createDM();
-	user = await getUserByDiscordUuid(interaction.user.id).catch(() => null);
+	userFromDb = await getUserByDiscordUuid(interaction.user.id).catch(() => null);
 
 	info(template(Logs. memberClickedRegisterButton, {username: interaction.user.username}));
 
 	try {
-		if (user && user.inscription_status === inscriptionStatus.rejected)
-			await interaction.reply({ content: ButtonEvents.register.adminsAlreadyDeniedRequest, ephemeral: true });
-		else if (user)
-			await updateExistingUser(user);
+		if (userFromDb) {
+			if (userFromDb.isRejected())
+				await interaction.reply({ content: ButtonEvents.register.adminsAlreadyDeniedRequest, ephemeral: true });
+			else
+				await updateExistingUser(userFromDb);
+		}
 		else
 			await registerUser();
 	}
@@ -60,15 +62,13 @@ async function registerUser(interactionToReplyFrom?: ButtonInteraction) {
 	}
 	catch (e) {
 		let message = e.message;
+
 		if (message === Errors.database.notUnique) {
 			message = Errors.usernameUsedWithAnotherAccount;
 			warn(template(Logs.usernameAlreadyTaken, {discordUsername: interaction.user.username, minecraftUsername: userFromMojangApi.name}));
 		}
 
-		if (replyToThisButton && !replyToThisButton.replied)
-			await sendRetryMessage(message, true, replyToThisButton);
-		else
-			await sendRetryMessage(message, true);
+		await sendRetryMessage(message, true, (replyToThisButton && !replyToThisButton.replied) && replyToThisButton);
 	}
 }
 
@@ -76,35 +76,28 @@ async function askIfFirstTimeMember(interactionToReplyFrom?: ButtonInteraction):
 	const notFirstTime = new ButtonBuilder({ customId: 'not-first-time-member', label: Components.buttons.yes, style: ButtonStyle.Secondary });
 	const firstTime = new ButtonBuilder({ customId: 'first-time-member', label: Components.buttons.no, style: ButtonStyle.Secondary });
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(notFirstTime, firstTime);
-
 	const message = { content: ButtonEvents.register.askIfFirstTimePlaying, components: [row] };
-	const askIfFirstTimeMemberMessage = (interactionToReplyFrom) ? await (await interactionToReplyFrom.reply(message)).fetch() : await interaction.user.send(message);
+
+	const askIfFirstTimeMemberMessage = interactionToReplyFrom
+		? await (await interactionToReplyFrom.reply(message)).fetch()
+		: await interaction.user.send(message);
 
 	if (!interaction.replied) await interaction.reply({ content: ButtonEvents.register.messageSentInDms, ephemeral: true });
-	let buttonClicked: ButtonInteraction;
 
-	try {
-		buttonClicked = await collectMessageComponent(askIfFirstTimeMemberMessage);
-	}
-	catch (e) {
-		await disableButtonsOfMessage(askIfFirstTimeMemberMessage);
-		throw e;
-	}
+	let selectedButton: ButtonInteraction;
+	await collectMessageComponent(askIfFirstTimeMemberMessage)
+		.then((collected) => selectedButton = collected)
+		.finally(() => disableButtonsOfMessage(askIfFirstTimeMemberMessage, selectedButton));
 
-	await disableButtonsOfMessage(askIfFirstTimeMemberMessage, buttonClicked);
-
-	if (buttonClicked.customId === 'first-time-member') {
-		await buttonClicked.reply(ButtonEvents.register.welcome);
-		return true;
-	}
-	else {
-		await buttonClicked.reply(ButtonEvents.register.welcomeBack);
-		return false;
-	}
+	const isFirstTimeMember = selectedButton.customId === 'first-time-member';
+	await selectedButton.reply(isFirstTimeMember ? ButtonEvents.register.welcome : ButtonEvents.register.welcomeBack);
+	return isFirstTimeMember;
 }
 
 async function askWhatIsMinecraftUsername(interactionToReplyFrom?: ButtonInteraction): Promise<ButtonInteraction> {
-	(interactionToReplyFrom) ? await interactionToReplyFrom.reply(ButtonEvents.register.askWhatIsMinecraftUsername) : await dmChannel.send(ButtonEvents.register.askWhatIsMinecraftUsername);
+	interactionToReplyFrom
+		? await interactionToReplyFrom.reply(ButtonEvents.register.askWhatIsMinecraftUsername)
+		: await dmChannel.send(ButtonEvents.register.askWhatIsMinecraftUsername);
 
 	const minecraftUsernameSentByUser = await collectMessage();
 
@@ -126,7 +119,10 @@ async function askWhatIsMinecraftUsername(interactionToReplyFrom?: ButtonInterac
 
 	const confirmUsernameSelection = await dmChannel.send({ content: template(ButtonEvents.register.confirmSelectedUsername, {minecraftUsername: userFromMojangApi.name}), components: [row] });
 
-	const selectedButton = await collectMessageComponent(confirmUsernameSelection).finally(async () => await disableButtonsOfMessage(confirmUsernameSelection));
+	let selectedButton: ButtonInteraction;
+	await collectMessageComponent(confirmUsernameSelection)
+		.then((collected) => selectedButton = collected)
+		.finally(async () => await disableButtonsOfMessage(confirmUsernameSelection));
 
 	if (selectedButton.customId === 'reject-username-selection')
 		return await askWhatIsMinecraftUsername(selectedButton);
@@ -143,7 +139,6 @@ async function getRulesAcknowledgment() {
 	const rulesEmbed = new EmbedBuilder({ color: 0x0099FF, title: Components.titles.rules, description: Components.descriptions.rules });
 	const acceptRules = new ButtonBuilder({ customId: 'accept-rules', label: 'J\'accepte !', style: ButtonStyle.Success });
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(acceptRules);
-
 	const rulesMessage = await dmChannel.send({ content: ButtonEvents.register.clickToAcceptRules, embeds: [rulesEmbed], components: [row] });
 
 	return await collectMessageComponent(rulesMessage, 'accept-rules').finally(async () => await disableButtonsOfMessage(rulesMessage));
@@ -151,7 +146,10 @@ async function getRulesAcknowledgment() {
 
 async function updateExistingUser(userFromDb: UserFromDb, interactionToReplyFrom?: ButtonInteraction) {
 	const message = ButtonEvents.register.askWhatIsNewMinecraftUsername;
-	(interactionToReplyFrom) ? await interactionToReplyFrom.reply(message) : await dmChannel.send(message);
+	interactionToReplyFrom
+		? await interactionToReplyFrom.reply(message)
+		: await dmChannel.send(message);
+
 	if (!interaction.replied) await interaction.reply({ content: ButtonEvents.register.messageSentInDms, ephemeral: true });
 
 	const usernameSentByUser = await collectMessage();
@@ -159,13 +157,13 @@ async function updateExistingUser(userFromDb: UserFromDb, interactionToReplyFrom
 	try {
 		userFromMojangApi = await getMojangUser(usernameSentByUser);
 
-		if (userFromDb.minecraft_uuid == userFromMojangApi.id) {
+		if (userFromDb.minecraft_uuid === userFromMojangApi.id) {
 			await dmChannel.send(ButtonEvents.register.sameMinecraftAccountAsBefore);
 			return;
 		}
 
 		// User awaiting approval, edit approval request instead of creating another request
-		if (userFromDb.inscription_status === inscriptionStatus.awaitingApproval) {
+		if (userFromDb.isAwaitingApproval()) {
 			await changeMinecraftUuid(interaction.user.id, userFromMojangApi.id);
 			await updateAdminApprovalRequest(userFromMojangApi.name);
 			await dmChannel.send(ButtonEvents.register.requestSucessfullyUpdated);
@@ -176,10 +174,10 @@ async function updateExistingUser(userFromDb: UserFromDb, interactionToReplyFrom
 		}
 	}
 	catch (e) {
-		let message;
-		if (e.message === Errors.api.noMojangAccountWithThatUsername)
+		let message = e.message;
+		if (message === Errors.api.noMojangAccountWithThatUsername)
 			message = template(ButtonEvents.register.minecraftAccountDoesNotExist, {minecraftUsername: usernameSentByUser});
-		else if (e.message === Errors.database.notUnique) {
+		else if (message === Errors.database.notUnique) {
 			message = Errors.usernameUsedWithAnotherAccount;
 			warn(template(Logs.usernameAlreadyTaken, {discordUsername: interaction.user.username, minecraftUsername: userFromMojangApi.name}));
 		}
@@ -190,11 +188,12 @@ async function updateExistingUser(userFromDb: UserFromDb, interactionToReplyFrom
 
 async function sendRetryMessage(message: string, isNewUser: boolean, interactionToReplyFrom?: ButtonInteraction) {
 	const retry = new ButtonBuilder({ customId: 'retry', label: Components.buttons.retry, style: ButtonStyle.Primary });
-
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(retry);
-
 	const retryMessageToSend = { content: message, components: [row] };
-	const retryMessage = (interactionToReplyFrom) ? await (await interactionToReplyFrom.reply(retryMessageToSend)).fetch() : await dmChannel.send(retryMessageToSend);
+
+	const retryMessage = interactionToReplyFrom
+		? await (await interactionToReplyFrom.reply(retryMessageToSend)).fetch()
+		: await dmChannel.send(retryMessageToSend);
 
 	let selectedButton;
 	try {
@@ -208,7 +207,9 @@ async function sendRetryMessage(message: string, isNewUser: boolean, interaction
 	}
 
 	await disableButtonsOfMessage(retryMessage);
-	(isNewUser) ? await registerUser(selectedButton) : await updateExistingUser(user, selectedButton);
+	isNewUser
+		? await registerUser(selectedButton)
+		: await updateExistingUser(userFromDb, selectedButton);
 }
 
 async function updateAdminApprovalRequest(minecraftUsername: string) {
@@ -226,10 +227,9 @@ async function collectMessage(): Promise<string> {
 
 async function collectMessageComponent(message: Message, customId?: string): Promise<ButtonInteraction> {
 	const collectorFilter = (i: ButtonInteraction) => i.user.id === interaction.user.id && (i.customId === customId || !customId);
-	const selectedButton = await message.awaitMessageComponent({ filter: collectorFilter, time: timeoutUserInput }).catch(() => {
+	return await message.awaitMessageComponent({ filter: collectorFilter, time: timeoutUserInput }).catch(() => {
 		throw new Error(Errors.userResponseTimeout)
-	});
-	return selectedButton as ButtonInteraction;
+	}) as ButtonInteraction;
 }
 
 async function disableButtonsOfMessage(message: Message, buttonToHighlight?: ButtonInteraction) {
@@ -238,15 +238,15 @@ async function disableButtonsOfMessage(message: Message, buttonToHighlight?: But
 		return;
 	}
 
-	let components = message.components[0].components;
+	const components = message.components[0].components;
 	const newRow = new ActionRowBuilder<ButtonBuilder>();
 	components.forEach((component: ButtonComponent) => {
-		const highlight = (buttonToHighlight) ? component.customId === buttonToHighlight.customId : false;
+		const highlight = component.customId === buttonToHighlight?.customId;
 
 		const newButton = new ButtonBuilder({
 			customId: component.customId,
 			label: component.label,
-			style: (highlight) ? ButtonStyle.Primary : component.style,
+			style: highlight ? ButtonStyle.Primary : component.style,
 			disabled: true
 		});
 

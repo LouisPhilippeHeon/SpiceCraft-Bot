@@ -49,23 +49,27 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 async function saveNewUser(interaction: ChatInputCommandInteraction, discordUuid: string, usernameMinecraft: string, status: number, silent: boolean) {
 	try {
 		const member = await fetchGuildMember(interaction.guild, discordUuid);
-
 		const userFromMojangApi = await getMojangUser(usernameMinecraft);
-		const user = await createUser(discordUuid, userFromMojangApi.id, status);
-
-		let rconFailure: boolean = false;
+		const userFromDb = await createUser(discordUuid, userFromMojangApi.id, status);
 
 		if (status === inscriptionStatus.approved) {
 			await addPlayerRole(member);
-			await user.addToWhitelist().catch(() => rconFailure = true);
+			try {
+				await userFromDb.addToWhitelist();
+			}
+			catch {
+				await interaction.reply(template(Commands.addMember.rconFailedManualInterventionRequired, {discordUuid: discordUuid}));
+				return;
+			}
 		}
 
-		const sendDm = !silent && status !== inscriptionStatus.awaitingApproval;
-		if (sendDm && !rconFailure)
-			await sendMessageToMember(getMessageToSendToUser(status), member, interaction, undefined, template(Commands.addMember.successNoDm, {discordUuid: discordUuid}));
-		
-		const replyMessage = template((sendDm && rconFailure) ? Commands.addMember.successNoDm : Commands.addMember.success, {discordUuid: discordUuid});
-		await interaction.reply({ content: replyMessage, ephemeral: true });
+		const messageOnSuccess = template(Commands.addMember.success, {discordUuid: discordUuid});
+		const messageOnFailure = template(Commands.addMember.successDmFailed, {discordUuid: discordUuid});
+
+		if (!silent && status !== inscriptionStatus.awaitingApproval)
+			await sendMessageToMember(getMessageToSendToUser(status), member, interaction, messageOnSuccess, messageOnFailure);
+		else
+			await interaction.reply(messageOnSuccess);
 	}
 	catch (e) {
 		await interaction.reply({ content: e.message, ephemeral: true });
@@ -73,8 +77,6 @@ async function saveNewUser(interaction: ChatInputCommandInteraction, discordUuid
 }
 
 function getMessageToSendToUser(status: number): string {
-	if (status === inscriptionStatus.approved)
-		return Commands.addMember.dmApproved;
-	if (status === inscriptionStatus.rejected)
-		return Commands.addMember.dmRejected;
+	if (status === inscriptionStatus.approved) return Commands.addMember.dmApproved;
+	if (status === inscriptionStatus.rejected) return Commands.addMember.dmRejected;
 }

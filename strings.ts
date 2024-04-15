@@ -4,7 +4,7 @@ import { minecraftServerName, playerRoleName, whitelistChannelName } from './con
 export namespace ButtonEvents {
 	export const clickToConfirmChangesToWhitelist = 'Clique sur le bouton lorsque c\'est fait, afin que <@${discordUuid}> soit informé du changement lié à sa demande.';
 
-	export enum approbation {
+	export const enum approbation {
 		changeWhitelistBeforeCliking = 'N\'oublies pas d\'ajouter manuellement le joueur à la whitelist AVANT de cliquer sur le bouton !',
 		messageSentToPlayerToConfirmInscription = 'Tu a été ajouté à la whitelist. Si tu n\'arrive pas à te connecter, ton username Minecraft est peut-être incorrect. Si c\'est le cas, clique à nouveau sur le bouton d\'inscription.',
 		requestGranted = '✅ La demande a été approuvée par <@${discordUuid}>.',
@@ -12,42 +12,42 @@ export namespace ButtonEvents {
 		successNoDm = '<@${discordUuid}> a été ajouté à la whitelist. Cependant, ses paramètres de confidentialité m\'empêchent de lui envoyer un message afin de lui en informer.'
 	}
 
-	export enum ban {
+	export const enum ban {
 		messageUpdate = '🔨 Le joueur a été retiré de la whitelist du serveur Minecraft par <@${discordUuid}>.',
 		reply = '<@${discordUuid}> a été retiré du serveur Minecraft avec succès.'
 	}
 
-	export enum register {
+	export const enum register {
 		adminsAlreadyDeniedRequest = '🚫 Les administrateurs ont déjà refusé ta demande ! 🚫',
 		askIfFirstTimePlaying = `As-tu déjà joué sur ${minecraftServerName} ?`,
 		askWhatIsMinecraftUsername = 'Quel est ton nom d\'utilisateur sur Minecraft ?',
 		askWhatIsNewMinecraftUsername = 'Quel est le bon nom d\'utilisateur ?',
-		askWhoInvitedNewPlayer = `Qui t\'a invité sur ${minecraftServerName} ? Inscrit son nom d\'utilisateur Discord.`,
-		awaitingApprovalUserChangedMinecraftUsername = '<@${discordUuid}> a changé son username Minecraft pour \`${minecraftUsername}\` dans sa demande d\'ajout à la whitelist.',
-		confirmSelectedUsername = 'Est-tu bel et bien le propriétaire de compte Minecraft \`${minecraftUsername}\` ?',
-		dmsAreClosed = '❌ Tes paramètres de confidentialité m\'empêchent de t\'envoyer des messages. Change ces paramètres pour continuer. ❌',
-		embedDescription = 'Compte Discord : <@${discordUuid}>.\nUsername Minecraft : \`${minecraftUsername}\`.',
+		askWhoInvitedNewPlayer = `Qui t'a invité sur ${minecraftServerName} ? Inscrit son nom d'utilisateur Discord.`,
+		awaitingApprovalUserChangedMinecraftUsername = '<@${discordUuid}> a changé son username Minecraft pour `${minecraftUsername}` dans sa demande d\'ajout à la whitelist.',
+		confirmSelectedUsername = 'Est-tu bel et bien le propriétaire de compte Minecraft `${minecraftUsername}` ?',
+		dmsAreClosed = '❌ Tes paramètres de confidentialité m\'empêchent de t\'envoyer des messages privés. Change ces paramètres pour continuer. ❌',
+		embedDescription = 'Compte Discord : <@${discordUuid}>.\nUsername Minecraft : `${minecraftUsername}`.',
 		messageSentInDms = 'Merci de répondre au bot qui t\'a a envoyé un message en privé !',
 		minecraftAccountDoesNotExist = '❌ Le compte Minecraft « ${minecraftUsername} » n\'existe pas! ❌',
 		clickToAcceptRules = 'Clique sur le bouton pour indiquer que tu accepte les règles.',
 		requestSucessfullyUpdated = 'Ta demande à été mise à jour avec succès !',
-		sameMinecraftAccountAsBefore = '⚠️ Pas besoin de mettre à jour ton nom d\'utilisateur, car il est identique à celui associé au compte Minecraft dans la whitelist. ⚠️',
+		sameMinecraftAccountAsBefore = '⚠️ Pas besoin de mettre à jour ton nom d\'utilisateur, car il est identique à celui dans la whitelist du serveur Minecraft. ⚠️',
 		usernameUpdated = 'Ton nom d\'utilisateur a été changé avec succès, je t\'envoie un message lorsque le nom d\'utilisateur sera mis à jour dans la whitelist.',
 		waitForAdminApprobation = 'Ton inscription est en attente d\'approbation par les administrateurs, je t\'enverrais un message quand elle sera acceptée !',
 		welcome = `👋 Bienvenue sur ${minecraftServerName} !`,
 		welcomeBack = `👋 Bienvenue à nouveau sur ${minecraftServerName} !`
 	}
 
-	export enum rejection {
+	export const enum rejection {
 		messageSentToUserToInformRejection = 'Désolé, mais les administrateurs ont choisi de ne pas t\'ajouter à la whitelist. Contacte-les pour plus de détails.',
 		requestDenied = '❌ La demande a été rejetée par <@${discordUuid}>.',
 		askConfirmation = 'Es-tu certain de vouloir rejeter <@${discordUuid}> ?',
 		success = 'Un message a été envoyé à <@${discordUuid}> pour l\'informer du rejet.',
 		successNoDm = '<@${discordUuid}> a été rejeté. Cependant, ses paramètres de confidentialité m\'empêchent de lui envoyer un message afin de lui en informer.',
-		userStillInBdExplanation = 'Cet utilisateur est encore dans la base de données, avec le statut « rejeté », donc s\'il rejoint à nouveau le serveur, le bot se souvient que <@${discordUuid}> est rejeté. Si tu souhaite le supprimer, tu peux utiliser la commande /supprimer-entree'
+		userStillInBdExplanation = 'Cet utilisateur est encore dans la base de données, avec le statut « rejeté », donc s\'il rejoint à nouveau le serveur, le bot se souvient que <@${discordUuid}> est rejeté. Si tu souhaite le supprimer, tu peux utiliser la commande `/supprimer-entree`.'
 	}
 
-	export enum usernameChangeConfirmation {
+	export const enum usernameChangeConfirmation {
 		changeWhitelistBeforeCliking = 'N\'oublies pas de modifier manuellement la whitelist AVANT de cliquer sur le bouton !',
 		messageUpdate = '✅ La mise à jour de username a été complétée (avec l\'autorisation de <@${discordUuid}>).',
 		messageSentToConfirmUsernameChange = 'Ton username Minecraft a été mis à jour dans la whitelist.',
@@ -57,25 +57,26 @@ export namespace ButtonEvents {
 }
 
 export namespace Commands {
-	export enum addMember {
+	export const enum addMember {
 		alreadyInDatabase = 'Cet utilisateur existe déjà dans la base de données. Si tu veux modifier le compte Minecraft qui lui est associé, utilise la commande `/modifier-username`.',
 		dmApproved = 'Un administrateur t\'a manuellement ajouté à la whitelist du serveur Minecraft.',
 		dmRejected = 'Un administrateur t\'a manuellement rejeté de la whitelist du serveur Minecraft.',
 		membreOptionDescription = 'Membre à inscrire.',
+		rconFailedManualInterventionRequired = 'La connexion au serveur Minecraft a échoué, l\'ajout de <@${discordUuid}> à la whitelist doit être effectué manuellement.',
 		silentOptionDescription = 'Envoyer un message à l\'utilisateur ?',
-		success = 'Le profil de <@${discordUuid}> est ajouté dans la base de données !',
-		successNoDm = 'Le profil de <@${discordUuid}> est ajouté dans la base de données ! Toutefois, il a été impossible de lui envoyer un message en raison de ses paramètres de confidentialité.',
+		success = 'Le profil de <@${discordUuid}> est ajouté dans la base de données et dans la whitelist du serveur Minecraft !',
+		successDmFailed = 'Le profil de <@${discordUuid}> est ajouté dans la base de données et la whitelist du serveur Minecraft ! Toutefois, il a été impossible de lui envoyer un message en raison de ses paramètres de confidentialité.',
 		statusOptionDescription = 'Status à attribuer au membre. Si aucun n\'est spécifié, il sera approuvé.',
 		usernameMinecraftOptionDescription = 'Nom de l\'utilisateur sur Minecraft du joueur.'
 	}
 
-	export enum approve {
+	export const enum approve {
 		description = 'Approuver le membre du serveur Minecraft et lui ajouter le rôle joueur sur le Discord.',
 		memberOptionDescription = 'Membre à approuver',
 		silentOptionDescription = 'Envoyer un message à l\'utilisateur approuvé ?'
 	}
 
-	export enum deleteEntry {
+	export const enum deleteEntry {
 		description = 'Supprime une rangée dans la base de données.',
 		messageUpdate = '🗑️ L\'utilisateur a été supprimé de la whitelist et de la base de données.',
 		removeFromWhitelistOption = 'Retirer le joueur de la whitelist (par défaut: Oui) ?',
@@ -83,17 +84,17 @@ export namespace Commands {
 		userIdOption = 'Retirer l\'entrée pour quel UUID Discord ?'
 	}
 
-	export enum findDiscordMember {
+	export const enum findDiscordMember {
 		description = 'Afficher un membre du serveur Discord associé à un username Minecraft.',
 		usernameOptionDescription = 'Username Minecraft'
 	}
 
-	export enum findMinecraftMember {
+	export const enum findMinecraftMember {
 		description = 'Affiche le nom d\'utilisateur Minecraft d\'un membre du serveur Discord.',
 		userOptionDescription = 'Membre dont il faut afficher le nom d\'utilisateur Minecraft.'
 	}
 
-	export enum displayUsers {
+	export const enum displayUsers {
 		databaseEntryLine = '<@${discordUuid}> | [Afficher](<' + mojangApiUrl + '/user/profile/${minecraftUuid}>) | ${statusEmoji}\n',
 		description = 'Affiche les utilisateurs inscrit selon leur statut (optionnel).',
 		displayingAllUsers = 'Affichage de tous les utilisateurs',
@@ -107,7 +108,7 @@ export namespace Commands {
 		statusOptionDescription = 'Rechercher les utilisateur avec un statut particulier.'
 	}
 
-	export enum editUsername {
+	export const enum editUsername {
 		confirmationMessage = 'Nom d\'utilisateur changé.',
 		description = 'Manuellement modifier le nom d\'utilisateur Minecraft d\'un joueur.',
 		newUsernameOptionDescription = 'Quel est le nouveau nom d\'utilisateur ?',
@@ -115,7 +116,7 @@ export namespace Commands {
 		usernameIdenticalToPreviousOne = 'Pas besoin de changer le nom d\'utilisateur, le nouveau est identique à celui déjà dans la base de données.'
 	}
 
-	export enum endSeason {
+	export const enum endSeason {
 		description = `Efface la base de données, efface les messages de #${whitelistChannelName} et supprime le rôle ${playerRoleName}.`,
 		newSeasonBegins = 'Nouvelle saison !',
 		saveFilename = 'sauvegarde_saison.json',
@@ -123,18 +124,18 @@ export namespace Commands {
 		warning = `Attention ! Es-tu certain de vouloir terminer la saison en cours? La base de donnée sera effacée, les rôles seront remis à zéro et tous les messages sur le channel #${whitelistChannelName} seront effacés.`
 	}
 
-	export enum reject {
+	export const enum reject {
 		description = 'Rejeter le membre du serveur Minecraft et lui retirer le rôle joueur sur le Discord.',
 		silentOptionDescription = 'Envoyer un message à l\'utilisateur rejeté ?',
 		userOptionDescription = 'Membre à rejeter'
 	}
 
-	export enum resetStatus {
+	export const enum resetStatus {
 		description = 'Remettre le statut d\'un membre à « en attente ».',
 		userOptionDescription = 'Membre dont il faut réinitialiser le statut'
 	}
 
-	export enum showInscriptionButton {
+	export const enum showInscriptionButton {
 		description = 'Envoie un message avec un bouton permettant de s\'inscrire.',
 		done = 'Fait !',
 		instructions = 'Pour t\'inscrire, clique sur le bouton. Le bot t\'enverra un message privé pour compléter l\'inscription.'
@@ -142,7 +143,7 @@ export namespace Commands {
 }
 
 export namespace Components {
-	export enum buttons {
+	export const enum buttons {
 		approve = 'Approuver',
 		cancel = 'Annuler',
 		endSeason = 'Oui, terminer la saison',
@@ -159,16 +160,15 @@ export namespace Components {
 		yes = 'Oui'
 	}
 
-	export enum descriptions {
-		approvalRequest = 'Compte Discord : <@${discordUuid}>.\nUsername Minecraft : \`${username}\`.',
-		approvalRequestNewUser = 'Compte Discord : <@${discordUuid}>.\nUsername Minecraft : \`${username}\`.\nPersonne qui a invité : ${inviter}.',
-		usernameChangeRequest = 'Compte Discord : <@${discordUuid}>.\nNouveau username Minecraft : \`${username}\`.',
-		userLeft = 'Compte Discord : <@${discordUuid}>.',
-		userBanned = 'Compte Discord : <@${discordUuid}>.',
-		rules = '1. Jouer sur le serveur signifie que vous avez pris connaissance des règles.\n2. Il est possible de construire une base dans l\'overworld à l\'extérieur d\'un carré de 600 blocs de largeur autour de 0,0 (donc, si une des coordonnées excède +300 ou -300, vous pouvez construire votre base). Ce carré est donc réservé pour les boutiques!\n3. Assurez vous que vos constructions sur le toit du nether soient spawn-proof.\n4. Aucun grief ou vol n\'est toléré. Cela inclut boutiques, maisons et farms.\n5. Aucun hack, cheat, xray, minimap ou tout autre avantage injuste n\'est toléré, ceci inclut les ressource packs, clients, mods et autres. Les seules modifications du client autorisées sont Optifine, Iris, Sodium, Phosphore et Litematica.\n6. Le PVP est toléré uniquement si tous les participants y consentent.\n7. Les pranks sont acceptés, à condition d\'être inoffensifs et de bon goût.\n8. Respectez le territoire des autres joueurs. Ne construisez pas proche du territoire d\'un autre sans son accord.\n9. Il est interdit d\'être toxique, méchant ou rude avec un autre joueur, sur Discord ou dans le serveur Minecraft directement.\n10. La seed est privée, par conséquent il est interdit d\'essayer de la découvrir. Si un joueur est en possession de la seed du serveur, il lui est interdit de l\'utiliser pour obtenir un avantage, cela inclut trouver les slime chunks, certains biomes, des portails de l\'end, etc...\n11. Si vous voyez un ou des joueurs enfreindre ces règlements, veuillez aviser un admin le plus rapiement possible sur Discord.\n12. Si un joueur enfreint un de ces règlements, les conséquences sont à la discrétion des administrateurs.\n13. Les conséquences peuvent aller jusqu\'à un bannissement permanent, tout comme elles peuvent être plus légères.'
+	export const enum descriptions {
+		discordAccount = 'Compte Discord : <@${discordUuid}>.',
+		approvalRequest = discordAccount + '\nUsername Minecraft : `${username}`.',
+		approvalRequestNewUser = discordAccount + '\nUsername Minecraft : `${username}`.\nPersonne qui a invité : ${inviter}.',
+		rules = '1. Jouer sur le serveur signifie que vous avez pris connaissance des règles.\n2. Il est possible de construire une base dans l\'overworld à l\'extérieur d\'un carré de 600 blocs de largeur autour de 0,0 (donc, si une des coordonnées excède +300 ou -300, vous pouvez construire votre base). Ce carré est donc réservé pour les boutiques!\n3. Assurez vous que vos constructions sur le toit du nether soient spawn-proof.\n4. Aucun grief ou vol n\'est toléré. Cela inclut boutiques, maisons et farms.\n5. Aucun hack, cheat, xray, minimap ou tout autre avantage injuste n\'est toléré, ceci inclut les ressource packs, clients, mods et autres. Les seules modifications du client autorisées sont Optifine, Iris, Sodium, Phosphore et Litematica.\n6. Le PVP est toléré uniquement si tous les participants y consentent.\n7. Les pranks sont acceptés, à condition d\'être inoffensifs et de bon goût.\n8. Respectez le territoire des autres joueurs. Ne construisez pas proche du territoire d\'un autre sans son accord.\n9. Il est interdit d\'être toxique, méchant ou rude avec un autre joueur, sur Discord ou dans le serveur Minecraft directement.\n10. La seed est privée, par conséquent il est interdit d\'essayer de la découvrir. Si un joueur est en possession de la seed du serveur, il lui est interdit de l\'utiliser pour obtenir un avantage, cela inclut trouver les slime chunks, certains biomes, des portails de l\'end, etc...\n11. Si vous voyez un ou des joueurs enfreindre ces règlements, veuillez aviser un admin le plus rapiement possible sur Discord.\n12. Si un joueur enfreint un de ces règlements, les conséquences sont à la discrétion des administrateurs.\n13. Les conséquences peuvent aller jusqu\'à un bannissement permanent, tout comme elles peuvent être plus légères.',
+		usernameChangeRequest = discordAccount + '\nNouveau username Minecraft : `${username}`.'
 	}
 
-	export enum titles {
+	export const enum titles {
 		approvalRequest = '${discordUsername} veut être ajouté à la whitelist.',
 		usernameChangeRequest = '${discordUsername} demande un changement de nom d\'utilisateur.',
 		userLeft = 'Un utilisateur a quitté. Faut-il le retirer de la whitelist du serveur et de la base de données ?',
@@ -182,7 +182,7 @@ export namespace Errors {
 	export const usernameUsedWithAnotherAccount = '⚠️ Un autre joueur est déjà inscrit avec ce nom d\'utilisateur Minecraft. S\'il s\'agit bien de ton nom d\'utilisateur, contacte un administrateur. ⚠️';
 	export const userResponseTimeout = '❌ Temps de réponse maximum dépassé, tu dois recommencer. ❌';
 
-	export enum interaction {
+	export const enum interaction {
 		buttonExecution = 'Une erreur inconnue s\'est produite !',
 		buttonNotFound = 'Aucun bouton ne corresponsant à ${button} n\'a été trouvée.',
 		commandExecution = 'Une erreur s\'est produite lors de l\'exécution de cette commande !',
@@ -190,30 +190,30 @@ export namespace Errors {
 		unauthorized = 'Tu n\'as pas les permissions requises pour effectuer ceci.'
 	}
 
-	export enum discord {
+	export const enum discord {
 		cantReadLogs = 'Le bot n\'a pas la permission de lire les logs.',
 		noDiscordUserWithThisUuid = 'Cet utilisateur Discord n\'est pas membre du serveur.',
 		notRepliable = 'Impossible de répondre à cette interaction.'
 	}
 
-	export enum api {
+	export const enum api {
 		couldNotConnectToApi = 'Erreur lors de la connexion à l\'API de Mojang.',
 		noMojangAccountWithThatUsername = 'Aucun compte Mojang n\'a ce nom d\'utilisateur !',
 		noMojangAccountWithThatUuid = 'Aucun compte Mojang n\'a ce UUID !'
 	}
 
-	export enum database {
+	export const enum database {
 		invalidStatus = 'Statut invalide',
 		notUnique = 'Un autre joueur s\'est inscrit avec ce compte Minecraft.',
 		unknownError = 'Une erreur inconnue est survenue lors de l\'écriture dans la base de données.',
 		userDoesNotExist = 'Cet utilisateur n\'est pas inscrit !'
 	}
 
-	export enum rcon {
+	export const enum rcon {
 		connexionError = 'Une erreur est survenue lors de la connexion au serveur avec RCON.',
-		add = connexionError + ' L\'ajout du joueur (\`${username}\`) à la whitelist doit être effectué manuellement.',
-		edit = connexionError + ' La modification de la whitelist doit être effectuée manuellement (retrait de \`${oldUsername}\` et ajout de \`${newUsername}\`).',
-		remove = connexionError + ' Le retrait du joueur (\`${username}\`) dans la whitelist doit être effectué manuellement.'
+		add = connexionError + ' L\'ajout du joueur (`${username}`) à la whitelist doit être effectué manuellement.',
+		edit = connexionError + ' La modification de la whitelist doit être effectuée manuellement (retrait de `${oldUsername}` et ajout de `${newUsername}`).',
+		remove = connexionError + ' Le retrait du joueur (`${username}`) dans la whitelist doit être effectué manuellement.'
 	}
 }
 
@@ -231,16 +231,16 @@ export namespace Logs {
 }
 
 export namespace Services {
-	export enum html {
+	export const enum html {
 		style = '<style>h1,h2,h3,h4,h5,h6,p,table{font-family:arial, sans-serif;color:#d4dfe4;}p{text-align:right;}html{background-color:#141414;padding:0 40px;}table{border-collapse:collapse; width:100%;border-spacing:0;}td,th{border:1px solid #4d4d4d;padding:8px;}tr:nth-child(even){background-color:#303030;}.user{display:flex;align-items:center;height:auto;}.center{text-align:center;}img{height:50px;border-radius:5px;margin-right:10px;}.date:first-letter{text-transform: capitalize;}</style>',
-		script = `<script>async function fetchUsername (minecraftUuid) { const apiUrl = \'${mojangApiUrl}/user/profile/\' + minecraftUuid; const response = await fetch("https://corsproxy.io/?" + apiUrl, {}); const user = await response.json(); document.getElementById(minecraftUuid).innerText = user.name;}</script>`,
+		script = `<script>async function fetchUsername (minecraftUuid) { const apiUrl = '${mojangApiUrl}/user/profile/' + minecraftUuid; const response = await fetch("https://corsproxy.io/?" + apiUrl, {}); const user = await response.json(); document.getElementById(minecraftUuid).innerText = user.name;}</script>`,
 		template = '<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Membres de ${minecraftServerName}</title>'+style+'</head><body><h1>Membres de ' + minecraftServerName + '</h1><table><tr><th>Membre</th><th>Nom d\'utilisateur Minecraft</th><th>Statut</th><th>Date d\'inscription</th><th>Dernière modification</th></tr>${table}</table><p>Joueurs inscrits : ${memberCount}</p></body>'+script+'</html>',
 		templateWithStatus = `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Membres de ${minecraftServerName}</title>`+style+'</head><body><h1>Membres de ' + minecraftServerName + 'avec le statut « ${status} »</h1><table><tr><th>Membre</th><th>Nom d\'utilisateur Minecraft</th><th>Date d\'inscription</th><th>Dernière modification</th></tr>${table}</table><p>Membres ayant le statut « ${status} » : ${memberCount}</p></body>'+script+'</html>',
 		rowTemplate = '<tr><td><div class="user"><img src="${imgUrl}" alt="Photo de profil de ${username}">${username}</div></td><td id="${minecraftUuid}"><button onclick="fetchUsername(\'${minecraftUuid}\')">Afficher</button></td><td class="center">${status}</td><td class="date">${createdAt}</td><td class="date">${updatedAt}</td></tr>',
 		rowTemplateWithStatus = '<tr><td><div class="user"><img src="${imgUrl}" alt="Photo de profil de ${username}">${username}</div></td><td id="${minecraftUuid}"><button onclick="fetchUsername(\'${minecraftUuid}\')">Afficher</button></td><td class="date">${createdAt}</td><td class="date">${updatedAt}</td></tr>'
 	}
 
-	export enum userStatus {
+	export const enum userStatus {
 		cantSendDm = 'Attention : Impossible d\'envoyer un message à cet utilisateur en raison de ses paramètres de confidentialité !',
 		dmAddedToWhitelist = `Tu a été ajouté à la whitelist de ${minecraftServerName}.`,
 		dmRemovedFromWhitelist = `Tu a été retiré de la whitelist de ${minecraftServerName}. Contacte les administrateurs pour plus de détails.`,

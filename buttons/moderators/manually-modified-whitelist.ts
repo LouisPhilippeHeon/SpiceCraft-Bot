@@ -24,11 +24,7 @@ export async function execute(interaction: ButtonInteraction) {
 
 	await editApprovalRequest(interaction.message, template(ButtonEvents.usernameChangeConfirmation.messageUpdate, {discordUuid: discordUuid}), undefined, [], Colors.Green);
 
-	await sendMessageToMember(
-		ButtonEvents.usernameChangeConfirmation.messageSentToConfirmUsernameChange,
-		member,
-		interaction,
-		template(ButtonEvents.usernameChangeConfirmation.success, {discordUuid: discordUuid}),
-		template(ButtonEvents.usernameChangeConfirmation.successNoDm, {discordUuid: discordUuid})
-	);
+	const replyOnSuccess = template(ButtonEvents.usernameChangeConfirmation.success, {discordUuid: discordUuid});
+	const replyOnFailure = template(ButtonEvents.usernameChangeConfirmation.successNoDm, {discordUuid: discordUuid});
+	await sendMessageToMember(ButtonEvents.usernameChangeConfirmation.messageSentToConfirmUsernameChange, member, interaction, replyOnSuccess, replyOnFailure);
 }

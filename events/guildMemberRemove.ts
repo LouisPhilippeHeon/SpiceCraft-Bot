@@ -13,11 +13,11 @@ export const once = false;
 export async function execute(member: GuildMember) {
 	try {
 		info(template(Logs.memberLeft, {username: member.user.username}));
-		let userFromDb: UserFromDb | null = await getUserByDiscordUuid(member.user.id).catch(() => null);
+		const userFromDb: UserFromDb | null = await getUserByDiscordUuid(member.user.id).catch(() => null);
 		if (!userFromDb) return;
 
 		// If user leaves server or was banned before his request was approved
-		if (userFromDb.inscription_status === inscriptionStatus.awaitingApproval) {
+		if (userFromDb.isAwaitingApproval()) {
 			await (await findApprovalRequestOfMember(member.guild, member.user)).delete();
 			await deleteEntry(member.user.id);
 			return;
@@ -45,7 +45,7 @@ async function handleUserLeft(member: GuildMember) {
 }
 
 async function handleBan(userFromDb: UserFromDb, member: GuildMember) {
-	if (userFromDb.inscription_status === inscriptionStatus.rejected) return;
+	if (userFromDb.isRejected()) return;
 
 	await changeStatus(member.user.id, inscriptionStatus.rejected);
 	const whitelistChannel = await fetchBotChannel(member.guild);
@@ -60,14 +60,14 @@ function createMessage(discordUuid: string): MessageCreateOptions {
 	});
 
 	const ignore = new ButtonBuilder({
-		customId: 'dissmiss',
+		customId: 'dismiss',
 		label: Components.buttons.ignore,
 		style: ButtonStyle.Secondary
 	});
 
 	const deleteEmbed = new EmbedBuilder({
 		title: Components.titles.userLeft,
-		description: template(Components.descriptions.userLeft, {discordUuid: discordUuid})
+		description: template(Components.descriptions.discordAccount, {discordUuid: discordUuid})
 	});
 
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmDelete, ignore);
@@ -82,14 +82,14 @@ function createMessageBanned(bannedUuid: string): MessageCreateOptions {
 	});
 
 	const ignore = new ButtonBuilder({
-		customId: 'dissmiss',
+		customId: 'dismiss',
 		label: Components.buttons.ignore,
 		style: ButtonStyle.Secondary
 	});
 
 	const banEmbed = new EmbedBuilder({
 		title: Components.titles.userBanned,
-		description: template(Components.descriptions.userBanned, {discordUuid: bannedUuid})
+		description: template(Components.descriptions.discordAccount, {discordUuid: bannedUuid})
 	});
 
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmBan, ignore);

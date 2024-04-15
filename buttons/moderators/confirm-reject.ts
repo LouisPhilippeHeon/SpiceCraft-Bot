@@ -16,7 +16,7 @@ export async function execute(interaction: ButtonInteraction) {
 	let statusChanged = false;
 
 	const whitelistChannel = await fetchBotChannel(interaction.guild);
-	let approvalRequest: Message | null = await whitelistChannel.messages.fetch(messageUuid).catch(() => null);
+	const approvalRequest: Message | null = await whitelistChannel.messages.fetch(messageUuid).catch(() => null);
 
 	await interaction.message.delete();
 
@@ -26,10 +26,10 @@ export async function execute(interaction: ButtonInteraction) {
 		member = await fetchGuildMember(interaction.guild, discordUuid);
 	}
 	catch (e) {
-		if (statusChanged)
-			await interaction.reply(e.message + '\n' + template(ButtonEvents.rejection.userStillInBdExplanation, {discordUuid: discordUuid}));
-		else
-			await interaction.reply({ content: e.message, ephemeral: true });
+		await interaction.reply(statusChanged
+			? e.message + '\\n' + template(ButtonEvents.rejection.userStillInBdExplanation, {discordUuid: discordUuid})
+			: { content: e.message, ephemeral: true }
+		);
 
 		if (approvalRequest) await approvalRequest.delete();
 		return;
@@ -38,11 +38,7 @@ export async function execute(interaction: ButtonInteraction) {
 	if (approvalRequest)
 		await editApprovalRequest(approvalRequest, template(ButtonEvents.rejection.requestDenied, {discordUuid: interaction.user.id}), undefined, [], Colors.Red);
 
-	await sendMessageToMember(
-		ButtonEvents.rejection.messageSentToUserToInformRejection,
-		member,
-		interaction,
-		template(ButtonEvents.rejection.success, {discordUuid: discordUuid}),
-		template(ButtonEvents.rejection.successNoDm, {discordUuid: discordUuid})
-	);
+	const messageOnSuccess = template(ButtonEvents.rejection.success, {discordUuid: discordUuid});
+	const messageOnFailure = template(ButtonEvents.rejection.successNoDm, {discordUuid: discordUuid});
+	await sendMessageToMember(ButtonEvents.rejection.messageSentToUserToInformRejection, member, interaction, messageOnSuccess, messageOnFailure);
 }

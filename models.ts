@@ -1,3 +1,4 @@
+import { inscriptionStatus } from './bot-constants';
 import { changeMinecraftUuid, changeStatus, deleteEntry } from './services/database';
 import { Client, Collection, Guild, GuildMember, Interaction } from 'discord.js';
 import { whitelistAdd, whitelistRemove, whitelistReplaceUsername } from './services/rcon';
@@ -61,5 +62,13 @@ export class UserFromDb {
 
 	async fetchGuildMember(guild: Guild): Promise<GuildMember> {
 		return await fetchGuildMember(guild, this.discord_uuid);
+	}
+
+	isAwaitingApproval(): boolean {
+		return this.inscription_status === inscriptionStatus.awaitingApproval;
+	}
+
+	isRejected(): boolean {
+		return this.inscription_status === inscriptionStatus.rejected;
 	}
 }

@@ -65,6 +65,7 @@ export async function changeStatus(discordUuid: string, newStatus: number) {
 
 export async function changeMinecraftUuid(discordUuid: string, minecraftUuid: string) {
 	let isUnchanged;
+
 	try {
 		const affectedRows = await tags.update({ minecraft_uuid: minecraftUuid }, { where: { discord_uuid: discordUuid }});
 		isUnchanged = (affectedRows[0] === 0);
@@ -75,6 +76,7 @@ export async function changeMinecraftUuid(discordUuid: string, minecraftUuid: st
 
 		throw new Error(Errors.database.unknownError);
 	}
+
 	if (isUnchanged)
 		throw new Error(Errors.database.userDoesNotExist);
 }
@@ -88,11 +90,11 @@ export async function getUserByDiscordUuid(discordUuid: string): Promise<UserFro
 	return Object.assign(new UserFromDb(), tag.get({ plain: true }));
 }
 
-export async function getUserByMinecraftUuid(minecraftUuid: string): Promise<UserFromDb | null> {
+export async function getUserByMinecraftUuid(minecraftUuid: string): Promise<UserFromDb> {
 	const tag = await tags.findOne({ where: { minecraft_uuid: minecraftUuid }});
 
 	if (!tag)
-		return null;
+		throw new Error(Errors.database.userDoesNotExist);
 
 	return Object.assign(new UserFromDb(), tag.get({ plain: true }));
 }

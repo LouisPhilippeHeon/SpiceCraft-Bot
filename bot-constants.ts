@@ -17,7 +17,7 @@ export const client = new Client({
 	]
 }) as ClientWithCommands;
 
-export enum inscriptionStatus {
+export const enum inscriptionStatus {
 	awaitingApproval = 0,
 	approved = 1,
 	rejected = 2

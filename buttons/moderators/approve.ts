@@ -16,10 +16,10 @@ export async function execute(buttonInteraction: ButtonInteraction) {
 	let member: GuildMember;
 
 	try {
-		let user = await getUserByDiscordUuid(discordUuid);
-		member = await user.fetchGuildMember(interaction.guild);
-		await addToWhitelist(user, discordUuid);
-		await user.changeStatus(inscriptionStatus.approved);
+		const userFromDb = await getUserByDiscordUuid(discordUuid);
+		member = await userFromDb.fetchGuildMember(interaction.guild);
+		await addToWhitelist(userFromDb, discordUuid);
+		await userFromDb.changeStatus(inscriptionStatus.approved);
 	}
 	catch (e) {
 		if (e.message !== 'rcon-failed') {
@@ -32,13 +32,9 @@ export async function execute(buttonInteraction: ButtonInteraction) {
 	await addPlayerRole(member);
 	await editApprovalRequest(interaction.message, template(ButtonEvents.approbation.requestGranted, {discordUuid: interaction.user.id}), undefined, [], Colors.Green);
 
-	await sendMessageToMember(
-		ButtonEvents.approbation.messageSentToPlayerToConfirmInscription,
-		member,
-		interaction,
-		template(ButtonEvents.approbation.success, {discordUuid: discordUuid}),
-		template(ButtonEvents.approbation.successNoDm, {discordUuid: discordUuid})
-	);
+	const messageOnSuccess = template(ButtonEvents.approbation.success, {discordUuid: discordUuid});
+	const messageOnFailure = template(ButtonEvents.approbation.successNoDm, {discordUuid: discordUuid});
+	await sendMessageToMember(ButtonEvents.approbation.messageSentToPlayerToConfirmInscription, member, interaction, messageOnSuccess, messageOnFailure);
 }
 
 async function addToWhitelist(user: UserFromDb, discordUuid: string) {

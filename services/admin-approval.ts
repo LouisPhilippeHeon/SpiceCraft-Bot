@@ -18,10 +18,9 @@ export async function createApprovalRequest(user: User, guild: Guild, username: 
 
 	let description: string;
 
-	if (inviter)
-		description = template(Components.descriptions.approvalRequestNewUser, {discordUuid: user.id, username: username, inviter: inviter.substring(0, 32)});
-	else
-		description = template(Components.descriptions.approvalRequest, {discordUuid: user.id, username: username});
+	description = inviter
+		? template(Components.descriptions.approvalRequestNewUser, {discordUuid: user.id, username: username, inviter: inviter.substring(0, 32)})
+		: template(Components.descriptions.approvalRequest, {discordUuid: user.id, username: username});
 
 	const approvalRequestEmbed = new EmbedBuilder({
 		title: template(Components.titles.approvalRequest, {discordUsername: user.username}),
@@ -42,7 +41,7 @@ export async function createUsernameChangeRequest(user: User, guild: Guild, user
 	});
 
 	const ignore = new ButtonBuilder({
-		customId: 'dissmiss',
+		customId: 'dismiss',
 		label: Components.buttons.doNotUpdate,
 		style: ButtonStyle.Secondary
 	});

@@ -12,12 +12,12 @@ export async function execute(interaction: ButtonInteraction) {
 	const discordUuid = interaction.customId.split('_')[1];
 
 	try {
-		let user = await getUserByDiscordUuid(discordUuid);
-		await user.removeFromWhitelist();
-		await user.changeStatus(inscriptionStatus.rejected);
+		const userFromDb = await getUserByDiscordUuid(discordUuid);
+		await userFromDb.removeFromWhitelist();
+		await userFromDb.changeStatus(inscriptionStatus.rejected);
 	}
 	catch (e) {
-		await interaction.reply({content: e.message, ephemeral: true});
+		await interaction.reply({ content: e.message, ephemeral: true });
 		await interaction.message.delete();
 		return;
 	}
