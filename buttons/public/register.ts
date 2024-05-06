@@ -39,24 +39,22 @@ export async function execute(buttonInteraction: ButtonInteraction) {
 }
 
 async function registerUser(interactionToReplyFrom?: ButtonInteraction) {
-	let replyToThisButton = interactionToReplyFrom;
-
 	try {
-		const isFirstTimeMember = await askIfFirstTimeMember(replyToThisButton);
-		replyToThisButton = await askWhatIsMinecraftUsername();
+		const isFirstTimeMember = await askIfFirstTimeMember(interactionToReplyFrom);
+		interactionToReplyFrom = await askWhatIsMinecraftUsername();
 
 		let userThatInvited;
 
 		if (isFirstTimeMember) {
-			userThatInvited = await askWhoInvited(replyToThisButton);
-			replyToThisButton = await getRulesAcknowledgment();
+			userThatInvited = await askWhoInvited(interactionToReplyFrom);
+			interactionToReplyFrom = await getRulesAcknowledgment();
 		}
 
 		await createUser(interaction.user.id, userFromMojangApi.id);
 		await createApprovalRequest(interaction.user, interaction.guild, userFromMojangApi.name, userThatInvited);
 
-		if (replyToThisButton && !replyToThisButton.replied)
-			await replyToThisButton.reply(ButtonEvents.register.waitForAdminApprobation);
+		if (interactionToReplyFrom && !interactionToReplyFrom.replied)
+			await interactionToReplyFrom.reply(ButtonEvents.register.waitForAdminApprobation);
 		else
 			await dmChannel.send(ButtonEvents.register.waitForAdminApprobation)
 	}
@@ -68,7 +66,7 @@ async function registerUser(interactionToReplyFrom?: ButtonInteraction) {
 			warn(template(Logs.usernameAlreadyTaken, {discordUsername: interaction.user.username, minecraftUsername: userFromMojangApi.name}));
 		}
 
-		await sendRetryMessage(message, true, (replyToThisButton && !replyToThisButton.replied) && replyToThisButton);
+		await sendRetryMessage(message, true, (interactionToReplyFrom && !interactionToReplyFrom.replied) && interactionToReplyFrom);
 	}
 }
 
@@ -202,7 +200,7 @@ async function sendRetryMessage(message: string, isNewUser: boolean, interaction
 	catch {
 		const linkToRegister = new ButtonBuilder({ url: interaction.message.url, label: Components.buttons.retry, style: ButtonStyle.Link });
 		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(linkToRegister);
-		await retryMessage.edit({ components: [row]} );
+		await retryMessage.edit({ components: [row] });
 		return;
 	}
 
