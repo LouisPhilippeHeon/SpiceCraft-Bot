@@ -1,6 +1,7 @@
 import { client } from './bot-constants';
 import { playerRoleName, whitelistChannelName } from './config';
 import { ChannelType, Colors, Guild, GuildMember, Interaction, InteractionReplyOptions, MessagePayload, PermissionsBitField, Role, TextChannel } from 'discord.js';
+import { SpiceCraftError } from './models/error';
 import { error, warn } from './services/logger';
 import { Errors, Logs, Utils } from './strings';
 
@@ -56,7 +57,7 @@ export async function removePlayerRole(member: GuildMember) {
 
 export async function fetchGuildMember(guild: Guild, id: string): Promise<GuildMember> {
 	return await guild.members.fetch(id).catch(() => {
-		throw new Error(Errors.discord.noDiscordUserWithThisUuid);
+		throw new SpiceCraftError(Errors.discord.noDiscordUserWithThisUuid);
 	});
 }
 
@@ -79,7 +80,7 @@ export async function replyOrFollowUp(message: string | MessagePayload | Interac
 
 export async function sendMessageToMember(message: string, member: GuildMember, interaction: Interaction, replyOnSuccess: string, replyOnFailure: string) {
 	if (!interaction.isRepliable())
-		throw new Error(Errors.discord.notRepliable);
+		throw new SpiceCraftError(Errors.discord.notRepliable);
 
 	try {
 		await member.send(message);

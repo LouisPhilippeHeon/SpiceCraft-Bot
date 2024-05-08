@@ -1,6 +1,7 @@
 import Axios from 'axios';
 import { setupCache } from 'axios-cache-interceptor';
 import { mojangApiUrl } from '../bot-constants';
+import { SpiceCraftError } from '../models/error';
 import { error } from './logger';
 import { UserFromMojangApi } from '../models';
 import { Errors } from '../strings';
@@ -18,8 +19,8 @@ export async function getMojangUser(username: string): Promise<UserFromMojangApi
 		error(JSON.stringify(apiError), 'HTP_FUN');
 
 		if (apiError.error)
-			throw new Error(Errors.api.couldNotConnectToApi);
-		throw new Error(Errors.api.noMojangAccountWithThatUsername);
+			throw new SpiceCraftError(Errors.api.couldNotConnectToApi);
+		throw new SpiceCraftError(Errors.api.noMojangAccountWithThatUsername);
 	}
 }
 
@@ -31,7 +32,7 @@ export async function getUsernameFromUuid(uuid: string): Promise<string> {
 		error(JSON.stringify(e.response.data), 'HTP_FID');
 
 		if (e.response.status === 400)
-			throw new Error(Errors.api.noMojangAccountWithThatUuid);
-		throw new Error(Errors.api.couldNotConnectToApi);
+			throw new SpiceCraftError(Errors.api.noMojangAccountWithThatUuid);
+		throw new SpiceCraftError(Errors.api.couldNotConnectToApi);
 	}
 }

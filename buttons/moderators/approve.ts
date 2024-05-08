@@ -2,6 +2,7 @@ import { editApprovalRequest } from '../../services/admin-approval';
 import { inscriptionStatus } from '../../bot-constants';
 import { getUserByDiscordUuid } from '../../services/database';
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, GuildMember, PermissionFlagsBits } from 'discord.js';
+import { SpiceCraftError } from '../../models/error';
 import { ButtonData, UserFromDb } from '../../models';
 import { ButtonEvents, Components } from '../../strings';
 import { addPlayerRole, sendMessageToMember, template } from '../../utils';
@@ -43,7 +44,7 @@ async function addToWhitelist(user: UserFromDb, discordUuid: string) {
 	}
 	catch (e) {
 		await rconFailed(discordUuid, e);
-		throw new Error('rcon-failed');
+		throw new SpiceCraftError('rcon-failed');
 	}
 }
 

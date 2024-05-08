@@ -2,6 +2,7 @@ import { createApprovalRequest, createUsernameChangeRequest, editApprovalRequest
 import { timeoutUserInput } from '../../bot-constants';
 import { changeMinecraftUuid, createUser, getUserByDiscordUuid } from '../../services/database';
 import { ActionRowBuilder, ButtonBuilder, ButtonComponent, ButtonInteraction, ButtonStyle, DMChannel, EmbedBuilder, Message } from 'discord.js';
+import { SpiceCraftError } from '../../models/error';
 import { getMojangUser } from '../../services/http';
 import { info, warn } from '../../services/logger';
 import { ButtonData, UserFromDb, UserFromMojangApi } from '../../models';
@@ -108,7 +109,7 @@ async function askWhatIsMinecraftUsername(interactionToReplyFrom?: ButtonInterac
 		if (e.message === Errors.api.noMojangAccountWithThatUsername)
 			message = template(ButtonEvents.register.minecraftAccountDoesNotExist, {minecraftUsername: minecraftUsernameSentByUser});
 
-		throw new Error(message);
+		throw new SpiceCraftError(message);
 	}
 
 	const confirm = new ButtonBuilder({ customId: 'confirm-username-selection', label: Components.buttons.enthousiastYes, style: ButtonStyle.Primary });
@@ -219,14 +220,14 @@ async function updateAdminApprovalRequest(minecraftUsername: string) {
 async function collectMessage(): Promise<string> {
 	const collectorFilter = (m: Message) => m.author.id === interaction.user.id;
 	const collected = await dmChannel.awaitMessages({ filter: collectorFilter, max: 1, time: timeoutUserInput });
-	if (collected.size === 0) throw new Error(Errors.userResponseTimeout);
+	if (collected.size === 0) throw new SpiceCraftError(Errors.userResponseTimeout);
 	return collected.first().content;
 }
 
 async function collectMessageComponent(message: Message, customId?: string): Promise<ButtonInteraction> {
 	const collectorFilter = (i: ButtonInteraction) => i.user.id === interaction.user.id && (i.customId === customId || !customId);
 	return await message.awaitMessageComponent({ filter: collectorFilter, time: timeoutUserInput }).catch(() => {
-		throw new Error(Errors.userResponseTimeout)
+		throw new SpiceCraftError(Errors.userResponseTimeout)
 	}) as ButtonInteraction;
 }
 

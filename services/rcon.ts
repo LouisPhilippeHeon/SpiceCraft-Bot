@@ -1,4 +1,5 @@
 import { rconConnexions } from '../config';
+import { SpiceCraftError } from '../models/error';
 import { getUsernameFromUuid } from './http';
 import { error } from './logger';
 import { Errors } from '../strings';
@@ -16,7 +17,7 @@ export async function whitelistAdd(uuid: string) {
 	}
 	catch (e) {
 		error(e, 'RCN_ADD');
-		throw new Error(template(Errors.rcon.add, { username: username }));
+		throw new SpiceCraftError(template(Errors.rcon.add, { username: username }));
 	}
 }
 
@@ -32,7 +33,7 @@ export async function whitelistRemove(uuid: string) {
 	}
 	catch (e) {
 		error(e, 'RCN_RMV');
-		throw new Error(template(Errors.rcon.remove, { username: username }));
+		throw new SpiceCraftError(template(Errors.rcon.remove, { username: username }));
 	}
 }
 
@@ -50,6 +51,6 @@ export async function whitelistReplaceUsername(newUuid: string, oldUuid: string)
 	}
 	catch (e) {
 		error(e, 'RCN_EDT');
-		throw new Error(template(Errors.rcon.edit, { oldUsername: oldUsername, newUsername: newUsername }));
+		throw new SpiceCraftError(template(Errors.rcon.edit, { oldUsername: oldUsername, newUsername: newUsername }));
 	}
 }

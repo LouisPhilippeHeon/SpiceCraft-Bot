@@ -1,4 +1,5 @@
 import { inscriptionStatus } from '../bot-constants';
+import { SpiceCraftError } from '../models/error';
 import { UserFromDb } from '../models';
 const Sequelize = require('sequelize');
 import { Errors } from '../strings';
@@ -48,19 +49,19 @@ export async function createUser(discordUuid: string, minecraftUuid: string, sta
 	}
 	catch (e) {
 		if (e.name === 'SequelizeUniqueConstraintError')
-			throw new Error(Errors.database.notUnique);
+			throw new SpiceCraftError(Errors.database.notUnique);
 
-		throw new Error(Errors.database.unknownError);
+		throw new SpiceCraftError(Errors.database.unknownError);
 	}
 }
 
 export async function changeStatus(discordUuid: string, newStatus: number) {
-	if (![0, 1, 2].includes(newStatus)) throw new Error(Errors.database.invalidStatus);
+	if (![0, 1, 2].includes(newStatus)) throw new SpiceCraftError(Errors.database.invalidStatus);
 
 	const affectedRows = await tags.update({ inscription_status: newStatus }, { where: { discord_uuid: discordUuid }});
 
 	if (affectedRows[0] === 0)
-		throw new Error(Errors.database.userDoesNotExist);
+		throw new SpiceCraftError(Errors.database.userDoesNotExist);
 }
 
 export async function changeMinecraftUuid(discordUuid: string, minecraftUuid: string) {
@@ -72,20 +73,20 @@ export async function changeMinecraftUuid(discordUuid: string, minecraftUuid: st
 	}
 	catch (e) {
 		if (e.name === 'SequelizeUniqueConstraintError')
-			throw new Error(Errors.database.notUnique);
+			throw new SpiceCraftError(Errors.database.notUnique);
 
-		throw new Error(Errors.database.unknownError);
+		throw new SpiceCraftError(Errors.database.unknownError);
 	}
 
 	if (isUnchanged)
-		throw new Error(Errors.database.userDoesNotExist);
+		throw new SpiceCraftError(Errors.database.userDoesNotExist);
 }
 
 export async function getUserByDiscordUuid(discordUuid: string): Promise<UserFromDb> {
 	const tag = await tags.findOne({ where: { discord_uuid: discordUuid }});
 
 	if (!tag)
-		throw new Error(Errors.database.userDoesNotExist);
+		throw new SpiceCraftError(Errors.database.userDoesNotExist);
 
 	return Object.assign(new UserFromDb(), tag.get({ plain: true }));
 }
@@ -94,7 +95,7 @@ export async function getUserByMinecraftUuid(minecraftUuid: string): Promise<Use
 	const tag = await tags.findOne({ where: { minecraft_uuid: minecraftUuid }});
 
 	if (!tag)
-		throw new Error(Errors.database.userDoesNotExist);
+		throw new SpiceCraftError(Errors.database.userDoesNotExist);
 
 	return Object.assign(new UserFromDb(), tag.get({ plain: true }));
 }
@@ -110,7 +111,7 @@ export async function deleteEntry(discordUuid: string) {
 	const tagToDelete = await tags.findOne({ where: { discord_uuid: discordUuid }})
 
 	if (!tagToDelete)
-		throw new Error(Errors.database.userDoesNotExist);
+		throw new SpiceCraftError(Errors.database.userDoesNotExist);
 
 	tagToDelete.destroy();
 }
