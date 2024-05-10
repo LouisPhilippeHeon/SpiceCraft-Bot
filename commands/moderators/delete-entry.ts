@@ -21,19 +21,14 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 	const removeFromWhitelistOption = interaction.options.getBoolean('remove-from-whitelist');
 	const removeFromWhitelist = removeFromWhitelistOption ?? true;
 
-	try {
-		const userFromDb = await getUserByDiscordUuid(discordUuid);
-		await userFromDb.delete();
+	const userFromDb = await getUserByDiscordUuid(discordUuid);
+	await userFromDb.delete();
 
-		await fetchGuildMember(interaction.guild, discordUuid).then(
-			async (member) => await removePlayerRole(member)
-		).catch();
+	await fetchGuildMember(interaction.guild, discordUuid).then(
+		async (member) => await removePlayerRole(member)
+	).catch();
 
-		if (removeFromWhitelist)
-			await userFromDb.removeFromWhitelist();
-		await interaction.reply({ content: template(Commands.deleteEntry.reply, {discordUuid: discordUuid}), ephemeral: true });
-	}
-	catch (e) {
-		await interaction.reply(e.message);
-	}
+	if (removeFromWhitelist)
+		await userFromDb.removeFromWhitelist();
+	await interaction.reply({ content: template(Commands.deleteEntry.reply, {discordUuid: discordUuid}), ephemeral: true });
 }

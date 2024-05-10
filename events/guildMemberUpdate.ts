@@ -1,8 +1,9 @@
 import { clientId, playerRoleName } from '../config';
 import { deleteEntry } from '../services/database';
 import { AuditLogEvent, Events, GuildMember } from 'discord.js';
-import { error, info } from '../services/logger';
-import { Errors, Logs } from '../strings';
+import { handleError } from '../services/error-handler';
+import { info } from '../services/logger';
+import { Logs } from '../strings';
 import { template } from '../utils';
 
 export const name = Events.GuildMemberUpdate;
@@ -23,8 +24,7 @@ export async function execute(oldMember: GuildMember, newMember: GuildMember) {
 				await deleteEntry(newMember.user.id);
 		}
 		catch (e) {
-			if (e.code === 50013) error(Errors.discord.cantReadLogs, 'GMR_LOG');
-			else error(e, 'GMU_UKN');
+			handleError(e, name);
 		}
 	}
 }

@@ -1,9 +1,10 @@
 import { editApprovalRequest } from '../../services/admin-approval';
+import { ButtonData } from '../../models/button-data';
 import { getUserByDiscordUuid } from '../../services/database';
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, GuildMember, PermissionFlagsBits } from 'discord.js';
 import { SpiceCraftError } from '../../models/error';
-import { ButtonData, UserFromDb } from '../../models';
 import { ButtonEvents, Components } from '../../strings';
+import { UserFromDb } from '../../models/user-from-db';
 import { sendMessageToMember, template } from '../../utils';
 
 export const data = new ButtonData('update', PermissionFlagsBits.BanMembers);
@@ -19,10 +20,13 @@ export async function execute(buttonInteraction: ButtonInteraction) {
 	try {
 		const userFromDb = await getUserByDiscordUuid(discordUuid);
 		member = await userFromDb.fetchGuildMember(interaction.guild);
+
 		await modifyWhitelist(userFromDb, minecraftUuid, discordUuid);
+
 		await userFromDb.editMinecraftUuid(minecraftUuid);
 	}
 	catch (e) {
+		// TODO Refactor
 		if (e.message !== 'rcon-failed') {
 			await interaction.reply(e.message);
 			await interaction.message.delete();
@@ -60,7 +64,7 @@ async function rconFailed(discordUuid: string, minecraftUuid: string, e: Error) 
 		style: ButtonStyle.Secondary
 	});
 
-	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmManualModificationOfWhitelist, cancel);
+	const row = new ActionRowBuilder<ButtonBuilder>().setComponents(confirmManualModificationOfWhitelist, cancel);
 	await editApprovalRequest(interaction.message, `${e.message} ${template(ButtonEvents.clickToConfirmChangesToWhitelist, {discordUuid: discordUuid})}`, undefined, [row], Colors.Yellow);
 
 	await interaction.reply({ content: ButtonEvents.usernameChangeConfirmation.changeWhitelistBeforeCliking, ephemeral: true });

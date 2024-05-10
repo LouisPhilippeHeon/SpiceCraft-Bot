@@ -1,8 +1,10 @@
 import { editApprovalRequest } from '../../services/admin-approval';
+import { ButtonData } from '../../models/button-data';
 import { changeStatus } from '../../services/database';
 import { inscriptionStatus } from '../../bot-constants';
 import { ButtonInteraction, Colors, GuildMember, Message, PermissionFlagsBits } from 'discord.js';
-import { ButtonData } from '../../models';
+import { SpiceCraftError } from '../../models/error';
+import { handleError } from '../../services/error-handler';
 import { ButtonEvents } from '../../strings';
 import { fetchBotChannel, fetchGuildMember, sendMessageToMember, template } from '../../utils';
 
@@ -13,26 +15,20 @@ export async function execute(interaction: ButtonInteraction) {
 	const messageUuid = interaction.customId.split('_')[2];
 
 	let member: GuildMember;
-	let statusChanged = false;
 
 	const whitelistChannel = await fetchBotChannel(interaction.guild);
 	const approvalRequest: Message | null = await whitelistChannel.messages.fetch(messageUuid).catch(() => null);
 
 	await interaction.message.delete();
 
+	await changeStatus(discordUuid, inscriptionStatus.approved);
+
 	try {
-		await changeStatus(discordUuid, inscriptionStatus.approved);
-		statusChanged = true;
 		member = await fetchGuildMember(interaction.guild, discordUuid);
 	}
 	catch (e) {
-		await interaction.reply(statusChanged
-			? e.message + '\\n' + template(ButtonEvents.rejection.userStillInBdExplanation, {discordUuid: discordUuid})
-			: { content: e.message, ephemeral: true }
-		);
-
 		if (approvalRequest) await approvalRequest.delete();
-		return;
+		throw new SpiceCraftError(handleError(e, data.name) + '\n' + template(ButtonEvents.rejection.userStillInBdExplanation, {discordUuid: discordUuid}));
 	}
 
 	if (approvalRequest)

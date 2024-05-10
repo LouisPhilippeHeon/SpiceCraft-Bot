@@ -1,7 +1,9 @@
 import * as assert from 'assert';
 import { ButtonInteraction, Events } from 'discord.js';
+import { SpiceCraftError } from '../models/error';
+import { handleError } from '../services/error-handler';
 import { error } from '../services/logger';
-import { InteractionWithCommands } from '../models';
+import { InteractionWithCommands } from '../models/interaction-with-commands';
 import { Errors } from '../strings';
 import { replyOrFollowUp, template } from '../utils';
 
@@ -29,18 +31,14 @@ async function handleButtonInteraction(interaction: InteractionWithCommands) {
 	}
 
 	try {
-		assert(member);
+		assert(member, new SpiceCraftError(Errors.interaction.unauthorized));
 		if (button.data.permissions)
 			assert(member.permissions.has(button.data.permissions));
 
 		await button.execute(interaction);
 	}
 	catch (e) {
-		if (e.code === 'ERR_ASSERTION') await replyOrFollowUp({ content: Errors.interaction.unauthorized, ephemeral: true }, interaction);
-		else {
-			error(e, 'BTN_UKN');
-			await replyOrFollowUp({ content: Errors.interaction.buttonExecution, ephemeral: true }, interaction);
-		}
+		await replyOrFollowUp({ content: handleError(e, button.data.name, Errors.interaction.buttonExecution), ephemeral: true }, interaction);
 	}
 }
 
@@ -58,7 +56,6 @@ async function handleChatInputCommand(interaction: InteractionWithCommands) {
 		await command.execute(interaction);
 	}
 	catch (e) {
-		error(e, 'CMD_UKN');
-		await replyOrFollowUp({content: Errors.interaction.commandExecution, ephemeral: true}, interaction);
+		await replyOrFollowUp({ content: handleError(e, interaction.commandName, Errors.interaction.commandExecution), ephemeral: true }, interaction);
 	}
 }

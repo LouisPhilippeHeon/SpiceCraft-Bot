@@ -1,6 +1,6 @@
 import { client } from '../bot-constants';
-import { UserFromDb } from '../models';
 import { getStatusName, Services, statusToEmoji } from '../strings';
+import { UserFromDb } from '../models/user-from-db';
 import { template } from '../utils';
 
 export function buildHtml(users: UserFromDb[], status?: number) {

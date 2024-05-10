@@ -2,8 +2,8 @@ import { inscriptionStatus } from '../../bot-constants';
 import { getUsers } from '../../services/database';
 import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { buildHtml } from '../../services/html';
-import { UserFromDb } from '../../models';
 import { Commands, getStatusName, statusToEmoji } from '../../strings';
+import { UserFromDb } from '../../models/user-from-db';
 import { template } from '../../utils';
 
 export const data = new SlashCommandBuilder()
@@ -13,7 +13,7 @@ export const data = new SlashCommandBuilder()
 	.addStringOption(option =>
 		option.setName('statut')
 			  .setDescription(Commands.displayUsers.statusOptionDescription)
-			  .addChoices(
+			  .setChoices(
 				  { name: 'Approuvé', value: inscriptionStatus.approved.toString() },
 				  { name: 'Rejeté', value: inscriptionStatus.rejected.toString() },
 				  { name: 'En attente', value: inscriptionStatus.awaitingApproval.toString() }
@@ -21,7 +21,7 @@ export const data = new SlashCommandBuilder()
 	.addStringOption(option =>
 		option.setName('format')
 			  .setDescription(Commands.displayUsers.formatOptionDescription)
-			  .addChoices(
+			  .setChoices(
 				  { name: 'HTML', value: 'html' },
 				  { name: 'JSON', value: 'json' },
 				  { name: 'Messages', value: 'messages' }
@@ -106,7 +106,7 @@ async function sendMessages(interaction: ChatInputCommandInteraction, messages: 
 			: template(Commands.displayUsers.displayingUsersWithStatus, {status: getStatusName(status)})
 	});
 
-	messages.forEach(async (message) => {
+	for (const message of messages) {
 		await interaction.channel.send({ content: message });
-	});
+	}
 }

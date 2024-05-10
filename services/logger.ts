@@ -1,3 +1,4 @@
+import { handleError } from './error-handler';
 import fs = require('node:fs');
 
 const enum Colors {
@@ -22,18 +23,18 @@ export function warn(message: string) {
 	addToLogFile(formatLog(message, 'WARN'));
 }
 
-export function error(error: string | Error, code: string) {
+export function error(error: string | Error, source: string) {
 	const message = error instanceof Error ? error.stack : error;
-	logger.error(formatConsole(message, code));
-	addToLogFile(formatLog(message, 'ERROR', code));
+	logger.error(formatConsole(message, source));
+	addToLogFile(formatLog(message, 'ERROR', source));
 }
 
-function formatConsole(message: string, code?: string): string {
-	return code ? `[${getFormatedDate()}] [${code}] ${message}` : `[${getFormatedDate()}] ${message}`;
+function formatConsole(message: string, source?: string): string {
+	return source ? `[${getFormatedDate()}] [${source}] ${message}` : `[${getFormatedDate()}] ${message}`;
 }
 
-function formatLog(message: string, type: string, code?: string): string {
-	return code ? `[${type} ${code}] [${getFormatedDate()}] ${message}` : `[${type}] [${getFormatedDate()}] ${message}`;
+function formatLog(message: string, type: string, source?: string): string {
+	return source ? `[${type} ${source}] [${getFormatedDate()}] ${message}` : `[${type}] [${getFormatedDate()}] ${message}`;
 }
 
 function addToLogFile(message: string) {
@@ -45,7 +46,7 @@ function addToLogFile(message: string) {
 		fs.appendFileSync(filePath, `${message}\n`);
 	}
 	catch (e) {
-		logger.error(message);
+		handleError(e, 'LOG');
 	}
 }
 

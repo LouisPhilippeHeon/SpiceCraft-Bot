@@ -1,32 +1,8 @@
-import { inscriptionStatus } from './bot-constants';
-import { changeMinecraftUuid, changeStatus, deleteEntry } from './services/database';
-import { Client, Collection, Guild, GuildMember, Interaction } from 'discord.js';
-import { whitelistAdd, whitelistRemove, whitelistReplaceUsername } from './services/rcon';
-import { fetchGuildMember } from './utils';
-
-export interface ClientWithCommands extends Client {
-	commands: Collection<string, any>;
-	buttons: Collection<string, any>;
-}
-
-export type InteractionWithCommands = Interaction & {
-	client: ClientWithCommands;
-}
-
-export class UserFromMojangApi {
-	id: string;
-	name: string;
-}
-
-export class ButtonData {
-	name: string;
-	permissions: BigInt;
-
-	constructor(name: string, permisions?: BigInt) {
-		this.name = name;
-		this.permissions = permisions;
-	}
-}
+import { inscriptionStatus } from '../bot-constants';
+import { changeMinecraftUuid, changeStatus, deleteEntry } from '../services/database';
+import { Guild, GuildMember } from 'discord.js';
+import { whitelistAdd, whitelistRemove, whitelistReplaceUsername } from '../services/rcon';
+import { fetchGuildMember } from '../utils';
 
 export class UserFromDb {
 	readonly id: number;
@@ -39,6 +15,8 @@ export class UserFromDb {
 	async delete() {
 		await deleteEntry(this.discord_uuid);
 	}
+
+	// TODO Add player role, remove player role
 
 	async addToWhitelist() {
 		await whitelistAdd(this.minecraft_uuid);

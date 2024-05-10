@@ -1,5 +1,5 @@
+import { ClientWithCommands } from './models/client-with-commands';
 import { Client, GatewayIntentBits } from 'discord.js';
-import { ClientWithCommands } from './models';
 
 export const timeoutUserInput = 240000;
 export const mojangApiUrl = 'https://api.mojang.com';

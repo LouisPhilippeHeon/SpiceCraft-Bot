@@ -1,8 +1,8 @@
 import { editApprovalRequest } from '../../services/admin-approval';
 import { inscriptionStatus } from '../../bot-constants';
+import { ButtonData } from '../../models/button-data';
 import { changeStatus } from '../../services/database';
 import { ButtonInteraction, Colors, GuildMember, PermissionFlagsBits } from 'discord.js';
-import { ButtonData } from '../../models';
 import { ButtonEvents } from '../../strings';
 import { addPlayerRole, fetchGuildMember, sendMessageToMember, template } from '../../utils';
 
@@ -14,13 +14,13 @@ export async function execute(interaction: ButtonInteraction) {
 
 	try {
 		member = await fetchGuildMember(interaction.guild, discordUuid);
-		await changeStatus(discordUuid, inscriptionStatus.approved);
 	}
 	catch (e) {
-		await interaction.reply({content: e.message, ephemeral: true});
 		await interaction.message.delete();
-		return;
+		throw e;
 	}
+
+	await changeStatus(discordUuid, inscriptionStatus.approved);
 
 	await addPlayerRole(member);
 	await editApprovalRequest(interaction.message, template(ButtonEvents.approbation.requestGranted, {discordUuid: interaction.user.id}), undefined, [], Colors.Green);

@@ -1,8 +1,8 @@
 import { inscriptionStatus } from '../bot-constants';
 import { SpiceCraftError } from '../models/error';
-import { UserFromDb } from '../models';
 const Sequelize = require('sequelize');
 import { Errors } from '../strings';
+import { UserFromDb } from '../models/user-from-db';
 
 const sequelize = new Sequelize('database', 'user', 'password', {
 	host: 'localhost',
@@ -45,7 +45,7 @@ export async function createUser(discordUuid: string, minecraftUuid: string, sta
 			inscription_status: status
 		});
 
-		return Object.assign(new UserFromDb(), tag.get({ plain: true }))
+		return Object.assign(new UserFromDb(), tag.get({ plain: true }));
 	}
 	catch (e) {
 		if (e.name === 'SequelizeUniqueConstraintError')
@@ -65,11 +65,10 @@ export async function changeStatus(discordUuid: string, newStatus: number) {
 }
 
 export async function changeMinecraftUuid(discordUuid: string, minecraftUuid: string) {
-	let isUnchanged;
+	let affectedRows;
 
 	try {
-		const affectedRows = await tags.update({ minecraft_uuid: minecraftUuid }, { where: { discord_uuid: discordUuid }});
-		isUnchanged = (affectedRows[0] === 0);
+		affectedRows = await tags.update({ minecraft_uuid: minecraftUuid }, { where: { discord_uuid: discordUuid }});
 	}
 	catch (e) {
 		if (e.name === 'SequelizeUniqueConstraintError')
@@ -78,7 +77,7 @@ export async function changeMinecraftUuid(discordUuid: string, minecraftUuid: st
 		throw new SpiceCraftError(Errors.database.unknownError);
 	}
 
-	if (isUnchanged)
+	if (affectedRows.length > 0)
 		throw new SpiceCraftError(Errors.database.userDoesNotExist);
 }
 
@@ -108,7 +107,7 @@ export async function getUsers(status?: number): Promise<UserFromDb[]> {
 }
 
 export async function deleteEntry(discordUuid: string) {
-	const tagToDelete = await tags.findOne({ where: { discord_uuid: discordUuid }})
+	const tagToDelete = await tags.findOne({ where: { discord_uuid: discordUuid }});
 
 	if (!tagToDelete)
 		throw new SpiceCraftError(Errors.database.userDoesNotExist);

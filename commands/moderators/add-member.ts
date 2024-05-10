@@ -1,6 +1,7 @@
 import { inscriptionStatus } from '../../bot-constants';
 import { createUser, getUserByDiscordUuid } from '../../services/database';
 import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
+import { SpiceCraftError } from '../../models/error';
 import { getMojangUser } from '../../services/http';
 import { Commands } from '../../strings';
 import { addPlayerRole, fetchGuildMember, sendMessageToMember, template } from '../../utils';
@@ -22,7 +23,7 @@ export const data = new SlashCommandBuilder()
 	.addStringOption(option =>
 		option.setName('statut')
 			  .setDescription(Commands.addMember.statusOptionDescription)
-			  .addChoices(
+			  .setChoices(
 				  { name: 'Approuvé', value: inscriptionStatus.approved.toString() },
 				  { name: 'Rejeté', value: inscriptionStatus.rejected.toString() },
 				  { name: 'En attente', value: inscriptionStatus.awaitingApproval.toString() }
@@ -47,33 +48,27 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 }
 
 async function saveNewUser(interaction: ChatInputCommandInteraction, discordUuid: string, usernameMinecraft: string, status: number, silent: boolean) {
-	try {
-		const member = await fetchGuildMember(interaction.guild, discordUuid);
-		const userFromMojangApi = await getMojangUser(usernameMinecraft);
-		const userFromDb = await createUser(discordUuid, userFromMojangApi.id, status);
+	const member = await fetchGuildMember(interaction.guild, discordUuid);
+	const userFromMojangApi = await getMojangUser(usernameMinecraft);
+	const userFromDb = await createUser(discordUuid, userFromMojangApi.id, status);
 
-		if (status === inscriptionStatus.approved) {
-			await addPlayerRole(member);
-			try {
-				await userFromDb.addToWhitelist();
-			}
-			catch {
-				await interaction.reply(template(Commands.addMember.rconFailedManualInterventionRequired, {discordUuid: discordUuid}));
-				return;
-			}
+	if (status === inscriptionStatus.approved) {
+		await addPlayerRole(member);
+		try {
+			await userFromDb.addToWhitelist();
 		}
-
-		const messageOnSuccess = template(Commands.addMember.success, {discordUuid: discordUuid});
-		const messageOnFailure = template(Commands.addMember.successDmFailed, {discordUuid: discordUuid});
-
-		if (!silent && status !== inscriptionStatus.awaitingApproval)
-			await sendMessageToMember(getMessageToSendToUser(status), member, interaction, messageOnSuccess, messageOnFailure);
-		else
-			await interaction.reply(messageOnSuccess);
+		catch {
+			throw new SpiceCraftError(template(Commands.addMember.rconFailedManualInterventionRequired, {discordUuid: discordUuid}))
+		}
 	}
-	catch (e) {
-		await interaction.reply({ content: e.message, ephemeral: true });
-	}
+
+	const messageOnSuccess = template(Commands.addMember.success, {discordUuid: discordUuid});
+	const messageOnFailure = template(Commands.addMember.successDmFailed, {discordUuid: discordUuid});
+
+	if (!silent && status !== inscriptionStatus.awaitingApproval)
+		await sendMessageToMember(getMessageToSendToUser(status), member, interaction, messageOnSuccess, messageOnFailure);
+	else
+		await interaction.reply(messageOnSuccess);
 }
 
 function getMessageToSendToUser(status: number): string {

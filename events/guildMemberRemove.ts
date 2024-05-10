@@ -2,9 +2,10 @@ import { findApprovalRequestOfMember } from '../services/admin-approval';
 import { inscriptionStatus } from '../bot-constants';
 import { changeStatus, deleteEntry, getUserByDiscordUuid } from '../services/database';
 import { ActionRowBuilder, AuditLogEvent, ButtonBuilder, ButtonStyle, EmbedBuilder, Events, GuildMember, MessageCreateOptions } from 'discord.js';
-import { error, info } from '../services/logger';
-import { UserFromDb } from '../models';
-import { Components, Errors, Logs } from '../strings';
+import { handleError } from '../services/error-handler';
+import { info } from '../services/logger';
+import { Components, Logs } from '../strings';
+import { UserFromDb } from '../models/user-from-db';
 import { fetchBotChannel, template } from '../utils';
 
 export const name = Events.GuildMemberRemove;
@@ -34,8 +35,7 @@ export async function execute(member: GuildMember) {
 			await handleUserLeft(member);
 	}
 	catch (e) {
-		if (e.code === 50013) error(Errors.discord.cantReadLogs, 'GMR_LOG');
-		else error(e, 'GMR_UKN');
+		handleError(e, name);
 	}
 }
 

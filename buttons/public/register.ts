@@ -1,12 +1,14 @@
 import { createApprovalRequest, createUsernameChangeRequest, editApprovalRequestOfUser } from '../../services/admin-approval';
 import { timeoutUserInput } from '../../bot-constants';
+import { ButtonData } from '../../models/button-data';
 import { changeMinecraftUuid, createUser, getUserByDiscordUuid } from '../../services/database';
 import { ActionRowBuilder, ButtonBuilder, ButtonComponent, ButtonInteraction, ButtonStyle, DMChannel, EmbedBuilder, Message } from 'discord.js';
 import { SpiceCraftError } from '../../models/error';
 import { getMojangUser } from '../../services/http';
 import { info, warn } from '../../services/logger';
-import { ButtonData, UserFromDb, UserFromMojangApi } from '../../models';
 import { ButtonEvents, Components, Errors, Logs } from '../../strings';
+import { UserFromDb } from '../../models/user-from-db';
+import { UserFromMojangApi } from '../../models/user-from-mojang-api';
 import { replyOrFollowUp, template } from '../../utils';
 
 export const data = new ButtonData('inscription');
@@ -34,6 +36,7 @@ export async function execute(buttonInteraction: ButtonInteraction) {
 			await registerUser();
 	}
 	catch (e) {
+		// TODO Manage 50007 in the error handler service, so that we no longer catch errors here
 		if (e.code === 50007) await replyOrFollowUp({ content: ButtonEvents.register.dmsAreClosed, ephemeral: true }, interaction);
 		else throw e;
 	}
@@ -60,6 +63,9 @@ async function registerUser(interactionToReplyFrom?: ButtonInteraction) {
 			await dmChannel.send(ButtonEvents.register.waitForAdminApprobation)
 	}
 	catch (e) {
+		// TODO Move to error handler
+		if (!(e instanceof SpiceCraftError)) throw e;
+
 		let message = e.message;
 
 		if (message === Errors.database.notUnique) {
@@ -106,7 +112,7 @@ async function askWhatIsMinecraftUsername(interactionToReplyFrom?: ButtonInterac
 	catch (e) {
 		let message = e.message;
 
-		if (e.message === Errors.api.noMojangAccountWithThatUsername)
+		if (e.message === Errors.mojangApi.noMojangAccountWithThatUsername)
 			message = template(ButtonEvents.register.minecraftAccountDoesNotExist, {minecraftUsername: minecraftUsernameSentByUser});
 
 		throw new SpiceCraftError(message);
@@ -173,8 +179,9 @@ async function updateExistingUser(userFromDb: UserFromDb, interactionToReplyFrom
 		}
 	}
 	catch (e) {
+		// TODO Move to error handler
 		let message = e.message;
-		if (message === Errors.api.noMojangAccountWithThatUsername)
+		if (message === Errors.mojangApi.noMojangAccountWithThatUsername)
 			message = template(ButtonEvents.register.minecraftAccountDoesNotExist, {minecraftUsername: usernameSentByUser});
 		else if (message === Errors.database.notUnique) {
 			message = Errors.usernameUsedWithAnotherAccount;

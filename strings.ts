@@ -178,7 +178,7 @@ export namespace Components {
 }
 
 export namespace Errors {
-	export const missingDataOrExecute = 'Le ${itemType} ${filePath} n\'a pas les propriétés « data » ou « execute ».';
+	export const genericError = 'Une erreur inconnue s\'est produite !';
 	export const usernameUsedWithAnotherAccount = '⚠️ Un autre joueur est déjà inscrit avec ce nom d\'utilisateur Minecraft. S\'il s\'agit bien de ton nom d\'utilisateur, contacte un administrateur. ⚠️';
 	export const userResponseTimeout = '❌ Temps de réponse maximum dépassé, tu dois recommencer. ❌';
 
@@ -196,17 +196,17 @@ export namespace Errors {
 		notRepliable = 'Impossible de répondre à cette interaction.'
 	}
 
-	export const enum api {
-		couldNotConnectToApi = 'Erreur lors de la connexion à l\'API de Mojang.',
-		noMojangAccountWithThatUsername = 'Aucun compte Mojang n\'a ce nom d\'utilisateur !',
-		noMojangAccountWithThatUuid = 'Aucun compte Mojang n\'a ce UUID !'
-	}
-
 	export const enum database {
 		invalidStatus = 'Statut invalide',
 		notUnique = 'Un autre joueur s\'est inscrit avec ce compte Minecraft.',
 		unknownError = 'Une erreur inconnue est survenue lors de l\'écriture dans la base de données.',
 		userDoesNotExist = 'Cet utilisateur n\'est pas inscrit !'
+	}
+
+	export const enum mojangApi {
+		couldNotConnectToApi = 'Erreur lors de la connexion à l\'API de Mojang.',
+		noMojangAccountWithThatUsername = 'Aucun compte Mojang n\'a ce nom d\'utilisateur !',
+		noMojangAccountWithThatUuid = 'Aucun compte Mojang n\'a ce UUID !'
 	}
 
 	export const enum rcon {
@@ -222,6 +222,7 @@ export namespace Logs {
 	export const interactionIsNotRepliable = 'Impossible de répondre à l\'interaction ${interaction}.'
 	export const memberClickedRegisterButton = '${username} a cliqué sur le bouton d\'inscription.';
 	export const memberLeft = '${username} a quitté le serveur Discord.';
+	export const missingDataOrExecute = 'Le ${itemType} ${filePath} n\'a pas les propriétés « data » ou « execute ».';
 	export const noButtonsToDisable = 'Aucun bouton à désactiver sur ce message : ${message}'
 	export const playerRoleWasRemoved = 'Le rôle « ' + playerRoleName + ' » de ${username} est retiré.';
 	export const ready = 'Prêt ! Connecté en tant que ${username}.';

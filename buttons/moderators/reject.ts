@@ -1,5 +1,5 @@
+import { ButtonData } from '../../models/button-data';
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, PermissionFlagsBits } from 'discord.js';
-import { ButtonData } from '../../models';
 import { ButtonEvents, Components } from '../../strings';
 import { template } from '../../utils';
 
@@ -20,6 +20,6 @@ export async function execute(interaction: ButtonInteraction) {
 		style: ButtonStyle.Secondary
 	});
 
-	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmRejection, cancel);
+	const row = new ActionRowBuilder<ButtonBuilder>().setComponents(confirmRejection, cancel);
 	await interaction.reply({ content: template(ButtonEvents.rejection.askConfirmation, {discordUuid: discordUuid}), components: [row] });
 }

@@ -1,6 +1,7 @@
 import { inscriptionStatus } from '../bot-constants';
 import { changeStatus, getUserByDiscordUuid } from './database';
 import { ChatInputCommandInteraction, GuildMember } from 'discord.js';
+import { handleError } from './error-handler';
 import { Services, getStatusName } from '../strings';
 import { addPlayerRole, fetchGuildMember, removePlayerRole, template } from '../utils';
 
@@ -23,28 +24,26 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
 			await removePlayerRole(member);
 			await userFromDb.removeFromWhitelist();
 		}
+
+		let interactionReplyMessage = template(Services.userStatus.statusChanged, {
+			discordUuid: idToEdit,
+			status: getStatusName(status)
+		});
+
+		if (!silent && status !== inscriptionStatus.awaitingApproval) {
+			try {
+				await member.send(getMessageToSendToUser(status));
+			}
+			catch {
+				interactionReplyMessage += '\n' + Services.userStatus.cantSendDm;
+			}
+		}
+
+		await interaction.reply(interactionReplyMessage);
 	}
 	catch (e) {
-		await interaction.reply(e.message);
-		return;
+		await interaction.reply(handleError(e, 'STA'));
 	}
-
-	const interactionReplyMessage = template(Services.userStatus.statusChanged, {
-		discordUuid: idToEdit,
-		status: getStatusName(status)
-	});
-
-	if (!silent && status !== inscriptionStatus.awaitingApproval) {
-		try {
-			await member.send(getMessageToSendToUser(status));
-		}
-		catch {
-			await interaction.reply(interactionReplyMessage + '\n' + Services.userStatus.cantSendDm);
-			return;
-		}
-	}
-
-	await interaction.reply(interactionReplyMessage);
 }
 
 function getMessageToSendToUser(status: number): string {

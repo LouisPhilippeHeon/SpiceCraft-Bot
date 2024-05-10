@@ -14,13 +14,8 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction: ChatInputCommandInteraction) {
 	const username = interaction.options.getString('username');
 
-	try {
-		const minecraftUuid = (await getMojangUser(username)).id;
-		const userFromDb = await getUserByMinecraftUuid(minecraftUuid);
-		if (userFromDb)
-			await interaction.reply(`<@${userFromDb.discord_uuid}>`);
-	}
-	catch (e) {
-		await interaction.reply(e.message);
-	}
+	const minecraftUuid = (await getMojangUser(username)).id;
+	const userFromDb = await getUserByMinecraftUuid(minecraftUuid);
+	if (userFromDb)
+		await interaction.reply(`<@${userFromDb.discord_uuid}>`);
 }

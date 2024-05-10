@@ -1,7 +1,7 @@
+import { ButtonData } from '../../models/button-data';
 import { drop, getUsers } from '../../services/database';
 import { ButtonInteraction, PermissionFlagsBits } from 'discord.js';
 import { info } from '../../services/logger';
-import { ButtonData } from '../../models';
 import { Commands } from '../../strings';
 import { fetchBotChannel, fetchPlayerRole } from '../../utils';
 

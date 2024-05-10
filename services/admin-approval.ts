@@ -1,6 +1,6 @@
 import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, Message, Guild, User, APIEmbed } from 'discord.js';
-import { UserFromMojangApi } from '../models';
 import { Components } from '../strings';
+import { UserFromMojangApi } from '../models/user-from-mojang-api';
 import { deepCloneWithJson, fetchBotChannel, template } from '../utils';
 
 export async function createApprovalRequest(user: User, guild: Guild, username: string, inviter?: string) {
@@ -48,7 +48,7 @@ export async function createUsernameChangeRequest(user: User, guild: Guild, user
 
 	const approvalRequestEmbed = new EmbedBuilder({
 		title: template(Components.titles.usernameChangeRequest, {discordUsername: user.username}),
-		description: template(Components.descriptions.usernameChangeRequest, { discordUuid: user.id, username: userFromMojangApi.name }),
+		description: template(Components.descriptions.usernameChangeRequest, {discordUuid: user.id, username: userFromMojangApi.name}),
 		thumbnail: { url: user.displayAvatarURL({ size: 256 }) }
 	});
 

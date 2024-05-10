@@ -1,7 +1,7 @@
 import { editApprovalRequest } from '../../services/admin-approval';
+import { ButtonData } from '../../models/button-data';
 import { changeMinecraftUuid } from '../../services/database';
 import { ButtonInteraction, Colors, GuildMember, PermissionFlagsBits } from 'discord.js';
-import { ButtonData } from '../../models';
 import { ButtonEvents } from '../../strings';
 import { fetchGuildMember, sendMessageToMember, template } from '../../utils';
 
@@ -14,13 +14,13 @@ export async function execute(interaction: ButtonInteraction) {
 
 	try {
 		member = await fetchGuildMember(interaction.guild, discordUuid);
-		await changeMinecraftUuid(discordUuid, minecraftUuid);
 	}
 	catch (e) {
-		await interaction.reply({ content: e.message, ephemeral: true });
 		await interaction.message.delete();
-		return;
+		throw e;
 	}
+
+	await changeMinecraftUuid(discordUuid, minecraftUuid);
 
 	await editApprovalRequest(interaction.message, template(ButtonEvents.usernameChangeConfirmation.messageUpdate, {discordUuid: discordUuid}), undefined, [], Colors.Green);
 
