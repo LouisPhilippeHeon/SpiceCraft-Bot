@@ -4,7 +4,6 @@ import { getUserByDiscordUuid } from '../../services/database';
 import { ButtonInteraction, Colors, PermissionFlagsBits } from 'discord.js';
 import { Commands } from '../../strings';
 import { template } from '../../utils';
-import {handleError} from "../../services/error-handler";
 
 export const data = new ButtonData('delete', PermissionFlagsBits.Administrator);
 

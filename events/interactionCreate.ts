@@ -5,7 +5,7 @@ import { handleError } from '../services/error-handler';
 import { error } from '../services/logger';
 import { InteractionWithCommands } from '../models/interaction-with-commands';
 import { Errors } from '../strings';
-import { replyOrFollowUp, template } from '../utils';
+import { template } from '../utils';
 
 export const name = Events.InteractionCreate;
 export const once = false;
@@ -38,7 +38,7 @@ async function handleButtonInteraction(interaction: InteractionWithCommands) {
 		await button.execute(interaction);
 	}
 	catch (e) {
-		await replyOrFollowUp({ content: handleError(e, button.data.name, Errors.interaction.buttonExecution), ephemeral: true }, interaction);
+		await handleError(e, button.data.name, interaction, Errors.interaction.buttonExecution);
 	}
 }
 
@@ -56,6 +56,6 @@ async function handleChatInputCommand(interaction: InteractionWithCommands) {
 		await command.execute(interaction);
 	}
 	catch (e) {
-		await replyOrFollowUp({ content: handleError(e, interaction.commandName, Errors.interaction.commandExecution), ephemeral: true }, interaction);
+		await handleError(e, interaction.commandName, interaction, Errors.interaction.commandExecution);
 	}
 }

@@ -3,7 +3,7 @@ import { inscriptionStatus } from '../../bot-constants';
 import { ButtonData } from '../../models/button-data';
 import { getUserByDiscordUuid } from '../../services/database';
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, PermissionFlagsBits } from 'discord.js';
-import { handleError } from '../../services/error-handler';
+import { getUserFriendlyErrorMessage } from '../../services/error-handler';
 import { ButtonEvents, Components } from '../../strings';
 import { addPlayerRole, sendMessageToMember, template } from '../../utils';
 
@@ -47,7 +47,7 @@ async function rconFailed(discordUuid: string, interaction: ButtonInteraction, e
 	});
 
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmManualAdditionToWhitelist, reject);
-	await editApprovalRequest(interaction.message, `${handleError(e, data.name)} ${template(ButtonEvents.clickToConfirmChangesToWhitelist, {discordUuid: discordUuid})}`, undefined, [row], Colors.Yellow);
+	await editApprovalRequest(interaction.message, `${getUserFriendlyErrorMessage(e, data.name)} ${template(ButtonEvents.clickToConfirmChangesToWhitelist, {discordUuid: discordUuid})}`, undefined, [row], Colors.Yellow);
 
 	await interaction.reply({ content: ButtonEvents.approbation.changeWhitelistBeforeCliking, ephemeral: true });
 }

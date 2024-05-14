@@ -2,6 +2,7 @@ import { editApprovalRequest } from '../../services/admin-approval';
 import { ButtonData } from '../../models/button-data';
 import { changeMinecraftUuid } from '../../services/database';
 import { ButtonInteraction, Colors, GuildMember, PermissionFlagsBits } from 'discord.js';
+import { handleError } from '../../services/error-handler';
 import { ButtonEvents } from '../../strings';
 import { fetchGuildMember, sendMessageToMember, template } from '../../utils';
 
@@ -16,8 +17,8 @@ export async function execute(interaction: ButtonInteraction) {
 		member = await fetchGuildMember(interaction.guild, discordUuid);
 	}
 	catch (e) {
-		await interaction.message.delete();
-		throw e;
+		await handleError(e, data.name, interaction, undefined, true);
+		return;
 	}
 
 	await changeMinecraftUuid(discordUuid, minecraftUuid);

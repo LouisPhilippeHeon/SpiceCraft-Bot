@@ -1,4 +1,3 @@
-import { handleError } from './error-handler';
 import fs = require('node:fs');
 
 const enum Colors {
@@ -39,14 +38,13 @@ function formatLog(message: string, type: string, source?: string): string {
 
 function addToLogFile(message: string) {
 	const filePath = './logs.log';
-	
+
 	try {
 		// Create file if it does not exist
 		fs.closeSync(fs.openSync(filePath, 'a'));
 		fs.appendFileSync(filePath, `${message}\n`);
-	}
-	catch (e) {
-		handleError(e, 'LOG');
+	} catch (e) {
+		error(e, 'LOG');
 	}
 }
 

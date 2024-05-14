@@ -1,8 +1,7 @@
 import { clientId, playerRoleName } from '../config';
 import { deleteEntry } from '../services/database';
 import { AuditLogEvent, Events, GuildMember } from 'discord.js';
-import { handleError } from '../services/error-handler';
-import { info } from '../services/logger';
+import { error, info } from '../services/logger';
 import { Logs } from '../strings';
 import { template } from '../utils';
 
@@ -24,7 +23,7 @@ export async function execute(oldMember: GuildMember, newMember: GuildMember) {
 				await deleteEntry(newMember.user.id);
 		}
 		catch (e) {
-			handleError(e, name);
+			error(e, name);
 		}
 	}
 }

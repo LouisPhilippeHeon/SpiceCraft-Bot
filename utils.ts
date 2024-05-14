@@ -4,7 +4,6 @@ import { ChannelType, Colors, Guild, GuildMember, Interaction, InteractionReplyO
 import { SpiceCraftError } from './models/error';
 import { error, warn } from './services/logger';
 import { Errors, Logs, Utils } from './strings';
-import {handleError} from "./services/error-handler";
 
 // structuredClone dosen't work in some circumstances
 export function deepCloneWithJson(objectToClone: any): any {
@@ -75,7 +74,7 @@ export async function replyOrFollowUp(message: string | MessagePayload | Interac
 			: await interaction.reply(message);
 	}
 	catch (e) {
-		handleError(e, 'UTL_ROF');
+		error(e, 'UTL_ROF');
 	}
 }
 

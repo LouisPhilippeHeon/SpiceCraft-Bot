@@ -4,7 +4,7 @@ import { changeStatus } from '../../services/database';
 import { inscriptionStatus } from '../../bot-constants';
 import { ButtonInteraction, Colors, GuildMember, Message, PermissionFlagsBits } from 'discord.js';
 import { SpiceCraftError } from '../../models/error';
-import { handleError } from '../../services/error-handler';
+import { getUserFriendlyErrorMessage } from '../../services/error-handler';
 import { ButtonEvents } from '../../strings';
 import { fetchBotChannel, fetchGuildMember, sendMessageToMember, template } from '../../utils';
 
@@ -28,7 +28,7 @@ export async function execute(interaction: ButtonInteraction) {
 	}
 	catch (e) {
 		if (approvalRequest) await approvalRequest.delete();
-		throw new SpiceCraftError(handleError(e, data.name) + '\n' + template(ButtonEvents.rejection.userStillInBdExplanation, {discordUuid: discordUuid}));
+		throw new SpiceCraftError(getUserFriendlyErrorMessage(e) + '\n' + template(ButtonEvents.rejection.userStillInBdExplanation, {discordUuid: discordUuid}));
 	}
 
 	if (approvalRequest)

@@ -3,6 +3,7 @@ import { inscriptionStatus } from '../../bot-constants';
 import { ButtonData } from '../../models/button-data';
 import { getUserByDiscordUuid } from '../../services/database';
 import { ButtonInteraction, Colors, PermissionFlagsBits } from 'discord.js';
+import { handleError } from '../../services/error-handler';
 import { ButtonEvents } from '../../strings';
 import { template } from '../../utils';
 
@@ -16,8 +17,8 @@ export async function execute(interaction: ButtonInteraction) {
 		userFromDb = await getUserByDiscordUuid(discordUuid);
 	}
 	catch (e) {
-		await interaction.message.delete();
-		throw e;
+		await handleError(e, data.name, interaction, undefined, true);
+		return;
 	}
 
 	await userFromDb.removeFromWhitelist();

@@ -2,8 +2,7 @@ import { findApprovalRequestOfMember } from '../services/admin-approval';
 import { inscriptionStatus } from '../bot-constants';
 import { changeStatus, deleteEntry, getUserByDiscordUuid } from '../services/database';
 import { ActionRowBuilder, AuditLogEvent, ButtonBuilder, ButtonStyle, EmbedBuilder, Events, GuildMember, MessageCreateOptions } from 'discord.js';
-import { handleError } from '../services/error-handler';
-import { info } from '../services/logger';
+import { error, info } from '../services/logger';
 import { Components, Logs } from '../strings';
 import { UserFromDb } from '../models/user-from-db';
 import { fetchBotChannel, template } from '../utils';
@@ -35,7 +34,7 @@ export async function execute(member: GuildMember) {
 			await handleUserLeft(member);
 	}
 	catch (e) {
-		handleError(e, name);
+		error(e, name);
 	}
 }
 
