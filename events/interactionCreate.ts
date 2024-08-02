@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import { ButtonInteraction, Events } from 'discord.js';
-import { SpiceCraftError } from '../models/error';
+import { ErrorType, SpiceCraftError } from '../models/error';
 import { handleError } from '../services/error-handler';
 import { error } from '../services/logger';
 import { InteractionWithCommands } from '../models/interaction-with-commands';
@@ -31,14 +31,13 @@ async function handleButtonInteraction(interaction: InteractionWithCommands) {
 	}
 
 	try {
-		assert(member, new SpiceCraftError(Errors.interaction.unauthorized));
 		if (button.data.permissions)
-			assert(member.permissions.has(button.data.permissions));
+			assert(member.permissions.has(button.data.permissions), new SpiceCraftError(Errors.interaction.unauthorized, ErrorType.discordApi));
 
 		await button.execute(interaction);
 	}
 	catch (e) {
-		await handleError(e, button.data.name, interaction, Errors.interaction.buttonExecution);
+		await handleError(e, button.data.name, interaction);
 	}
 }
 

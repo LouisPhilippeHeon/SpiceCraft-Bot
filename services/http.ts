@@ -1,7 +1,7 @@
 import Axios from 'axios';
 import { setupCache } from 'axios-cache-interceptor';
 import { mojangApiUrl } from '../bot-constants';
-import { SpiceCraftError } from '../models/error';
+import { ErrorType, SpiceCraftError } from '../models/error';
 import { error } from './logger';
 import { Errors } from '../strings';
 import { UserFromMojangApi } from '../models/user-from-mojang-api';
@@ -19,8 +19,8 @@ export async function getMojangUser(username: string): Promise<UserFromMojangApi
 		error(JSON.stringify(apiError), 'HTP_FUN');
 
 		if (apiError.error)
-			throw new SpiceCraftError(Errors.mojangApi.couldNotConnectToApi);
-		throw new SpiceCraftError(Errors.mojangApi.noMojangAccountWithThatUsername);
+			throw new SpiceCraftError(Errors.mojangApi.couldNotConnectToApi, ErrorType.mojangApi, e.stack);
+		throw new SpiceCraftError(Errors.mojangApi.noMojangAccountWithThatUsername, ErrorType.mojangApi, e.stack);
 	}
 }
 
@@ -30,10 +30,8 @@ export async function getUsernameFromUuid(uuid: string): Promise<string> {
 		return response.data.name;
 	}
 	catch (e) {
-		error(JSON.stringify(e.response.data), 'HTP_FID');
-
 		if (e.response.status === 400)
-			throw new SpiceCraftError(Errors.mojangApi.noMojangAccountWithThatUuid);
-		throw new SpiceCraftError(Errors.mojangApi.couldNotConnectToApi);
+			throw new SpiceCraftError(Errors.mojangApi.noMojangAccountWithThatUuid, ErrorType.mojangApi, e.stack);
+		throw new SpiceCraftError(Errors.mojangApi.couldNotConnectToApi, ErrorType.mojangApi, e.stack);
 	}
 }

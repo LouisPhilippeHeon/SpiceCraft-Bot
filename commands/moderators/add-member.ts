@@ -1,7 +1,7 @@
 import { inscriptionStatus } from '../../bot-constants';
 import { createUser, getUserByDiscordUuid } from '../../services/database';
 import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
-import { SpiceCraftError } from '../../models/error';
+import { ErrorType, SpiceCraftError } from '../../models/error';
 import { getMojangUser } from '../../services/http';
 import { Commands } from '../../strings';
 import { addPlayerRole, fetchGuildMember, sendMessageToMember, template } from '../../utils';
@@ -57,8 +57,8 @@ async function saveNewUser(interaction: ChatInputCommandInteraction, discordUuid
 		try {
 			await userFromDb.addToWhitelist();
 		}
-		catch {
-			throw new SpiceCraftError(template(Commands.addMember.rconFailedManualInterventionRequired, {discordUuid: discordUuid}))
+		catch (e) {
+			throw new SpiceCraftError(template(Commands.addMember.rconFailedManualInterventionRequired, {discordUuid: discordUuid}), ErrorType.rcon, e.stack);
 		}
 	}
 

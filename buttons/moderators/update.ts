@@ -2,9 +2,9 @@ import { editApprovalRequest } from '../../services/admin-approval';
 import { ButtonData } from '../../models/button-data';
 import { getUserByDiscordUuid } from '../../services/database';
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, GuildMember, PermissionFlagsBits } from 'discord.js';
-import { SpiceCraftError } from '../../models/error';
+import { ErrorType, SpiceCraftError } from '../../models/error';
+import { handleError } from '../../services/error-handler';
 import { ButtonEvents, Components } from '../../strings';
-import { UserFromDb } from '../../models/user-from-db';
 import { sendMessageToMember, template } from '../../utils';
 
 export const data = new ButtonData('update', PermissionFlagsBits.BanMembers);
@@ -13,24 +13,22 @@ let interaction: ButtonInteraction;
 
 export async function execute(buttonInteraction: ButtonInteraction) {
 	interaction = buttonInteraction;
-	const discordUuid = interaction.customId.split('_')[1];
-	const minecraftUuid = interaction.customId.split('_')[2];
+	const [_, discordUuid, minecraftUuid] = interaction.customId.split('_');
 	let member: GuildMember;
 
 	try {
 		const userFromDb = await getUserByDiscordUuid(discordUuid);
 		member = await userFromDb.fetchGuildMember(interaction.guild);
 
-		await modifyWhitelist(userFromDb, minecraftUuid, discordUuid);
-
+		await userFromDb.replaceWhitelistUsername(minecraftUuid);
 		await userFromDb.editMinecraftUuid(minecraftUuid);
 	}
 	catch (e) {
-		// TODO Refactor
-		if (e.message !== 'rcon-failed') {
-			await interaction.reply(e.message);
-			await interaction.message.delete();
-		}
+		if (e instanceof SpiceCraftError && e.type == ErrorType.rcon)
+			await rconFailed(discordUuid, minecraftUuid, e);
+		else
+			await handleError(e, data.name, interaction, null, true);
+
 		return;
 	}
 
@@ -39,16 +37,6 @@ export async function execute(buttonInteraction: ButtonInteraction) {
 	const replyOnSuccess = template(ButtonEvents.usernameChangeConfirmation.success, {discordUuid: discordUuid});
 	const replyOnFailure = template(ButtonEvents.usernameChangeConfirmation.successNoDm, {discordUuid: discordUuid});
 	await sendMessageToMember(ButtonEvents.usernameChangeConfirmation.messageSentToConfirmUsernameChange, member, interaction, replyOnSuccess, replyOnFailure);
-}
-
-async function modifyWhitelist(user: UserFromDb, minecraftUuid: string, discordUuid: string) {
-	try {
-		await user.replaceWhitelistUsername(minecraftUuid);
-	}
-	catch (e) {
-		await rconFailed(discordUuid, minecraftUuid, e);
-		throw new SpiceCraftError('rcon-failed');
-	}
 }
 
 async function rconFailed(discordUuid: string, minecraftUuid: string, e: Error) {

@@ -1,5 +1,5 @@
-import { SpiceCraftError } from '../models/error';
 import { DiscordAPIError, Interaction } from 'discord.js';
+import { SpiceCraftError } from '../models/error';
 import { error } from './logger';
 import { Errors } from '../strings';
 import { replyOrFollowUp } from '../utils';
@@ -20,6 +20,7 @@ export async function handleError(e: Error, source: string, interaction: Interac
 }
 
 export function getUserFriendlyErrorMessage(e: Error, defaultMessage?: string): string {
+	// TODO If message null use error type to generate message
 	if (e instanceof SpiceCraftError)
 		return e.message;
 	if (e instanceof DiscordAPIError) {

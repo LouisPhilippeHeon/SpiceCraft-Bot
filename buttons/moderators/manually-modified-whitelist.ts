@@ -9,8 +9,7 @@ import { fetchGuildMember, sendMessageToMember, template } from '../../utils';
 export const data = new ButtonData('manually-modified-whitelist', PermissionFlagsBits.BanMembers);
 
 export async function execute(interaction: ButtonInteraction) {
-	const discordUuid = interaction.customId.split('_')[1];
-	const minecraftUuid = interaction.customId.split('_')[2];
+	const [_, discordUuid, minecraftUuid] = interaction.customId.split('_');
 	let member: GuildMember;
 
 	try {

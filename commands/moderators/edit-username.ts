@@ -1,6 +1,6 @@
 import { getUserByDiscordUuid } from '../../services/database';
 import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
-import { SpiceCraftError } from '../../models/error';
+import { ErrorType, SpiceCraftError } from '../../models/error';
 import { getMojangUser } from '../../services/http';
 import { Commands } from '../../strings';
 import { UserFromMojangApi } from '../../models/user-from-mojang-api';
@@ -39,7 +39,7 @@ async function getMojangAccountForNewUsername(newUsername: string, discordUuid: 
 	const userFromMojangApi = await getMojangUser(newUsername);
 
 	if (userFromDb.minecraft_uuid === userFromMojangApi.id)
-		throw new SpiceCraftError(Commands.editUsername.usernameIdenticalToPreviousOne);
+		throw new SpiceCraftError(Commands.editUsername.usernameIdenticalToPreviousOne, ErrorType.database);
 
 	return userFromMojangApi;
 }

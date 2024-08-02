@@ -1,7 +1,7 @@
 import { clientId, playerRoleName } from '../config';
 import { deleteEntry } from '../services/database';
 import { AuditLogEvent, Events, GuildMember } from 'discord.js';
-import { error, info } from '../services/logger';
+import { info } from '../services/logger';
 import { Logs } from '../strings';
 import { template } from '../utils';
 
@@ -15,15 +15,10 @@ export async function execute(oldMember: GuildMember, newMember: GuildMember) {
 	if (oldMemberWasPlayer && !newMemberIsPlayer) {
 		info(template(Logs.playerRoleWasRemoved, {username: newMember.user.username}));
 
-		try {
-			const latestMemberRoleUpdateLog = await newMember.guild.fetchAuditLogs({ type: AuditLogEvent.MemberRoleUpdate, limit: 1 });
-			const executor = latestMemberRoleUpdateLog.entries.first().executor;
+		const latestMemberRoleUpdateLog = await newMember.guild.fetchAuditLogs({ type: AuditLogEvent.MemberRoleUpdate, limit: 1 });
+		const executor = latestMemberRoleUpdateLog.entries.first().executor;
 
-			if (executor.id !== clientId)
-				await deleteEntry(newMember.user.id);
-		}
-		catch (e) {
-			error(e, name);
-		}
+		if (executor.id !== clientId)
+			await deleteEntry(newMember.user.id);
 	}
 }

@@ -1,7 +1,7 @@
 import { client } from './bot-constants';
 import { playerRoleName, whitelistChannelName } from './config';
 import { ChannelType, Colors, Guild, GuildMember, Interaction, InteractionReplyOptions, MessagePayload, PermissionsBitField, Role, TextChannel } from 'discord.js';
-import { SpiceCraftError } from './models/error';
+import { ErrorType, SpiceCraftError } from './models/error';
 import { error, warn } from './services/logger';
 import { Errors, Logs, Utils } from './strings';
 
@@ -26,7 +26,7 @@ export async function fetchBotChannel(guild: Guild, createIfNecessary = true): P
 			},
 			{
 				// Highest role of bot
-				id: client.guilds.cache.get(guild.id).members.cache.get(client.user.id).roles.highest,
+				id: client.guilds.cache.get(guild.id).members.me.roles.highest,
 				allow: [PermissionsBitField.Flags.ViewChannel]
 			}
 		],
@@ -56,8 +56,8 @@ export async function removePlayerRole(member: GuildMember) {
 }
 
 export async function fetchGuildMember(guild: Guild, id: string): Promise<GuildMember> {
-	return await guild.members.fetch(id).catch(() => {
-		throw new SpiceCraftError(Errors.discord.noDiscordUserWithThisUuid);
+	return await guild.members.fetch(id).catch((e) => {
+		throw new SpiceCraftError(Errors.discord.noDiscordUserWithThisUuid, ErrorType.discordApi, e.stack);
 	});
 }
 
@@ -80,15 +80,17 @@ export async function replyOrFollowUp(message: string | MessagePayload | Interac
 
 export async function sendMessageToMember(message: string, member: GuildMember, interaction: Interaction, replyOnSuccess: string, replyOnFailure: string) {
 	if (!interaction.isRepliable())
-		throw new SpiceCraftError(Errors.discord.notRepliable);
+		throw new SpiceCraftError(Errors.discord.notRepliable, ErrorType.discordApi);
 
 	try {
 		await member.send(message);
-		await interaction.reply({ content: replyOnSuccess, ephemeral: true });
 	}
-	catch (e) {
+	catch {
 		await interaction.reply({ content: replyOnFailure, ephemeral: true });
+		return;
 	}
+
+	await interaction.reply({ content: replyOnSuccess, ephemeral: true });
 }
 
 export const template = require('es6-template-strings');

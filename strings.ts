@@ -183,7 +183,6 @@ export namespace Errors {
 	export const userResponseTimeout = '❌ Temps de réponse maximum dépassé, tu dois recommencer. ❌';
 
 	export const enum interaction {
-		buttonExecution = 'Une erreur inconnue s\'est produite !',
 		buttonNotFound = 'Aucun bouton ne corresponsant à ${button} n\'a été trouvée.',
 		commandExecution = 'Une erreur s\'est produite lors de l\'exécution de cette commande !',
 		commandNotFound = 'Aucune commande ne corresponsant à ${command} n\'a été trouvée.',
@@ -191,7 +190,6 @@ export namespace Errors {
 	}
 
 	export const enum discord {
-		cantReadLogs = 'Le bot n\'a pas la permission de lire les logs.',
 		noDiscordUserWithThisUuid = 'Cet utilisateur Discord n\'est pas membre du serveur.',
 		notRepliable = 'Impossible de répondre à cette interaction.'
 	}
@@ -228,7 +226,6 @@ export namespace Logs {
 	export const ready = 'Prêt ! Connecté en tant que ${username}.';
 	export const refreshingCommands = 'Début du rafraichissement de ${numberOfCommands} commandes slash.';
 	export const successfullyRefreshed = 'Rafraichissement réussi de ${numberOfCommands} commandes slash.';
-	export const usernameAlreadyTaken = '${discordUsername} a voulu s\'inscire avec le username Minecraft « ${minecraftUsername} » mais ce dernier est déjà utilisé par un autre joueur.';
 }
 
 export namespace Services {

@@ -2,7 +2,7 @@ import { findApprovalRequestOfMember } from '../services/admin-approval';
 import { inscriptionStatus } from '../bot-constants';
 import { changeStatus, deleteEntry, getUserByDiscordUuid } from '../services/database';
 import { ActionRowBuilder, AuditLogEvent, ButtonBuilder, ButtonStyle, EmbedBuilder, Events, GuildMember, MessageCreateOptions } from 'discord.js';
-import { error, info } from '../services/logger';
+import { info } from '../services/logger';
 import { Components, Logs } from '../strings';
 import { UserFromDb } from '../models/user-from-db';
 import { fetchBotChannel, template } from '../utils';
@@ -11,31 +11,26 @@ export const name = Events.GuildMemberRemove;
 export const once = false;
 
 export async function execute(member: GuildMember) {
-	try {
-		info(template(Logs.memberLeft, {username: member.user.username}));
-		const userFromDb: UserFromDb | null = await getUserByDiscordUuid(member.user.id).catch(() => null);
-		if (!userFromDb) return;
+	info(template(Logs.memberLeft, {username: member.user.username}));
+	const userFromDb: UserFromDb | null = await getUserByDiscordUuid(member.user.id).catch(() => null);
+	if (!userFromDb) return;
 
-		// If user leaves server or was banned before his request was approved
-		if (userFromDb.isAwaitingApproval()) {
-			await (await findApprovalRequestOfMember(member.guild, member.user)).delete();
-			await deleteEntry(member.user.id);
-			return;
-		}
-
-		const auditLog = await member.guild.fetchAuditLogs({
-			type: AuditLogEvent.MemberBanAdd,
-			limit: 1
-		});
-
-		if (auditLog.entries.size > 0 && auditLog.entries.first().createdTimestamp > (Date.now() - 5000))
-			await handleBan(userFromDb, member);
-		else
-			await handleUserLeft(member);
+	// If user leaves server or was banned before his request was approved
+	if (userFromDb.isAwaitingApproval()) {
+		await (await findApprovalRequestOfMember(member.guild, member.user)).delete();
+		await deleteEntry(member.user.id);
+		return;
 	}
-	catch (e) {
-		error(e, name);
-	}
+
+	const auditLog = await member.guild.fetchAuditLogs({
+		type: AuditLogEvent.MemberBanAdd,
+		limit: 1
+	});
+
+	if (auditLog.entries.size > 0 && auditLog.entries.first().createdTimestamp > (Date.now() - 5000))
+		await handleBan(userFromDb, member);
+	else
+		await handleUserLeft(member);
 }
 
 async function handleUserLeft(member: GuildMember) {

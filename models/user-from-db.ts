@@ -16,8 +16,6 @@ export class UserFromDb {
 		await deleteEntry(this.discord_uuid);
 	}
 
-	// TODO Add player role, remove player role
-
 	async addToWhitelist() {
 		await whitelistAdd(this.minecraft_uuid);
 	}

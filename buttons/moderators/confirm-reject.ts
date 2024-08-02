@@ -3,7 +3,7 @@ import { ButtonData } from '../../models/button-data';
 import { changeStatus } from '../../services/database';
 import { inscriptionStatus } from '../../bot-constants';
 import { ButtonInteraction, Colors, GuildMember, Message, PermissionFlagsBits } from 'discord.js';
-import { SpiceCraftError } from '../../models/error';
+import { ErrorType, SpiceCraftError } from '../../models/error';
 import { getUserFriendlyErrorMessage } from '../../services/error-handler';
 import { ButtonEvents } from '../../strings';
 import { fetchBotChannel, fetchGuildMember, sendMessageToMember, template } from '../../utils';
@@ -11,8 +11,7 @@ import { fetchBotChannel, fetchGuildMember, sendMessageToMember, template } from
 export const data = new ButtonData('confirm-reject', PermissionFlagsBits.BanMembers);
 
 export async function execute(interaction: ButtonInteraction) {
-	const discordUuid = interaction.customId.split('_')[1];
-	const messageUuid = interaction.customId.split('_')[2];
+	const [_, discordUuid, messageUuid] = interaction.customId.split('_');
 
 	let member: GuildMember;
 
@@ -28,7 +27,7 @@ export async function execute(interaction: ButtonInteraction) {
 	}
 	catch (e) {
 		if (approvalRequest) await approvalRequest.delete();
-		throw new SpiceCraftError(getUserFriendlyErrorMessage(e) + '\n' + template(ButtonEvents.rejection.userStillInBdExplanation, {discordUuid: discordUuid}));
+		throw new SpiceCraftError(getUserFriendlyErrorMessage(e) + '\n' + template(ButtonEvents.rejection.userStillInBdExplanation, {discordUuid: discordUuid}), ErrorType.discordApi, e.stack);
 	}
 
 	if (approvalRequest)

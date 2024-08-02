@@ -3,13 +3,14 @@ import { timeoutUserInput } from '../../bot-constants';
 import { ButtonData } from '../../models/button-data';
 import { changeMinecraftUuid, createUser, getUserByDiscordUuid } from '../../services/database';
 import { ActionRowBuilder, ButtonBuilder, ButtonComponent, ButtonInteraction, ButtonStyle, DMChannel, EmbedBuilder, Message } from 'discord.js';
-import { SpiceCraftError } from '../../models/error';
+import { ErrorType, SpiceCraftError } from '../../models/error';
+import { getUserFriendlyErrorMessage } from '../../services/error-handler';
 import { getMojangUser } from '../../services/http';
 import { info, warn } from '../../services/logger';
 import { ButtonEvents, Components, Errors, Logs } from '../../strings';
 import { UserFromDb } from '../../models/user-from-db';
 import { UserFromMojangApi } from '../../models/user-from-mojang-api';
-import { replyOrFollowUp, template } from '../../utils';
+import { template } from '../../utils';
 
 export const data = new ButtonData('inscription');
 
@@ -26,24 +27,23 @@ export async function execute(buttonInteraction: ButtonInteraction) {
 	info(template(Logs. memberClickedRegisterButton, {username: interaction.user.username}));
 
 	try {
-		if (userFromDb) {
-			if (userFromDb.isRejected())
-				await interaction.reply({ content: ButtonEvents.register.adminsAlreadyDeniedRequest, ephemeral: true });
-			else
-				await updateExistingUser(userFromDb);
-		}
-		else
+		if (!userFromDb)
 			await registerUser();
+		else if (userFromDb.isRejected())
+			await interaction.reply({ content: ButtonEvents.register.adminsAlreadyDeniedRequest, ephemeral: true });
+		else
+			await updateExistingUser(userFromDb);
 	}
 	catch (e) {
-		// TODO Manage 50007 in the error handler service, so that we no longer catch errors here
-		if (e.code === 50007) await replyOrFollowUp({ content: ButtonEvents.register.dmsAreClosed, ephemeral: true }, interaction);
-		else throw e;
+		if (e.code === 50007)
+			e.message = ButtonEvents.register.dmsAreClosed;
+		throw e;
 	}
 }
 
 async function registerUser(interactionToReplyFrom?: ButtonInteraction) {
 	try {
+		// TODO if askIfFirstTimeMember throws, the retry message will not reply to a message, creating another error
 		const isFirstTimeMember = await askIfFirstTimeMember(interactionToReplyFrom);
 		interactionToReplyFrom = await askWhatIsMinecraftUsername();
 
@@ -63,17 +63,8 @@ async function registerUser(interactionToReplyFrom?: ButtonInteraction) {
 			await dmChannel.send(ButtonEvents.register.waitForAdminApprobation)
 	}
 	catch (e) {
-		// TODO Move to error handler
 		if (!(e instanceof SpiceCraftError)) throw e;
-
-		let message = e.message;
-
-		if (message === Errors.database.notUnique) {
-			message = Errors.usernameUsedWithAnotherAccount;
-			warn(template(Logs.usernameAlreadyTaken, {discordUsername: interaction.user.username, minecraftUsername: userFromMojangApi.name}));
-		}
-
-		await sendRetryMessage(message, true, (interactionToReplyFrom && !interactionToReplyFrom.replied) && interactionToReplyFrom);
+		await sendRetryMessage(convertToUserFriendlyMessages(e), true, (interactionToReplyFrom && !interactionToReplyFrom.replied) && interactionToReplyFrom);
 	}
 }
 
@@ -87,14 +78,13 @@ async function askIfFirstTimeMember(interactionToReplyFrom?: ButtonInteraction):
 		? await (await interactionToReplyFrom.reply(message)).fetch()
 		: await interaction.user.send(message);
 
-	if (!interaction.replied) await interaction.reply({ content: ButtonEvents.register.messageSentInDms, ephemeral: true });
+	if (!interaction.replied)
+		await interaction.reply({ content: ButtonEvents.register.messageSentInDms, ephemeral: true });
 
-	let selectedButton: ButtonInteraction;
-	await collectMessageComponent(askIfFirstTimeMemberMessage)
-		.then((collected) => selectedButton = collected)
-		.finally(() => disableButtonsOfMessage(askIfFirstTimeMemberMessage, selectedButton));
-
+	const selectedButton = await collectMessageComponent(askIfFirstTimeMemberMessage);
 	const isFirstTimeMember = selectedButton.customId === 'first-time-member';
+
+	await disableButtonsOfMessage(askIfFirstTimeMemberMessage, selectedButton);
 	await selectedButton.reply(isFirstTimeMember ? ButtonEvents.register.welcome : ButtonEvents.register.welcomeBack);
 	return isFirstTimeMember;
 }
@@ -110,17 +100,12 @@ async function askWhatIsMinecraftUsername(interactionToReplyFrom?: ButtonInterac
 		userFromMojangApi = await getMojangUser(minecraftUsernameSentByUser);
 	}
 	catch (e) {
-		let message = e.message;
-
-		if (e.message === Errors.mojangApi.noMojangAccountWithThatUsername)
-			message = template(ButtonEvents.register.minecraftAccountDoesNotExist, {minecraftUsername: minecraftUsernameSentByUser});
-
-		throw new SpiceCraftError(message);
+		throw new SpiceCraftError(convertToUserFriendlyMessages(e, minecraftUsernameSentByUser), ErrorType.discordApi, e.stack);
 	}
 
 	const confirm = new ButtonBuilder({ customId: 'confirm-username-selection', label: Components.buttons.enthousiastYes, style: ButtonStyle.Primary });
 	const reject = new ButtonBuilder({ customId: 'reject-username-selection', label: Components.buttons.noMadeAMistake, style: ButtonStyle.Secondary });
-	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirm, reject);
+	const row = new ActionRowBuilder<ButtonBuilder>().setComponents(confirm, reject);
 
 	const confirmUsernameSelection = await dmChannel.send({ content: template(ButtonEvents.register.confirmSelectedUsername, {minecraftUsername: userFromMojangApi.name}), components: [row] });
 
@@ -179,16 +164,7 @@ async function updateExistingUser(userFromDb: UserFromDb, interactionToReplyFrom
 		}
 	}
 	catch (e) {
-		// TODO Move to error handler
-		let message = e.message;
-		if (message === Errors.mojangApi.noMojangAccountWithThatUsername)
-			message = template(ButtonEvents.register.minecraftAccountDoesNotExist, {minecraftUsername: usernameSentByUser});
-		else if (message === Errors.database.notUnique) {
-			message = Errors.usernameUsedWithAnotherAccount;
-			warn(template(Logs.usernameAlreadyTaken, {discordUsername: interaction.user.username, minecraftUsername: userFromMojangApi.name}));
-		}
-
-		await sendRetryMessage(message, false);
+		await sendRetryMessage(convertToUserFriendlyMessages(e, usernameSentByUser), false);
 	}
 }
 
@@ -227,14 +203,14 @@ async function updateAdminApprovalRequest(minecraftUsername: string) {
 async function collectMessage(): Promise<string> {
 	const collectorFilter = (m: Message) => m.author.id === interaction.user.id;
 	const collected = await dmChannel.awaitMessages({ filter: collectorFilter, max: 1, time: timeoutUserInput });
-	if (collected.size === 0) throw new SpiceCraftError(Errors.userResponseTimeout);
+	if (collected.size === 0) throw new SpiceCraftError(Errors.userResponseTimeout, ErrorType.discordApi);
 	return collected.first().content;
 }
 
 async function collectMessageComponent(message: Message, customId?: string): Promise<ButtonInteraction> {
 	const collectorFilter = (i: ButtonInteraction) => i.user.id === interaction.user.id && (i.customId === customId || !customId);
 	return await message.awaitMessageComponent({ filter: collectorFilter, time: timeoutUserInput }).catch(() => {
-		throw new SpiceCraftError(Errors.userResponseTimeout)
+		throw new SpiceCraftError(Errors.userResponseTimeout, ErrorType.discordApi);
 	}) as ButtonInteraction;
 }
 
@@ -260,4 +236,15 @@ async function disableButtonsOfMessage(message: Message, buttonToHighlight?: But
 	});
 
 	await message.edit({ components: [newRow] });
+}
+
+function convertToUserFriendlyMessages(e: Error, usernameSentByUser?: string): string {
+	let message = getUserFriendlyErrorMessage(e);
+
+	if (message === Errors.mojangApi.noMojangAccountWithThatUsername)
+		message = template(ButtonEvents.register.minecraftAccountDoesNotExist, {minecraftUsername: usernameSentByUser});
+	else if (message === Errors.database.notUnique)
+		message = Errors.usernameUsedWithAnotherAccount;
+
+	return message;
 }

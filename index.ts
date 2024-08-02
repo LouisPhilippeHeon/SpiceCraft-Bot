@@ -1,7 +1,7 @@
 import { client } from './bot-constants';
 import { token } from './config';
 import { Collection } from 'discord.js';
-import { warn } from './services/logger';
+import { error, warn } from './services/logger';
 import fs = require('node:fs');
 import path = require('node:path');
 import { Logs } from './strings';
@@ -13,6 +13,8 @@ client.buttons = new Collection();
 loadItems('command', 'commands', client.commands);
 loadItems('bouton', 'buttons', client.buttons);
 
+(async () => await client.login(token))();
+
 const eventsPath = path.join(__dirname, 'events');
 const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.ts') || file.endsWith('.js'));
 
@@ -20,15 +22,16 @@ for (const file of eventFiles) {
 	const filePath = path.join(eventsPath, file);
 	const event = require(filePath);
 
-	if (event.once)
-		client.once(event.name, (...args) => event.execute(...args));
-	else
-		client.on(event.name, (...args) => event.execute(...args));
+	try {
+		if (event.once)
+			client.once(event.name, (...args) => event.execute(...args));
+		else
+			client.on(event.name, (...args) => event.execute(...args));
+	}
+	catch (e) {
+		error(e, event.name);
+	}
 }
-
-(async () =>
-	await client.login(token)
-)();
 
 function loadItems(itemType: string, folderName: string, collection: Collection<string, any>) {
 	const itemPath = path.join(__dirname, folderName);
