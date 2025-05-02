@@ -12,6 +12,7 @@ Permet à l'administrateur d'accepter la demande (et indiquer que le membre est 
 <img width="429" alt="Capture d’écran, le 2023-11-15 à 09 14 08" src="https://github.com/LouisPhilippeHeon/SpiceCraft-Bot/assets/83369199/72938e82-d5fe-4657-a7b0-39bba7ffab04">
 ### Communication avec le serveur Minecraft
 Il est possible de gérer la whitelist d'un ou plusieurs serveurs Minecraft avec RCON. Il suffit d'ajouter leurs adresses IP, port et mot de passe à config.ts. Ainsi, lorsque l'on accepte la demande d'un joueur, l'ajout dans la whitelist est automatique.
+
 ![image](https://github.com/LouisPhilippeHeon/SpiceCraft-Bot/assets/83369199/ccfeb5be-19c3-4533-9cba-2689e9ba977e)
 # Commandes
 ## Administrateur <sub><sup>(permission requise : administrateur)</sup></sub>
