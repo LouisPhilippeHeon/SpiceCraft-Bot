@@ -14,13 +14,13 @@ export type InteractionWithCommands = Interaction & {
 }
 
 export class UserFromMojangApi {
-	id: string;
-	name: string;
+	readonly id: string;
+	readonly name: string;
 }
 
 export class ButtonData {
-	name: string;
-	permissions: BigInt;
+	readonly name: string;
+	readonly permissions: BigInt;
 
 	constructor(name: string, permisions?: BigInt) {
 		this.name = name;

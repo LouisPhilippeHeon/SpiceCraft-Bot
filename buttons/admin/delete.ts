@@ -15,8 +15,7 @@ export async function execute(interaction: ButtonInteraction) {
 		const userFromDb = await getUserByDiscordUuid(discordUuid);
 		await userFromDb.delete();
 		await userFromDb.removeFromWhitelist();
-	}
-	catch (e) {
+	} catch (e) {
 		await interaction.reply({ content: e.message, ephemeral: true });
 		return;
 	}
