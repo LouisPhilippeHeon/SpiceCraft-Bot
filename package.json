@@ -12,17 +12,17 @@
 	"author": "Louis-Philippe Héon",
 	"license": "ISC",
 	"dependencies": {
-		"axios": "^1.6.8",
-		"axios-cache-interceptor": "^1.5.2",
-		"discord.js": "^14.15.2",
+		"axios": "^1.11.0",
+		"axios-cache-interceptor": "^1.8.0",
+		"discord.js": "^14.21.0",
 		"dotenv": "^16.4.5",
 		"es6-template-strings": "^2.0.1",
 		"rconify": "^1.0.1",
-		"sequelize": "^6.37.3",
+		"sequelize": "^6.37.7",
 		"sqlite3": "^5.1.7"
 	},
 	"devDependencies": {
-		"eslint": "^8.57.0",
+		"eslint": "^9.32.0",
 		"ts-node": "^10.9.2"
 	}
 }
