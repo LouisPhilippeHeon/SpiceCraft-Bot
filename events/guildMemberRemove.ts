@@ -32,8 +32,7 @@ export async function execute(member: GuildMember) {
 			await handleBan(userFromDb, member);
 		else
 			await handleUserLeft(member);
-	}
-	catch (e) {
+	} catch (e) {
 		if (e.code === 50013) error(Errors.discord.cantReadLogs, 'GMR_LOG');
 		else error(e, 'GMR_UKN');
 	}

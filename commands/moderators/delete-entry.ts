@@ -1,5 +1,5 @@
 import { getUserByDiscordUuid } from '../../services/database';
-import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { Commands } from '../../strings';
 import { fetchGuildMember, removePlayerRole, template } from '../../utils';
 
@@ -31,9 +31,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
 		if (removeFromWhitelist)
 			await userFromDb.removeFromWhitelist();
-		await interaction.reply({ content: template(Commands.deleteEntry.reply, {discordUuid: discordUuid}), ephemeral: true });
-	}
-	catch (e) {
+		await interaction.reply({ content: template(Commands.deleteEntry.reply, {discordUuid: discordUuid}), flags: MessageFlags.Ephemeral });
+	} catch (e) {
 		await interaction.reply(e.message);
 	}
 }

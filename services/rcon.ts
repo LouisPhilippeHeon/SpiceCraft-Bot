@@ -13,8 +13,7 @@ export async function whitelistAdd(uuid: string) {
 			await rcon.sendCommand('whitelist add ' + username);
 			rcon.disconnect();
 		}
-	}
-	catch (e) {
+	} catch (e) {
 		error(e, 'RCN_ADD');
 		throw new Error(template(Errors.rcon.add, { username: username }));
 	}
@@ -29,8 +28,7 @@ export async function whitelistRemove(uuid: string) {
 			await rcon.sendCommand('whitelist remove ' + username);
 			rcon.disconnect();
 		}
-	}
-	catch (e) {
+	} catch (e) {
 		error(e, 'RCN_RMV');
 		throw new Error(template(Errors.rcon.remove, { username: username }));
 	}
@@ -47,8 +45,7 @@ export async function whitelistReplaceUsername(newUuid: string, oldUuid: string)
 			await rcon.sendCommand('whitelist remove ' + oldUsername);
 			rcon.disconnect();
 		}
-	}
-	catch (e) {
+	} catch (e) {
 		error(e, 'RCN_EDT');
 		throw new Error(template(Errors.rcon.edit, { oldUsername: oldUsername, newUsername: newUsername }));
 	}

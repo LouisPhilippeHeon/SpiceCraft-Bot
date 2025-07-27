@@ -43,8 +43,7 @@ function addToLogFile(message: string) {
 		// Create file if it does not exist
 		fs.closeSync(fs.openSync(filePath, 'a'));
 		fs.appendFileSync(filePath, `${message}\n`);
-	}
-	catch (e) {
+	} catch {
 		logger.error(message);
 	}
 }

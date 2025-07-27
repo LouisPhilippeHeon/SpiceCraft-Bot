@@ -21,8 +21,7 @@ export async function execute(oldMember: GuildMember, newMember: GuildMember) {
 
 			if (executor.id !== clientId)
 				await deleteEntry(newMember.user.id);
-		}
-		catch (e) {
+		} catch (e) {
 			if (e.code === 50013) error(Errors.discord.cantReadLogs, 'GMR_LOG');
 			else error(e, 'GMU_UKN');
 		}

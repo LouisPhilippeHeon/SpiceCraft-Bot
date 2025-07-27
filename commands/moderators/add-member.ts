@@ -1,6 +1,6 @@
 import { inscriptionStatus } from '../../bot-constants';
 import { createUser, getUserByDiscordUuid } from '../../services/database';
-import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { getMojangUser } from '../../services/http';
 import { Commands } from '../../strings';
 import { addPlayerRole, fetchGuildMember, sendMessageToMember, template } from '../../utils';
@@ -40,8 +40,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 	try {
 		await getUserByDiscordUuid(discordUuid);
 		await interaction.reply(Commands.addMember.alreadyInDatabase);
-	}
-	catch {
+	} catch {
 		await saveNewUser(interaction, discordUuid, usernameMinecraft, status, silent);
 	}
 }
@@ -56,8 +55,7 @@ async function saveNewUser(interaction: ChatInputCommandInteraction, discordUuid
 			await addPlayerRole(member);
 			try {
 				await userFromDb.addToWhitelist();
-			}
-			catch {
+			} catch {
 				await interaction.reply(template(Commands.addMember.rconFailedManualInterventionRequired, {discordUuid: discordUuid}));
 				return;
 			}
@@ -70,9 +68,8 @@ async function saveNewUser(interaction: ChatInputCommandInteraction, discordUuid
 			await sendMessageToMember(getMessageToSendToUser(status), member, interaction, messageOnSuccess, messageOnFailure);
 		else
 			await interaction.reply(messageOnSuccess);
-	}
-	catch (e) {
-		await interaction.reply({ content: e.message, ephemeral: true });
+	} catch (e) {
+		await interaction.reply({ content: e.message, flags: MessageFlags.Ephemeral });
 	}
 }
 

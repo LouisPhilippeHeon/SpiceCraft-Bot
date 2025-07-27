@@ -18,8 +18,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 		const userFromDb = await getUserByDiscordUuid(discordUuid);
 		const usernameMinecraft = await getUsernameFromUuid(userFromDb.minecraft_uuid);
 		await interaction.reply(usernameMinecraft);
-	}
-	catch (e) {
+	} catch (e) {
 		await interaction.reply(e.message);
 	}
 }

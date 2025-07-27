@@ -1,6 +1,6 @@
 import { client } from './bot-constants';
 import { playerRoleName, whitelistChannelName } from './config';
-import { ChannelType, Colors, Guild, GuildMember, Interaction, InteractionReplyOptions, MessagePayload, PermissionsBitField, Role, TextChannel } from 'discord.js';
+import { ChannelType, Colors, Guild, GuildMember, Interaction, InteractionReplyOptions, MessageFlags, MessagePayload, PermissionsBitField, Role, TextChannel } from 'discord.js';
 import { error, warn } from './services/logger';
 import { Errors, Logs, Utils } from './strings';
 
@@ -71,8 +71,7 @@ export async function replyOrFollowUp(message: string | MessagePayload | Interac
 		interactionRepliedOrDeferred
 			? await interaction.followUp(message)
 			: await interaction.reply(message);
-	}
-	catch (e) {
+	} catch (e) {
 		error(e, 'UTL_ROF');
 	}
 }
@@ -83,10 +82,9 @@ export async function sendMessageToMember(message: string, member: GuildMember, 
 
 	try {
 		await member.send(message);
-		await interaction.reply({ content: replyOnSuccess, ephemeral: true });
-	}
-	catch (e) {
-		await interaction.reply({ content: replyOnFailure, ephemeral: true });
+		await interaction.reply({ content: replyOnSuccess, flags: MessageFlags.Ephemeral });
+	} catch {
+		await interaction.reply({ content: replyOnFailure, flags: MessageFlags.Ephemeral });
 	}
 }
 

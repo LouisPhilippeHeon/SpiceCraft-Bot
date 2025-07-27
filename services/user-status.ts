@@ -23,8 +23,7 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
 			await removePlayerRole(member);
 			await userFromDb.removeFromWhitelist();
 		}
-	}
-	catch (e) {
+	} catch (e) {
 		await interaction.reply(e.message);
 		return;
 	}
@@ -37,8 +36,7 @@ export async function editUserStatus(interaction: ChatInputCommandInteraction, s
 	if (!silent && status !== inscriptionStatus.awaitingApproval) {
 		try {
 			await member.send(getMessageToSendToUser(status));
-		}
-		catch {
+		} catch {
 			await interaction.reply(interactionReplyMessage + '\n' + Services.userStatus.cantSendDm);
 			return;
 		}

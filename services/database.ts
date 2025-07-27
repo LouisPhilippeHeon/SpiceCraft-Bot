@@ -45,8 +45,7 @@ export async function createUser(discordUuid: string, minecraftUuid: string, sta
 		});
 
 		return Object.assign(new UserFromDb(), tag.get({ plain: true }))
-	}
-	catch (e) {
+	} catch (e) {
 		if (e.name === 'SequelizeUniqueConstraintError')
 			throw new Error(Errors.database.notUnique);
 
@@ -69,8 +68,7 @@ export async function changeMinecraftUuid(discordUuid: string, minecraftUuid: st
 	try {
 		const affectedRows = await tags.update({ minecraft_uuid: minecraftUuid }, { where: { discord_uuid: discordUuid }});
 		isUnchanged = (affectedRows[0] === 0);
-	}
-	catch (e) {
+	} catch (e) {
 		if (e.name === 'SequelizeUniqueConstraintError')
 			throw new Error(Errors.database.notUnique);
 

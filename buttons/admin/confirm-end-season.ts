@@ -1,5 +1,5 @@
 import { drop, getUsers } from '../../services/database';
-import { ButtonInteraction, PermissionFlagsBits } from 'discord.js';
+import { ButtonInteraction, MessageFlags, PermissionFlagsBits } from 'discord.js';
 import { info } from '../../services/logger';
 import { ButtonData } from '../../models';
 import { Commands } from '../../strings';
@@ -14,7 +14,7 @@ export async function execute(buttonInteraction: ButtonInteraction) {
 	await interaction.message.edit({ content: Commands.endSeason.seasonEnded, components: [] });
 	await sendBackupToInteractionAuthor();
 
-	await interaction.reply({ content: Commands.endSeason.newSeasonBegins, ephemeral: true });
+	await interaction.reply({ content: Commands.endSeason.newSeasonBegins, flags: MessageFlags.Ephemeral });
 	await drop();
 
 	const playerRole = await fetchPlayerRole(interaction.guild, false);

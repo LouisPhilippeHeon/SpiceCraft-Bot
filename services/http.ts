@@ -12,8 +12,7 @@ export async function getMojangUser(username: string): Promise<UserFromMojangApi
 	try {
 		const response = await axios.get(`${mojangApiUrl}/users/profiles/minecraft/${username}`);
 		return response.data;
-	}
-	catch (e) {
+	} catch (e) {
 		const apiError = e.response.data;
 		error(JSON.stringify(apiError), 'HTP_FUN');
 

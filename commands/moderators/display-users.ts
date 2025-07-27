@@ -106,7 +106,7 @@ async function sendMessages(interaction: ChatInputCommandInteraction, messages: 
 			: template(Commands.displayUsers.displayingUsersWithStatus, {status: getStatusName(status)})
 	});
 
-	messages.forEach(async (message) => {
+	for (const message of messages) {
 		await interaction.channel.send({ content: message });
-	});
+	}
 }

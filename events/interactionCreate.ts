@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { ButtonInteraction, Events } from 'discord.js';
+import { ButtonInteraction, Events, MessageFlags } from 'discord.js';
 import { error } from '../services/logger';
 import { InteractionWithCommands } from '../models';
 import { Errors } from '../strings';
@@ -34,12 +34,11 @@ async function handleButtonInteraction(interaction: InteractionWithCommands) {
 			assert(member.permissions.has(button.data.permissions));
 
 		await button.execute(interaction);
-	}
-	catch (e) {
-		if (e.code === 'ERR_ASSERTION') await replyOrFollowUp({ content: Errors.interaction.unauthorized, ephemeral: true }, interaction);
+	} catch (e) {
+		if (e.code === 'ERR_ASSERTION') await replyOrFollowUp({ content: Errors.interaction.unauthorized, flags: MessageFlags.Ephemeral }, interaction);
 		else {
 			error(e, 'BTN_UKN');
-			await replyOrFollowUp({ content: Errors.interaction.buttonExecution, ephemeral: true }, interaction);
+			await replyOrFollowUp({ content: Errors.interaction.buttonExecution, flags: MessageFlags.Ephemeral }, interaction);
 		}
 	}
 }
@@ -56,9 +55,8 @@ async function handleChatInputCommand(interaction: InteractionWithCommands) {
 
 	try {
 		await command.execute(interaction);
-	}
-	catch (e) {
+	} catch (e) {
 		error(e, 'CMD_UKN');
-		await replyOrFollowUp({content: Errors.interaction.commandExecution, ephemeral: true}, interaction);
+		await replyOrFollowUp({ content: Errors.interaction.commandExecution, flags: MessageFlags.Ephemeral }, interaction);
 	}
 }

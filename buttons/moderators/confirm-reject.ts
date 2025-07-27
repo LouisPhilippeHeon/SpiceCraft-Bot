@@ -1,7 +1,7 @@
 import { editApprovalRequest } from '../../services/admin-approval';
 import { changeStatus } from '../../services/database';
 import { inscriptionStatus } from '../../bot-constants';
-import { ButtonInteraction, Colors, GuildMember, Message, PermissionFlagsBits } from 'discord.js';
+import { ButtonInteraction, Colors, GuildMember, Message, MessageFlags, PermissionFlagsBits } from 'discord.js';
 import { ButtonData } from '../../models';
 import { ButtonEvents } from '../../strings';
 import { fetchBotChannel, fetchGuildMember, sendMessageToMember, template } from '../../utils';
@@ -24,11 +24,10 @@ export async function execute(interaction: ButtonInteraction) {
 		await changeStatus(discordUuid, inscriptionStatus.approved);
 		statusChanged = true;
 		member = await fetchGuildMember(interaction.guild, discordUuid);
-	}
-	catch (e) {
+	} catch (e) {
 		await interaction.reply(statusChanged
 			? e.message + '\\n' + template(ButtonEvents.rejection.userStillInBdExplanation, {discordUuid: discordUuid})
-			: { content: e.message, ephemeral: true }
+			: { content: e.message, flags: MessageFlags.Ephemeral }
 		);
 
 		if (approvalRequest) await approvalRequest.delete();

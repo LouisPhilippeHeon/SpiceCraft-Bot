@@ -1,7 +1,7 @@
 import { editApprovalRequest } from '../../services/admin-approval';
 import { inscriptionStatus } from '../../bot-constants';
 import { getUserByDiscordUuid } from '../../services/database';
-import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, GuildMember, PermissionFlagsBits } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, GuildMember, MessageFlags, PermissionFlagsBits } from 'discord.js';
 import { ButtonData, UserFromDb } from '../../models';
 import { ButtonEvents, Components } from '../../strings';
 import { addPlayerRole, sendMessageToMember, template } from '../../utils';
@@ -20,8 +20,7 @@ export async function execute(buttonInteraction: ButtonInteraction) {
 		member = await userFromDb.fetchGuildMember(interaction.guild);
 		await addToWhitelist(userFromDb, discordUuid);
 		await userFromDb.changeStatus(inscriptionStatus.approved);
-	}
-	catch (e) {
+	} catch (e) {
 		if (e.message !== 'rcon-failed') {
 			await interaction.reply(e.message);
 			await interaction.message.delete();
@@ -40,8 +39,7 @@ export async function execute(buttonInteraction: ButtonInteraction) {
 async function addToWhitelist(user: UserFromDb, discordUuid: string) {
 	try {
 		await user.addToWhitelist();
-	}
-	catch (e) {
+	} catch (e) {
 		await rconFailed(discordUuid, e);
 		throw new Error('rcon-failed');
 	}
@@ -63,5 +61,5 @@ async function rconFailed(discordUuid: string, e: Error) {
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmManualAdditionToWhitelist, reject);
 	await editApprovalRequest(interaction.message, `${e.message} ${template(ButtonEvents.clickToConfirmChangesToWhitelist, {discordUuid: discordUuid})}`, undefined, [row], Colors.Yellow);
 
-	await interaction.reply({ content: ButtonEvents.approbation.changeWhitelistBeforeCliking, ephemeral: true });
+	await interaction.reply({ content: ButtonEvents.approbation.changeWhitelistBeforeCliking, flags: MessageFlags.Ephemeral });
 }

@@ -1,6 +1,6 @@
 import { editApprovalRequest } from '../../services/admin-approval';
 import { getUserByDiscordUuid } from '../../services/database';
-import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, GuildMember, PermissionFlagsBits } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, Colors, GuildMember, MessageFlags, PermissionFlagsBits } from 'discord.js';
 import { ButtonData, UserFromDb } from '../../models';
 import { ButtonEvents, Components } from '../../strings';
 import { sendMessageToMember, template } from '../../utils';
@@ -20,8 +20,7 @@ export async function execute(buttonInteraction: ButtonInteraction) {
 		member = await userFromDb.fetchGuildMember(interaction.guild);
 		await modifyWhitelist(userFromDb, minecraftUuid, discordUuid);
 		await userFromDb.editMinecraftUuid(minecraftUuid);
-	}
-	catch (e) {
+	} catch (e) {
 		if (e.message !== 'rcon-failed') {
 			await interaction.reply(e.message);
 			await interaction.message.delete();
@@ -39,8 +38,7 @@ export async function execute(buttonInteraction: ButtonInteraction) {
 async function modifyWhitelist(user: UserFromDb, minecraftUuid: string, discordUuid: string) {
 	try {
 		await user.replaceWhitelistUsername(minecraftUuid);
-	}
-	catch (e) {
+	} catch (e) {
 		await rconFailed(discordUuid, minecraftUuid, e);
 		throw new Error('rcon-failed');
 	}
@@ -62,5 +60,5 @@ async function rconFailed(discordUuid: string, minecraftUuid: string, e: Error) 
 	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(confirmManualModificationOfWhitelist, cancel);
 	await editApprovalRequest(interaction.message, `${e.message} ${template(ButtonEvents.clickToConfirmChangesToWhitelist, {discordUuid: discordUuid})}`, undefined, [row], Colors.Yellow);
 
-	await interaction.reply({ content: ButtonEvents.usernameChangeConfirmation.changeWhitelistBeforeCliking, ephemeral: true });
+	await interaction.reply({ content: ButtonEvents.usernameChangeConfirmation.changeWhitelistBeforeCliking, flags: MessageFlags.Ephemeral });
 }

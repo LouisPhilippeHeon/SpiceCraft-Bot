@@ -1,6 +1,6 @@
 import { editApprovalRequest } from '../../services/admin-approval';
 import { getUserByDiscordUuid } from '../../services/database';
-import { ButtonInteraction, Colors, PermissionFlagsBits } from 'discord.js';
+import { ButtonInteraction, Colors, MessageFlags, PermissionFlagsBits } from 'discord.js';
 import { ButtonData } from '../../models';
 import { Commands } from '../../strings';
 import { template } from '../../utils';
@@ -16,10 +16,10 @@ export async function execute(interaction: ButtonInteraction) {
 		await userFromDb.delete();
 		await userFromDb.removeFromWhitelist();
 	} catch (e) {
-		await interaction.reply({ content: e.message, ephemeral: true });
+		await interaction.reply({ content: e.message, flags: MessageFlags.Ephemeral });
 		return;
 	}
 
 	await editApprovalRequest( interaction.message, Commands.deleteEntry.messageUpdate, undefined, [], Colors.Red );
-	await interaction.reply({ content: template(Commands.deleteEntry.reply, {discordUuid: discordUuid}), ephemeral: true });
+	await interaction.reply({ content: template(Commands.deleteEntry.reply, {discordUuid: discordUuid}), flags: MessageFlags.Ephemeral });
 }

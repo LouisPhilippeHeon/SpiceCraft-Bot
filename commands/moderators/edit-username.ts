@@ -31,8 +31,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 		await user.replaceWhitelistUsername(mojangUser.id);
 
 		await interaction.reply(Commands.editUsername.confirmationMessage);
-	}
-	catch (e) {
+	} catch (e) {
 		await interaction.reply(e.message);
 	}
 }
